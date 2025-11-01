@@ -444,4 +444,325 @@
                                         date_val = new_date_val
                                     
                                     new_time_val = datetime_match.group(2).strip()
-                                    if "002:0 0PM" in new_time_val: 
+                                    if "002:0 0PM" in new_time_val: new_time_val = "02:00 PM"
+                                    if " " not in new_time_val:
+                                        new_time_val = new_time_val.replace(" ", "")
+                                        if len(new_time_val) == 7: new_time_val = "0" + new_time_val[:4] + " " + new_time_val[4:]
+                                        elif len(new_time_val) == 8: new_time_val = new_time_val[:5] + " " + new_time_val[5:]
+                                    if new_time_val != time_val:
+                                        time_val = new_time_val
+                                
+                                # --- Extract Table Data ---
+                                tables = page.extract_tables()
+                                processed_rows_on_page = 0
+                                                        
+                                for table in tables:
+                                    for row in table:
+                                        try:
+                                            if not row or not row[0]: continue
+                                            if not row[0].strip().isdigit(): continue
+                                            
+                                            reg_num = "Unknown"
+                                            name = "Unknown"
+                                            
+                                            for idx, cell in enumerate(row):
+                                                if not cell: continue
+                                                cell_text = cell.strip().replace('\n', ' ')
+                                                reg_match = reg_num_regex.search(cell_text)
+                                                
+                                                if reg_match:
+                                                    reg_num = reg_match.group(1)
+                                                    name_fragment = cell_text.replace(reg_num, '').strip()
+                                                    
+                                                    if name_fragment and not reg_num_regex.search(name_fragment) and not name_fragment.isdigit():
+                                                        name = name_fragment
+                                                        break
+                                                    try:
+                                                        next_cell = row[idx+1]
+                                                        if next_cell and next_cell.strip():
+                                                            name = next_cell.strip().replace('\n', ' ')
+                                                            break
+                                                        next_next_cell = row[idx+2]
+                                                        if next_next_cell and next_next_cell.strip():
+                                                            name = next_next_cell.strip().replace('\n', ' ')
+                                                            break
+                                                    except IndexError:
+                                                        pass
+                                                    
+                                            if reg_num != "Unknown":
+                                                formatted_row = {
+                                                    'Date': date_val.strip(),
+                                                    'Time': time_val.strip(),
+                                                    'Course': course_name.strip(),
+                                                    'Register Number': reg_num.strip(),
+                                                    'Name': name.strip()
+                                                }
+                                                all_exam_rows.append(formatted_row)
+                                                processed_rows_on_page += 1
+                                        except Exception as e:
+                                            log_message(f"Warning: Skipping row. Details: {e}")
+                                
+                                # Noisy log, removed for batch
+                                # if processed_rows_on_page > 0:
+                                #    log_message(f"Found {processed_rows_on_page} candidates on page {i + 1}.")
+
+                    except Exception as e:
+                        log_message(f"CRITICAL ERROR processing file {file_name}: {e}. Skipping this file.")
+                
+                # --- *** END OF BATCH LOOP *** ---
+                
+                log_message("--- Batch processing complete. ---")
+
+                if not all_exam_rows:
+                    log_message("Error: No data was extracted from any file.")
+                    show_loader(False)
+                    return
+                
+                log_message(f"Found {len(all_exam_rows)} total candidates from {total_files} file(s).")
+                await asyncio.sleep(0)
+                
+                log_message("Sorting all entries by Date and Time...")
+                all_exam_rows_sorted = sorted(all_exam_rows, key=get_sort_key)
+                await asyncio.sleep(0)
+                                
+                log_message("Allocating room numbers...")
+                                
+                processed_rows_with_rooms = []
+                current_session_key = None
+                session_student_count = 0
+                students_per_room = 30
+                
+                for row in all_exam_rows_sorted:
+                    session_key = (row['Date'], row['Time'])
+                    if session_key != current_session_key:
+                        current_session_key = session_key
+                        session_student_count = 0
+                    session_student_count += 1
+                    room_number = math.ceil(session_student_count / students_per_room)
+                    row['Room No'] = f"Room {room_number}"
+                    processed_rows_with_rooms.append(row)
+                
+                log_message("Converting to DataFrame and creating CSV...")
+                
+                df = pd.DataFrame(processed_rows_with_rooms)
+                df = df[['Date', 'Time', 'Course', 'Register Number', 'Name', 'Room No']]
+                csv_data = df.to_csv(index=False, encoding='utf-8')
+                
+                blob = Blob.new([csv_data], {type: "text/csv;charset=utf-8"})
+                url = URL.createObjectURL(blob)
+                                
+                # --- Give a combined filename ---
+                csv_filename = 'Combined_Nominal_Roll.csv'
+                
+                csv_download_container.innerHTML = f"""
+                    <a href="{url}" download="{csv_filename}"
+                       class="w-full inline-flex justify-center items-center rounded-md border border-transparent bg-green-600 py-3 px-4 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                        Download {csv_filename} ({len(all_exam_rows)} rows)
+                    </a>
+                """
+                
+                json_data = json.dumps(processed_rows_with_rooms)
+                json_data_store.innerHTML = json_data
+                generate_report_button.classList.remove("hidden")
+                                
+                log_message("Success! Your combined files are ready.")
+            
+            except Exception as e:
+                log_message(f"An error occurred: {e}")
+            
+            finally:
+                show_loader(False)
+    </py-script>
+
+    <!-- *** JAVASCRIPT FOR REPORT VIEWER (WITH ALL FIXES) *** -->
+    <script>
+        // --- Get references to all new modal elements ---
+        const generateReportButton = document.getElementById('generate-report-button');
+        const jsonDataStore = document.getElementById('json-data-store');
+        const reportControls = document.getElementById('report-controls');
+        const reportOutputArea = document.getElementById('report-output-area');
+        const reportStatus = document.getElementById('report-status');
+        const finalPrintButton = document.getElementById('final-print-button');
+        const clearReportButton = document.getElementById('clear-report-button');
+        
+        // --- Helper function to numerically sort room keys ---
+        function getNumericSortKey(key) {
+            const parts = key.split('_'); // Date_Time_Room 1
+            const roomPart = parts[2] || "Room 0";
+            const roomNumber = parseInt(roomPart.replace('Room ', ''), 10);
+            return `${parts[0]}_${parts[1]}_${String(roomNumber).padStart(4, '0')}`;
+        }
+
+        // --- 1. Event listener for the "Generate Report" button ---
+        generateReportButton.addEventListener('click', async () => {
+            
+            generateReportButton.disabled = true;
+            generateReportButton.textContent = "Generating Report...";
+            reportOutputArea.innerHTML = "";
+            reportControls.classList.add('hidden');
+            await new Promise(resolve => setTimeout(resolve, 50));
+
+            try {
+                const data = JSON.parse(jsonDataStore.innerHTML);
+                if (!data || data.length === 0) {
+                    alert("No data to generate. Please run extraction first.");
+                    return;
+                }
+
+                const sessions = {};
+                data.forEach(student => {
+                    const key = `${student.Date}_${student.Time}_${student['Room No']}`;
+                    if (!sessions[key]) {
+                        sessions[key] = {
+                            Date: student.Date,
+                            Time: student.Time,
+                            Room: student['Room No'],
+                            students: [],
+                            courseCounts: {}
+                        };
+                    }
+                    sessions[key].students.push(student);
+                    
+                    const course = student.Course;
+                    if (!sessions[key].courseCounts[course]) {
+                        sessions[key].courseCounts[course] = 0;
+                    }
+                    sessions[key].courseCounts[course]++;
+                });
+
+                let allPagesHtml = '';
+                // --- USE NUMERIC SORT KEY ---
+                const sortedSessionKeys = Object.keys(sessions).sort((a, b) => {
+                    return getNumericSortKey(a).localeCompare(getNumericSortKey(b));
+                });
+
+                sortedSessionKeys.forEach(key => {
+                    const session = sessions[key];
+                    
+                    let courseSummaryHtml = '';
+                    for (const [courseName, count] of Object.entries(session.courseCounts)) {
+                        const shortCourseName = courseName.split(' ').slice(0, 4).join(' ') + (courseName.split(' ').length > 4 ? '...' : '');
+                        courseSummaryHtml += `<div style="font-weight: bold;">${shortCourseName}: ${count} Student(s)</div>`;
+                    }
+
+                    let tableRowsHtml = '';
+                    let previousCourseName = ""; 
+
+                    session.students.forEach((student, index) => {
+                        const tableCourseName = student.Course.split(' ').slice(0, 4).join(' ') + (student.Course.split(' ').length > 4 ? '...' : '');
+                        
+                        let displayCourseName;
+                        if (tableCourseName === previousCourseName) {
+                            displayCourseName = '"';
+                        } else {
+                            displayCourseName = tableCourseName;
+                            previousCourseName = tableCourseName;
+                        }
+
+                        tableRowsHtml += `
+                            <tr>
+                                <td class="sl-col">${index + 1}</td>
+                                <td class="course-col">${displayCourseName}</td>
+                                <td class="reg-col">${student['Register Number']}</td>
+                                <td class="name-col">${student.Name}</td>
+                                <td class="signature-col"></td>
+                            </tr>
+                        `;
+                        
+                        // --- *** NEW 20/10 Page Break Logic *** ---
+                        if ((index + 1) === 20 && session.students.length > 20) {
+                             tableRowsHtml += `
+                                </tbody>
+                            </table>
+                            <div class="print-page-break"></div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th class="sl-col">Sl No</th>
+                                        <th class="course-col">Course</th>
+                                        <th class="reg-col">Register Number</th>
+                                        <th class="name-col">Name</th>
+                                        <th class="signature-col">Signature</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                            `;
+                            // Reset course tracker for new page
+                            previousCourseName = ""; 
+                        }
+                    });
+                    
+                    // --- Invigilator Footer ---
+                    const invigilatorFooterHtml = `
+                        <div class="invigilator-footer">
+                            <div><strong>Answer Booklets Received:</strong> _________________</div>
+                            <div><strong>Answer Booklets Used:</strong> _________________</div>
+                            <div><strong>Answer Booklets Returned (Balance):</strong> _________________</div>
+                            <div class="signature">
+                                Invigilator Signature
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Assemble the full page
+                    allPagesHtml += `
+                        <div class="print-page">
+                            <h1>Government Victoria College Palakkad</h1>
+                            <h2>${session.Date} &nbsp;|&nbsp; ${session.Time} &nbsp;|&nbsp; ${session.Room}</h2>
+                            
+                            <div class="course-summary">
+                                ${courseSummaryHtml}
+                            </div>
+                            
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th class="sl-col">Sl No</th>
+                                        <th class="course-col">Course</th>
+                                        <th class="reg-col">Register Number</th>
+                                        <th class="name-col">Name</th>
+                                        <th class="signature-col">Signature</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${tableRowsHtml}
+                                </tbody>
+                            </table>
+                            
+                            ${invigilatorFooterHtml}
+                        </div>
+                    `;
+                });
+
+                reportOutputArea.innerHTML = allPagesHtml;
+                reportOutputArea.style.display = 'block'; 
+                reportStatus.textContent = `Generated ${sortedSessionKeys.length} room reports.`;
+                reportControls.classList.remove('hidden');
+
+            } catch (e) {
+                console.error("Error generating print report:", e);
+                reportStatus.textContent = "An error occurred while generating the report.";
+                reportControls.classList.remove('hidden');
+                
+            } finally {
+                generateReportButton.disabled = false;
+                generateReportButton.textContent = "Generate Room-wise Report";
+            }
+        });
+
+        // --- 2. Event listener for the "Print" button ---
+        finalPrintButton.addEventListener('click', () => {
+            window.print();
+        });
+
+        // --- 3. Event listener for the "Clear" button ---
+        clearReportButton.addEventListener('click', () => {
+            reportOutputArea.innerHTML = "";
+            reportOutputArea.style.display = 'none'; 
+            reportControls.classList.add('hidden');
+        });
+    </script>
+
+</body>
+</html>
+

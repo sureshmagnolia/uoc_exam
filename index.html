@@ -81,7 +81,7 @@
             }
             th, td {
                 border: 1px solid black;
-                padding: 8px;
+                padding: 4px; /* Reduced padding */
                 text-align: left;
                 word-wrap: break-word; /* Wrap long text */
             }
@@ -91,8 +91,10 @@
             
             /* Column widths for printing */
             .sl-col { width: 5%; }
-            .course-col { width: 25%; }
-            .signature-col { width: 30%; }
+            .course-col { width: 20%; }
+            .reg-col { width: 20%; }
+            .name-col { width: 35%; }
+            .signature-col { width: 20%; }
         }
         /* --- END PRINT STYLES --- */
 
@@ -132,19 +134,21 @@
         }
         .print-page th, .print-page td {
             border: 1px solid black;
-            padding: 8px;
+            padding: 4px; /* Reduced padding */
             text-align: left;
             word-wrap: break-word;
         }
         .print-page th {
             background-color: #eee;
         }
+        /* Optimized column widths */
         .print-page .sl-col { width: 5%; }
-        .print-page .course-col { width: 25%; }
-        .print-page .signature-col { 
-            width: 30%;
-            height: 40px; /* Give space for signature */
-        }
+        .print-page .course-col { width: 20%; }
+        .print-page .reg-col { width: 20%; }
+        .print-page .name-col { width: 35%; }
+        .print-page .signature-col { width: 20%; } 
+        /* Removed fixed height */
+        
         /* --- END REPORT STYLES --- */
 
     </style>
@@ -548,7 +552,7 @@
                 show_loader(False)
     </py-script>
 
-    <!-- *** JAVASCRIPT FOR REPORT VIEWER (This part is from the new code) *** -->
+    <!-- *** JAVASCRIPT FOR REPORT VIEWER (WITH NEW LOGIC) *** -->
     <script>
         // --- Get references to all new modal elements ---
         const generateReportButton = document.getElementById('generate-report-button');
@@ -628,17 +632,29 @@
 
                     // Student Table HTML
                     let tableRowsHtml = '';
+                    let previousCourseName = ""; // <-- Initialize for de-duplication
+
                     // The students are already grouped 1-30 by the Python script.
                     // We just need to display them.
                     session.students.forEach((student, index) => {
                         const tableCourseName = student.Course.split(' ').slice(0, 4).join(' ') + (student.Course.split(' ').length > 4 ? '...' : '');
                         
+                        // --- NEW De-duplication Logic ---
+                        let displayCourseName;
+                        if (tableCourseName === previousCourseName) {
+                            displayCourseName = '"'; // Use a ditto mark
+                        } else {
+                            displayCourseName = tableCourseName;
+                            previousCourseName = tableCourseName; // Update the tracker
+                        }
+                        // --- END New Logic ---
+
                         tableRowsHtml += `
                             <tr>
                                 <td class="sl-col">${index + 1}</td>
-                                <td class="course-col">${tableCourseName}</td>
-                                <td>${student['Register Number']}</td>
-                                <td>${student.Name}</td>
+                                <td class="course-col">${displayCourseName}</td>
+                                <td class="reg-col">${student['Register Number']}</td>
+                                <td class="name-col">${student.Name}</td>
                                 <td class="signature-col"></td>
                             </tr>
                         `;
@@ -659,8 +675,8 @@
                                     <tr>
                                         <th class="sl-col">Sl No</th>
                                         <th class="course-col">Course</th>
-                                        <th>Register Number</th>
-                                        <th>Name</th>
+                                        <th class="reg-col">Register Number</th>
+                                        <th class="name-col">Name</th>
                                         <th class="signature-col">Signature</th>
                                     </tr>
                                 </thead>

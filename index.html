@@ -28,7 +28,7 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* --- PRINT STYLES (FIXED) --- */
+        /* --- PRINT STYLES (Optimized for A4) --- */
         @media print {
             /* Hide the main app container and all other non-report elements */
             #main-app-container, body > py-config, body > py-script, #report-controls {
@@ -42,6 +42,7 @@
                 position: static; /* Use static positioning for print flow */
                 width: 100%;
                 overflow-y: visible;
+                padding: 0; /* No external padding */
             }
 
             /* Make sure each page is visible and breaks correctly */
@@ -51,50 +52,50 @@
                 page-break-after: always;
                 page-break-inside: avoid;
                 width: 100%;
-                padding: 1cm;
+                padding: 0.5cm; /* Minimal margin */
+                margin: 0;
                 box-sizing: border-box;
                 box-shadow: none;
                 border: none;
-                margin: 0;
-                /* Let the internal table/div elements render normally */
             }
             
             /* The rest of the styles are for formatting the page */
             h1, h2 {
                 text-align: center;
                 color: black;
+                margin-bottom: 0.2rem;
             }
-            h1 { font-size: 16pt; font-weight: bold; margin-bottom: 0.5rem; }
-            h2 { font-size: 14pt; font-weight: bold; margin-bottom: 1rem; }
+            h1 { font-size: 14pt; font-weight: bold; }
+            h2 { font-size: 11pt; font-weight: bold; margin-bottom: 0.5rem; }
 
             .course-summary {
-                font-size: 11pt;
-                margin-bottom: 1rem;
-                padding: 0.5rem;
+                font-size: 9pt;
+                margin-bottom: 0.5rem;
+                padding: 0.2rem;
                 border: 1px solid #ccc;
             }
 
             table {
                 width: 100%;
                 border-collapse: collapse;
-                font-size: 10pt;
+                font-size: 9pt; /* Smaller font for space */
             }
             th, td {
                 border: 1px solid black;
-                padding: 4px; /* Reduced padding */
+                padding: 2px; /* Minimal padding */
                 text-align: left;
-                word-wrap: break-word; /* Wrap long text */
+                word-wrap: break-word; 
             }
             th {
                 background-color: #eee;
             }
             
             /* Column widths for printing */
-            .sl-col { width: 5%; }
-            .course-col { width: 20%; }
-            .reg-col { width: 20%; }
-            .name-col { width: 35%; }
-            .signature-col { width: 20%; }
+            .sl-col { width: 4%; }
+            .course-col { width: 30%; } /* Increased width for course */
+            .reg-col { width: 18%; }
+            .name-col { width: 38%; }
+            .signature-col { width: 10%; } /* Minimal width for signature */
         }
         /* --- END PRINT STYLES --- */
 
@@ -107,7 +108,7 @@
             margin: 1rem auto;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             color: black;
-            box-sizing: border-box; /* Include padding in width/height */
+            box-sizing: border-box;
         }
         .print-page h1 {
             font-size: 16pt;
@@ -134,22 +135,24 @@
         }
         .print-page th, .print-page td {
             border: 1px solid black;
-            padding: 4px; /* Reduced padding */
+            padding: 4px; 
             text-align: left;
             word-wrap: break-word;
         }
         .print-page th {
             background-color: #eee;
         }
-        /* Optimized column widths */
-        .print-page .sl-col { width: 5%; }
-        .print-page .course-col { width: 20%; }
-        .print-page .reg-col { width: 20%; }
-        .print-page .name-col { width: 35%; }
-        .print-page .signature-col { width: 20%; } 
-        /* Removed fixed height */
+        /* Optimized column widths for viewer */
+        .print-page .sl-col { width: 4%; }
+        .print-page .course-col { width: 30%; }
+        .print-page .reg-col { width: 18%; }
+        .print-page .name-col { width: 38%; }
+        .print-page .signature-col { width: 10%; } 
         
-        /* --- END REPORT STYLES --- */
+        /* Ensure the report viewer is hidden on load */
+        #report-output-area {
+            display: none;
+        }
 
     </style>
 </head>
@@ -161,7 +164,7 @@
     </py-config>
 
     <!-- Main App Container -->
-    <div id="main-app-container" class="container max-w-2xl mx-auto p-4 min-h-screen" style="display: block;">
+    <div id="main-app-container" class="container max-w-2xl mx-auto p-4 min-h-screen">
         <div class="bg-white p-8 rounded-lg shadow-xl w-full">
             
             <header class="mb-6">
@@ -245,15 +248,14 @@
 
     <!-- 
       *** STRUCTURAL FIX ***
-      The Report Output Area is now OUTSIDE the main app container.
-      This allows print styles to hide the app and show the report.
+      The Report Output Area is OUTSIDE the main app container for correct printing flow.
     -->
-    <div id="report-output-area" class="mt-6 w-full" style="display: none;">
+    <div id="report-output-area" class="mt-6 w-full">
         <!-- Report pages will be injected here -->
     </div>
 
 
-    <!-- The Python Script (REVERTED to old working logic, merged with new report features) -->
+    <!-- The Python Script (STABLE EXTRACTION LOGIC) -->
     <py-script>
         import pandas as pd
         import pdfplumber
@@ -261,9 +263,9 @@
         import io
         from js import document, console, URL, Blob, window
         import asyncio
-        import json # Added for report generation
-        import math # Added for room number calculation
-        from datetime import datetime # Added for sorting
+        import json 
+        import math 
+        from datetime import datetime 
         
         # Get references to our HTML elements
         status_div = document.getElementById("status")
@@ -296,7 +298,7 @@
                 spinner.classList.add("hidden")
                 button_text.textContent = "2. Run Extraction"
 
-        # --- REVERTED to old, working get_sort_key ---
+        # --- Helper function for sorting ---
         def get_sort_key(row):
             """Converts DD.MM.YYYY and HH:MM PM to a sortable format."""
             try:
@@ -310,7 +312,6 @@
                 # Fallback for "Unknown" or malformed dates/times
                 return (datetime.min, datetime.min) 
 
-        # --- REVERTED to old, working run_extraction ---
         async def run_extraction(event=None):
             """
             This function is called when the "Run Extraction" button is clicked.
@@ -583,8 +584,13 @@
             try {
                 const data = JSON.parse(jsonDataStore.innerHTML);
                 if (!data || data.length === 0) {
-                    alert("No data to generate. Please run extraction first.");
-                    return;
+                    // Check local storage for data if not found in the hidden div (should not happen, but for robustness)
+                    if (localStorage.getItem('report_data')) {
+                        data = JSON.parse(localStorage.getItem('report_data'));
+                    } else {
+                        alert("No data to generate. Please run extraction first.");
+                        return;
+                    }
                 }
 
                 // --- 1. (FIX) Group data by Date, Time, AND Room ---
@@ -614,11 +620,24 @@
 
                 // --- 2. Generate HTML for all pages ---
                 let allPagesHtml = '';
-                // Sort session keys to ensure reports are in chronological order
+                
+                // --- FIX: Numeric sorting of Room Numbers ---
                 const sortedSessionKeys = Object.keys(sessions).sort((a, b) => {
-                    // Simple string sort works here because keys are Date_Time_Room
+                    // 1. Extract Date_Time part (e.g., '03.11.2025_02:00 PM')
+                    const sessionA = a.split('_').slice(0, 2).join('_');
+                    const sessionB = b.split('_').slice(0, 2).join('_');
+
+                    // 2. If Date and Time are the same, sort numerically by Room No
+                    if (sessionA === sessionB) {
+                        const roomNumA = parseInt(a.split('_')[2].replace('Room ', ''), 10);
+                        const roomNumB = parseInt(b.split('_')[2].replace('Room ', ''), 10);
+                        return roomNumA - roomNumB;
+                    }
+                    
+                    // 3. Otherwise, sort by the whole key (which is already chronologically sorted by Python)
                     return a.localeCompare(b);
                 });
+
 
                 sortedSessionKeys.forEach(key => {
                     const session = sessions[key];
@@ -664,7 +683,7 @@
                     allPagesHtml += `
                         <div class="print-page">
                             <h1>Government Victoria College Palakkad</h1>
-                            <h2>Date: ${session.Date} &nbsp;&nbsp;&nbsp; Time: ${session.Time} &nbsp;&nbsp;&nbsp; Room No: ${session.Room}</h2>
+                            <h2>Date: ${session.Date} &nbsp;&nbsp;&nbsp; Time: ${session.Time} &nbsp;&nbsp;&nbsp; ${session.Room}</h2>
                             
                             <div class="course-summary">
                                 ${courseSummaryHtml}
@@ -721,4 +740,3 @@
 
 </body>
 </html>
-

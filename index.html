@@ -49,7 +49,7 @@
             .print-page {
                 display: block !important;
                 visibility: visible !important;
-                page-break-after: always;
+                page-break-after: always; /* Break after the 30-student room report */
                 page-break-inside: avoid;
                 width: 100%;
                 padding: 0.5cm; /* Minimal margin */
@@ -58,6 +58,7 @@
                 box-shadow: none;
                 border: none;
             }
+            /* REMOVED: .page-split class to prevent mid-room break */
             
             /* The rest of the styles are for formatting the page */
             h1, h2 {
@@ -158,7 +159,7 @@
 </head>
 <body class="bg-gray-100 font-sans">
     
-    <!-- Define Python Environment (REVERTED to minimal set) -->
+    <!-- Define Python Environment (STABLE) -->
     <py-config>
         packages = ["pandas", "pdfplumber==0.7.1"]
     </py-config>
@@ -584,18 +585,11 @@
             try {
                 const data = JSON.parse(jsonDataStore.innerHTML);
                 if (!data || data.length === 0) {
-                    // Check local storage for data if not found in the hidden div (should not happen, but for robustness)
-                    if (localStorage.getItem('report_data')) {
-                        data = JSON.parse(localStorage.getItem('report_data'));
-                    } else {
-                        alert("No data to generate. Please run extraction first.");
-                        return;
-                    }
+                    alert("No data to generate. Please run extraction first.");
+                    return;
                 }
 
-                // --- 1. (FIX) Group data by Date, Time, AND Room ---
-                // This is the correct logic. The Python script already assigned rooms,
-                // so we just need to group by the session/room combination.
+                // --- 1. Group data by Date, Time, AND Room ---
                 const sessions = {};
                 data.forEach(student => {
                     const key = `${student.Date}_${student.Time}_${student['Room No']}`;
@@ -653,8 +647,6 @@
                     let tableRowsHtml = '';
                     let previousCourseName = ""; // <-- Initialize for de-duplication
 
-                    // The students are already grouped 1-30 by the Python script.
-                    // We just need to display them.
                     session.students.forEach((student, index) => {
                         const tableCourseName = student.Course.split(' ').slice(0, 4).join(' ') + (student.Course.split(' ').length > 4 ? '...' : '');
                         
@@ -677,13 +669,15 @@
                                 <td class="signature-col"></td>
                             </tr>
                         `;
+                        
+                        // --- REMOVED: Page break logic to ensure all 30 students are on one print page ---
                     });
                     
                     // Assemble the full page
                     allPagesHtml += `
                         <div class="print-page">
                             <h1>Government Victoria College Palakkad</h1>
-                            <h2>Date: ${session.Date} &nbsp;&nbsp;&nbsp; Time: ${session.Time} &nbsp;&nbsp;&nbsp; ${session.Room}</h2>
+                            <h2>${session.Date} | ${session.Time} | ${session.Room}</h2>
                             
                             <div class="course-summary">
                                 ${courseSummaryHtml}

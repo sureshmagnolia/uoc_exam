@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nominal Roll Extractor</title>
+    <title>Nominal Roll Extractor (Batch Version)</title>
     
     <!-- Load Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -28,7 +28,7 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* --- PRINT STYLES (Optimized for A4) --- */
+        /* --- PRINT STYLES (FIXED) --- */
         @media print {
             /* Hide the main app container and all other non-report elements */
             #main-app-container, body > py-config, body > py-script, #report-controls {
@@ -42,61 +42,83 @@
                 position: static; /* Use static positioning for print flow */
                 width: 100%;
                 overflow-y: visible;
-                padding: 0; /* No external padding */
             }
 
             /* Make sure each page is visible and breaks correctly */
             .print-page {
                 display: block !important;
                 visibility: visible !important;
-                page-break-after: always; /* Break after the 30-student room report */
+                page-break-after: always;
                 page-break-inside: avoid;
                 width: 100%;
-                padding: 0.5cm; /* Minimal margin */
-                margin: 0;
+                padding: 1cm;
                 box-sizing: border-box;
                 box-shadow: none;
                 border: none;
+                margin: 0;
             }
-            /* REMOVED: .page-split class to prevent mid-room break */
             
             /* The rest of the styles are for formatting the page */
             h1, h2 {
                 text-align: center;
                 color: black;
-                margin-bottom: 0.2rem;
             }
-            h1 { font-size: 14pt; font-weight: bold; }
-            h2 { font-size: 11pt; font-weight: bold; margin-bottom: 0.5rem; }
+            h1 { font-size: 16pt; font-weight: bold; margin-bottom: 0.5rem; }
+            h2 { font-size: 14pt; font-weight: bold; margin-bottom: 1rem; }
 
             .course-summary {
-                font-size: 9pt;
-                margin-bottom: 0.5rem;
-                padding: 0.2rem;
+                font-size: 11pt;
+                margin-bottom: 1rem;
+                padding: 0.5rem;
                 border: 1px solid #ccc;
+            }
+            
+            /* NEW: Footer for Invigilator */
+            .invigilator-footer {
+                margin-top: 2rem;
+                padding-top: 1rem;
+                border-top: 1px solid #ccc;
+                font-size: 10pt;
+            }
+            .invigilator-footer div {
+                margin-bottom: 0.5rem;
+            }
+            .invigilator-footer .signature {
+                margin-top: 2.5rem;
+                border-top: 1px solid black;
+                width: 200px;
+                padding-top: 4px;
+                text-align: center;
+            }
+            
+            /* NEW: Page break helper */
+            .print-page-break {
+                page-break-after: always;
+                border: 0;
+                height: 0;
             }
 
             table {
                 width: 100%;
                 border-collapse: collapse;
-                font-size: 9pt; /* Smaller font for space */
+                font-size: 9pt; /* Tighter font */
             }
             th, td {
                 border: 1px solid black;
-                padding: 2px; /* Minimal padding */
+                padding: 2px; /* Tighter padding */
                 text-align: left;
-                word-wrap: break-word; 
+                word-wrap: break-word; /* Wrap long text */
             }
             th {
                 background-color: #eee;
             }
             
-            /* Column widths for printing */
-            .sl-col { width: 4%; }
-            .course-col { width: 30%; } /* Increased width for course */
-            .reg-col { width: 18%; }
-            .name-col { width: 38%; }
-            .signature-col { width: 10%; } /* Minimal width for signature */
+            /* Optimized column widths */
+            .sl-col { width: 5%; }
+            .course-col { width: 30%; } /* Wider */
+            .reg-col { width: 20%; }
+            .name-col { width: 35%; }
+            .signature-col { width: 10%; } /* Narrower */
         }
         /* --- END PRINT STYLES --- */
 
@@ -109,7 +131,7 @@
             margin: 1rem auto;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             color: black;
-            box-sizing: border-box;
+            box-sizing: border-box; /* Include padding in width/height */
         }
         .print-page h1 {
             font-size: 16pt;
@@ -132,46 +154,65 @@
         .print-page table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 10pt;
+            font-size: 9pt; /* Tighter font */
         }
         .print-page th, .print-page td {
             border: 1px solid black;
-            padding: 4px; 
+            padding: 2px; /* Tighter padding */
             text-align: left;
             word-wrap: break-word;
         }
         .print-page th {
             background-color: #eee;
         }
-        /* Optimized column widths for viewer */
-        .print-page .sl-col { width: 4%; }
-        .print-page .course-col { width: 30%; }
-        .print-page .reg-col { width: 18%; }
-        .print-page .name-col { width: 38%; }
-        .print-page .signature-col { width: 10%; } 
+        /* Optimized column widths */
+        .print-page .sl-col { width: 5%; }
+        .print-page .course-col { width: 30%; } /* Wider */
+        .print-page .reg-col { width: 20%; }
+        .print-page .name-col { width: 35%; }
+        .print-page .signature-col { width: 10%; } /* Narrower */
         
-        /* Ensure the report viewer is hidden on load */
-        #report-output-area {
+        /* NEW: Footer for Invigilator */
+        .invigilator-footer {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #ccc;
+            font-size: 10pt;
+        }
+        .invigilator-footer div {
+            margin-bottom: 0.5rem;
+        }
+        .invigilator-footer .signature {
+            margin-top: 2.5rem;
+            border-top: 1px solid black;
+            width: 200px;
+            padding-top: 4px;
+            text-align: center;
+        }
+
+        /* NEW: Page break helper (only visible in print) */
+        .print-page-break {
             display: none;
         }
+        /* --- END REPORT STYLES --- */
 
     </style>
 </head>
 <body class="bg-gray-100 font-sans">
     
-    <!-- Define Python Environment (STABLE) -->
+    <!-- Define Python Environment -->
     <py-config>
         packages = ["pandas", "pdfplumber==0.7.1"]
     </py-config>
 
     <!-- Main App Container -->
-    <div id="main-app-container" class="container max-w-2xl mx-auto p-4 min-h-screen">
+    <div id="main-app-container" class="container max-w-2xl mx-auto p-4 min-h-screen" style="display: block;">
         <div class="bg-white p-8 rounded-lg shadow-xl w-full">
             
             <header class="mb-6">
-                <h1 class="text-3xl font-bold text-gray-800">UOC Examination Data Extraction and File Generator</h1>
+                <h1 class="text-3xl font-bold text-gray-800">Nominal Roll Extractor (Batch Version)</h1>
                 <p class="text-gray-600 mt-2">
-                    Upload a multi-page Nominal Roll PDF to extract student data, assign rooms, and print reports.
+                    Upload multiple Nominal Roll PDFs at once to extract all student data, assign rooms, and print unified reports.
                 </p>
             </header>
 
@@ -179,10 +220,10 @@
             <div class="bg-indigo-50 border border-indigo-200 p-4 rounded-md mb-6">
                 <h4 class="font-semibold text-gray-800">How to Use:</h4>
                 <ol class="list-decimal list-inside text-sm text-gray-700 mt-2 space-y-1">
-                    <li>Select your PDF Nominal Roll file.</li>
-                    <li>Click 'Run Extraction'.</li>
-                    <li>Wait for the processing log to show 'Success!'</li>
-                    <li>Click 'Download [filename].csv' to get all data.</li>
+                    <li>Click 'Select PDF Files' and choose 1 or 100+ PDF files.</li>
+                    <li>Click 'Run Batch Extraction'.</li>
+                    <li>Wait for the log to process all files (e.g., "Processing file 1/100...").</li>
+                    <li>Click 'Download Combined_Nominal_Roll.csv' for all data.</li>
                     <li>Click 'Generate Room-wise Report' to create seating lists below.</li>
                 </ol>
             </div>
@@ -191,14 +232,9 @@
             <!-- HTML Interface -->
             <div class="space-y-4">
                 <div>
-                    <label for="pdf-file" class="block text-sm font-medium text-gray-700">1. Select PDF File:</label>
-                    <input type="file" id="pdf-file" accept=".pdf"
-                           class="mt-1 block w-full text-sm text-gray-500
-                                  file:mr-4 file:py-2 file:px-4
-                                  file:rounded-md file:border-0
-                                  file:text-sm file:font-semibold
-                                  file:bg-indigo-50 file:text-indigo-700
-                                  hover:file:bg-indigo-100"/>
+                    <label for="pdf-file" class="block text-sm font-medium text-gray-700">1. Select PDF Files:</label>
+                    <!-- *** FIX HERE: Entire tag is on one line to prevent parsing errors *** -->
+                    <input type="file" id="pdf-file" accept=".pdf" multiple class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"/>
                 </div>
                 
                 <button id="run-button" 
@@ -206,7 +242,7 @@
                         class="w-full inline-flex justify-center items-center rounded-md border border-transparent bg-indigo-600 py-3 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50">
                     <!-- Loading spinner (hidden by default) -->
                     <span id="spinner" class="loader-spin -ml-1 mr-3 h-5 w-5 text-white hidden"></span>
-                    <span id="button-text">2. Run Extraction</span>
+                    <span id="button-text">2. Run Batch Extraction</span>
                 </button>
             </div>
 
@@ -249,14 +285,15 @@
 
     <!-- 
       *** STRUCTURAL FIX ***
-      The Report Output Area is OUTSIDE the main app container for correct printing flow.
+      The Report Output Area is now OUTSIDE the main app container.
+      This allows print styles to hide the app and show the report.
     -->
-    <div id="report-output-area" class="mt-6 w-full">
+    <div id="report-output-area" class="mt-6 w-full" style="display: none;">
         <!-- Report pages will be injected here -->
     </div>
 
 
-    <!-- The Python Script (STABLE EXTRACTION LOGIC) -->
+    <!-- The Python Script (Batch Processing Version) -->
     <py-script>
         import pandas as pd
         import pdfplumber
@@ -270,13 +307,11 @@
         
         # Get references to our HTML elements
         status_div = document.getElementById("status")
-        # --- NEW HTML elements ---
         csv_download_container = document.getElementById("csv-download-container")
         generate_report_button = document.getElementById("generate-report-button")
         json_data_store = document.getElementById("json-data-store")
         report_controls = document.getElementById("report-controls")
         report_output_area = document.getElementById("report-output-area")
-        # ---
         
         run_button = document.getElementById("run-button")
         spinner = document.getElementById("spinner")
@@ -297,20 +332,16 @@
             else:
                 run_button.disabled = False
                 spinner.classList.add("hidden")
-                button_text.textContent = "2. Run Extraction"
+                button_text.textContent = "2. Run Batch Extraction"
 
-        # --- Helper function for sorting ---
         def get_sort_key(row):
             """Converts DD.MM.YYYY and HH:MM PM to a sortable format."""
             try:
-                # Convert date
                 date_obj = datetime.strptime(row['Date'], '%d.%m.%Y')
-                # Convert time
-                time_obj = datetime.strptime(row['Time'], '%I:%M %p') # '02:00 PM'
+                time_obj = datetime.strptime(row['Time'], '%I:%M %p')
                 return (date_obj, time_obj)
             except ValueError as e:
                 console.log(f"Sort Error: Could not parse Date '{row['Date']}' or Time '{row['Time']}'. Error: {e}")
-                # Fallback for "Unknown" or malformed dates/times
                 return (datetime.min, datetime.min) 
 
         async def run_extraction(event=None):
@@ -318,419 +349,99 @@
             This function is called when the "Run Extraction" button is clicked.
             """
             try:
-                # Show loader and disable button
                 show_loader(True)
-                # Give the browser a moment to show the loader
                 await asyncio.sleep(0)                                
                 
-                # --- Clear old CSV and Report data ---
                 csv_download_container.innerHTML = ""
                 generate_report_button.classList.add("hidden")
                 json_data_store.innerHTML = ""
                 status_div.innerHTML = ""
                 report_controls.classList.add("hidden")
                 report_output_area.innerHTML = ""
-                report_output_area.style.display = 'none' # Hide on new run
-                # ---
-                                
-                log_message("Starting extraction...")
+                report_output_area.style.display = 'none'
                 
-                # 1. Get the file from the HTML input
+                log_message("Starting batch extraction...")
+                
                 file_input = document.getElementById("pdf-file")
                 file_list = file_input.files
                                 
                 if file_list.length == 0:
-                    log_message("Error: Please select a PDF file first.")
+                    log_message("Error: Please select one or more PDF files first.")
                     show_loader(False)
                     return
-
-                file = file_list.item(0)
-                # Get the filename from the file object
-                file_name = file.name
-                log_message(f"Loading file: {file_name}...")
                 
-                # 2. Read the file into a Python-readable bytes object
-                file_bytes = await file.arrayBuffer()
-                pdf_file_obj = io.BytesIO(file_bytes.to_py())
-                log_message("File loaded. Processing with pdfplumber...")
-                                
+                # --- This is now the master list for ALL files ---
                 all_exam_rows = []
-                                
-                # Regex for Register Number
+                total_files = file_list.length
+                log_message(f"Found {total_files} file(s) to process.")
+                
+                # --- Regex for Register Number (defined once) ---
                 reg_num_regex = re.compile(r'([A-Z0-9]{5,}\d{3})')
-                                
-                # --- Persistent Header Info ---
-                course_name = "Unknown"
-                date_val = "Unknown"
-                time_val = "Unknown"
-                # ---
                 
-                # 3. --- Start of PDF processing logic ---
-                with pdfplumber.open(pdf_file_obj) as pdf:
-                    total_pages = len(pdf.pages)
-                    log_message(f"Total pages found: {total_pages}")
+                # --- *** BATCH PROCESSING LOOP *** ---
+                for file_index in range(total_files):
+                    file = file_list.item(file_index)
+                    file_name = file.name
+                    log_message(f"--- Processing file {file_index + 1}/{total_files}: {file_name} ---")
                     
-                    for i, page in enumerate(pdf.pages):
-                        log_message(f"Processing page {i + 1}/{total_pages}...")
-                        await asyncio.sleep(0) 
+                    try:
+                        file_bytes = await file.arrayBuffer()
+                        pdf_file_obj = io.BytesIO(file_bytes.to_py())
                         
-                        # Use the "old" working page_text extraction
-                        page_text = page.extract_text(y_tolerance=3, x_tolerance=3)
-                                                
-                        # Find Course (Old working logic)
-                        course_match = re.search(r'([A-Z0-9]{3,}\d{3,}.*?\[.*?syllabus\])', page_text, re.DOTALL)
-                        if course_match:
-                            new_course_name = course_match.group(1).strip().replace('\n', ' ')
-                            new_course_name = new_course_name.replace(' Course [', ' [')
-                            if new_course_name != course_name:
-                                course_name = new_course_name
-                                log_message(f"Found new Course: {course_name}")
-
-                        # Find Date/Time (Old working logic)
-                        datetime_match = re.search(
-                            r'Date of Examination.*?(\d{2}\.\d{2}\.\d{4})\s*(\d{1,2}:\d{2}\s*PM|002:0 0PM)', 
-                            page_text, 
-                            re.DOTALL
-                        )
-                                                
-                        if datetime_match:
-                            # Group 1: Date
-                            new_date_val = datetime_match.group(1).strip()
-                            if new_date_val != date_val:
-                                date_val = new_date_val
-                                log_message(f"Found new Date: {date_val}")
-                                                        
-                            # Group 2: Time
-                            new_time_val = datetime_match.group(2).strip()
-                                                        
-                            # --- FIX FOR MALFORMED TIME ---
-                            if "002:0 0PM" in new_time_val:
-                                new_time_val = "02:00 PM"
-                            # --- END FIX ---
+                        # --- Persistent Header Info (resets for each file, but carries over pages) ---
+                        course_name = "Unknown"
+                        date_val = "Unknown"
+                        time_val = "Unknown"
+                        
+                        with pdfplumber.open(pdf_file_obj) as pdf:
+                            total_pages = len(pdf.pages)
+                            log_message(f"File has {total_pages} pages.")
                             
-                            # Standardize format (e.g., "2:00PM" -> "02:00 PM")
-                            if " " not in new_time_val:
-                                new_time_val = new_time_val.replace(" ", "") # remove all spaces
-                                if len(new_time_val) == 7: # "2:00PM" -> "02:00 PM"
-                                    new_time_val = "0" + new_time_val[:4] + " " + new_time_val[4:]
-                                elif len(new_time_val) == 8: # "02:00PM" -> "02:00 PM"
-                                    new_time_val = new_time_val[:5] + " " + new_time_val[5:]
+                            for i, page in enumerate(pdf.pages):
+                                # Log progress periodically
+                                if (i + 1) % 10 == 0 or (i + 1) == total_pages:
+                                    log_message(f"Processing page {i + 1}/{total_pages}...")
+                                    await asyncio.sleep(0) # Yield to browser
+                                
+                                page_text = page.extract_text(y_tolerance=3, x_tolerance=3)
                                                         
-                            if new_time_val != time_val:
-                                time_val = new_time_val
-                                log_message(f"Found new Time: {time_val}")
-                        # --- *** END OLD DATE/TIME LOGIC *** ---
-                                                
-                        # --- 3b. Extract Table Data (Old working logic) ---
-                        tables = page.extract_tables() # <-- Reverted to no settings
-                        processed_rows_on_page = 0
-                                                
-                        for table in tables:
-                            for row in table:
+                                course_match = re.search(r'([A-Z0-9]{3,}\d{3,}.*?\[.*?syllabus\])', page_text, re.DOTALL)
+                                if course_match:
+                                    new_course_name = course_match.group(1).strip().replace('\n', ' ')
+                                    new_course_name = new_course_name.replace(' Course [', ' [')
+                                    if new_course_name != course_name:
+                                        course_name = new_course_name
+                                        # log_message(f"Found new Course: {course_name}") # Too noisy for batch
+
+                                # --- *** NEW ROBUST DATE/TIME LOGIC *** ---
+                                datetime_match = None
+                                # 1. Try to find the specific, known-good string first
                                 try:
-                                    if not row or not row[0]: continue
-                                    if not row[0].strip().isdigit(): continue
-                                                                            
-                                    reg_num = "Unknown"
-                                    name = "Unknown"
-                                                                        
-                                    for idx, cell in enumerate(row):
-                                        if not cell: continue
-                                        cell_text = cell.strip().replace('\n', ' ')
-                                        reg_match = reg_num_regex.search(cell_text)
-                                                                                
-                                        if reg_match:
-                                            reg_num = reg_match.group(1)
-                                            name_fragment = cell_text.replace(reg_num, '').strip()
-                                                                                        
-                                            if name_fragment and not reg_num_regex.search(name_fragment) and not name_fragment.isdigit():
-                                                name = name_fragment
-                                                break
-                                                                                         
-                                            try:
-                                                next_cell = row[idx+1]
-                                                if next_cell and next_cell.strip():
-                                                    name = next_cell.strip().replace('\n', ' ')
-                                                    break
-                                                                                                
-                                                next_next_cell = row[idx+2]
-                                                if next_next_cell and next_next_cell.strip():
-                                                    name = next_next_cell.strip().replace('\n', ' ')
-                                                    break
-                                            except IndexError:
-                                                pass
-                                                                         
-                                    if reg_num != "Unknown":
-                                        formatted_row = {
-                                            'Date': date_val.strip(),
-                                            'Time': time_val.strip(),
-                                            'Course': course_name.strip(),
-                                            'Register Number': reg_num.strip(),
-                                            'Name': name.strip()
-                                        }
-                                        all_exam_rows.append(formatted_row)
-                                        processed_rows_on_page += 1
-                                                                
-                                except Exception as e:
-                                    log_message(f"Warning: Skipping row. Details: {e}")
-                        
-                        if processed_rows_on_page > 0:
-                           log_message(f"Found {processed_rows_on_page} candidates on page {i + 1}.")
-                           await asyncio.sleep(0)
-                # --- End of PDF processing logic ---
+                                    datetime_match = re.search(
+                                        r'Date of Examination.*?(\d{2}\.\d{2}\.\d{4})\s*(\d{1,2}:\d{2}\s*PM|002:0 0PM)', 
+                                        page_text, 
+                                        re.DOTALL
+                                    )
+                                except Exception:
+                                    pass # Regex might fail on weird text
                                 
-                if not all_exam_rows:
-                    log_message("Error: No data was extracted. Check if this is a Nominal Roll PDF.")
-                    show_loader(False)
-                    return
-                
-                log_message(f"Processed {total_pages} pages. Found {len(all_exam_rows)} total candidates.")
-                await asyncio.sleep(0)
-                
-                # --- 4. NEW: Sort by Date and Time ---
-                log_message("Sorting entries by Date and Time...")
-                all_exam_rows_sorted = sorted(all_exam_rows, key=get_sort_key)
-                await asyncio.sleep(0)
-                                
-                # --- 5. Allocate Room Numbers (on the sorted list) ---
-                log_message("Allocating room numbers...")
-                                
-                processed_rows_with_rooms = []
-                current_session_key = None
-                session_student_count = 0
-                students_per_room = 30
-                
-                for row in all_exam_rows_sorted: # Use the sorted list
-                    session_key = (row['Date'], row['Time'])
-                                        
-                    # Check if this is a new session (new Date or Time)
-                    if session_key != current_session_key:
-                        current_session_key = session_key
-                        session_student_count = 0 # Reset counter for new session
-                                        
-                    session_student_count += 1
-                                        
-                    # Calculate room number
-                    room_number = math.ceil(session_student_count / students_per_room)
-                    row['Room No'] = f"Room {room_number}"
-                                        
-                    processed_rows_with_rooms.append(row)
-                
-                log_message("Converting to DataFrame and creating CSV...")
-                
-                # 6. Convert to Pandas DataFrame and create CSV string
-                df = pd.DataFrame(processed_rows_with_rooms)
-                # Reorder columns to match user's request, adding Room No at the end
-                df = df[['Date', 'Time', 'Course', 'Register Number', 'Name', 'Room No']]
-                csv_data = df.to_csv(index=False, encoding='utf-8')
-                
-                # 7. Create a downloadable link for the CSV
-                blob = Blob.new([csv_data], {type: "text/csv;charset=utf-8"})
-                url = URL.createObjectURL(blob)
-                                
-                csv_filename = file_name.rsplit('.', 1)[0] + '.csv' if '.' in file_name else 'output.csv'
-                
-                # --- MODIFIED to use new HTML container ---
-                csv_download_container.innerHTML = f"""
-                    <a href="{url}" download="{csv_filename}"
-                       class="w-full inline-flex justify-center items-center rounded-md border border-transparent bg-green-600 py-3 px-4 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
-                        Download {csv_filename} ({len(all_exam_rows)} rows)
-                    </a>
-                """
-                
-                # --- ADDED: Bridge to Report Generator ---
-                json_data = json.dumps(processed_rows_with_rooms)
-                json_data_store.innerHTML = json_data
-                generate_report_button.classList.remove("hidden")
-                # --- END ADDED ---
-                                
-                log_message("Success! Your file is ready for download.")
-            
-            except Exception as e:
-                log_message(f"An error occurred: {e}")
-            
-            finally:
-                # Re-enable the button and hide loader
-                show_loader(False)
-    </py-script>
-
-    <!-- *** JAVASCRIPT FOR REPORT VIEWER (WITH NEW LOGIC) *** -->
-    <script>
-        // --- Get references to all new modal elements ---
-        const generateReportButton = document.getElementById('generate-report-button');
-        const jsonDataStore = document.getElementById('json-data-store');
-
-        // --- NEW Report Elements ---
-        const reportControls = document.getElementById('report-controls');
-        const reportOutputArea = document.getElementById('report-output-area');
-        const reportStatus = document.getElementById('report-status');
-        const finalPrintButton = document.getElementById('final-print-button');
-        const clearReportButton = document.getElementById('clear-report-button');
-        
-
-        // --- 1. Event listener for the "Generate Report" button ---
-        generateReportButton.addEventListener('click', async () => {
-            
-            // --- Show progress ---
-            generateReportButton.disabled = true;
-            generateReportButton.textContent = "Generating Report...";
-            
-            // Clear old report
-            reportOutputArea.innerHTML = "";
-            reportControls.classList.add('hidden');
-            
-            // Give browser time to show the message
-            await new Promise(resolve => setTimeout(resolve, 50));
-
-            try {
-                const data = JSON.parse(jsonDataStore.innerHTML);
-                if (!data || data.length === 0) {
-                    alert("No data to generate. Please run extraction first.");
-                    return;
-                }
-
-                // --- 1. Group data by Date, Time, AND Room ---
-                const sessions = {};
-                data.forEach(student => {
-                    const key = `${student.Date}_${student.Time}_${student['Room No']}`;
-                    if (!sessions[key]) {
-                        sessions[key] = {
-                            Date: student.Date,
-                            Time: student.Time,
-                            Room: student['Room No'],
-                            students: [],
-                            courseCounts: {}
-                        };
-                    }
-                    sessions[key].students.push(student);
-                    
-                    // Count courses *within this room*
-                    const course = student.Course;
-                    if (!sessions[key].courseCounts[course]) {
-                        sessions[key].courseCounts[course] = 0;
-                    }
-                    sessions[key].courseCounts[course]++;
-                });
-
-                // --- 2. Generate HTML for all pages ---
-                let allPagesHtml = '';
-                
-                // --- FIX: Numeric sorting of Room Numbers ---
-                const sortedSessionKeys = Object.keys(sessions).sort((a, b) => {
-                    // 1. Extract Date_Time part (e.g., '03.11.2025_02:00 PM')
-                    const sessionA = a.split('_').slice(0, 2).join('_');
-                    const sessionB = b.split('_').slice(0, 2).join('_');
-
-                    // 2. If Date and Time are the same, sort numerically by Room No
-                    if (sessionA === sessionB) {
-                        const roomNumA = parseInt(a.split('_')[2].replace('Room ', ''), 10);
-                        const roomNumB = parseInt(b.split('_')[2].replace('Room ', ''), 10);
-                        return roomNumA - roomNumB;
-                    }
-                    
-                    // 3. Otherwise, sort by the whole key (which is already chronologically sorted by Python)
-                    return a.localeCompare(b);
-                });
-
-
-                sortedSessionKeys.forEach(key => {
-                    const session = sessions[key];
-                    
-                    // Course Summary HTML
-                    let courseSummaryHtml = '';
-                    for (const [courseName, count] of Object.entries(session.courseCounts)) {
-                        const shortCourseName = courseName.split(' ').slice(0, 4).join(' ') + (courseName.split(' ').length > 4 ? '...' : '');
-                        courseSummaryHtml += `<div style="font-weight: bold;">${shortCourseName}: ${count} Student(s)</div>`;
-                    }
-
-                    // Student Table HTML
-                    let tableRowsHtml = '';
-                    let previousCourseName = ""; // <-- Initialize for de-duplication
-
-                    session.students.forEach((student, index) => {
-                        const tableCourseName = student.Course.split(' ').slice(0, 4).join(' ') + (student.Course.split(' ').length > 4 ? '...' : '');
-                        
-                        // --- NEW De-duplication Logic ---
-                        let displayCourseName;
-                        if (tableCourseName === previousCourseName) {
-                            displayCourseName = '"'; // Use a ditto mark
-                        } else {
-                            displayCourseName = tableCourseName;
-                            previousCourseName = tableCourseName; // Update the tracker
-                        }
-                        // --- END New Logic ---
-
-                        tableRowsHtml += `
-                            <tr>
-                                <td class="sl-col">${index + 1}</td>
-                                <td class="course-col">${displayCourseName}</td>
-                                <td class="reg-col">${student['Register Number']}</td>
-                                <td class="name-col">${student.Name}</td>
-                                <td class="signature-col"></td>
-                            </tr>
-                        `;
-                        
-                        // --- REMOVED: Page break logic to ensure all 30 students are on one print page ---
-                    });
-                    
-                    // Assemble the full page
-                    allPagesHtml += `
-                        <div class="print-page">
-                            <h1>University of Calicut</h1>
-                            <h2>${session.Date} | ${session.Time} | ${session.Room}</h2>
-                            
-                            <div class="course-summary">
-                                ${courseSummaryHtml}
-                            </div>
-                            
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th class="sl-col">Sl No</th>
-                                        <th class="course-col">Course</th>
-                                        <th class="reg-col">Register Number</th>
-                                        <th class="name-col">Name</th>
-                                        <th class="signature-col">Signature</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${tableRowsHtml}
-                                </tbody>
-                            </table>
-                        </div>
-                    `;
-                });
-
-                // --- 3. Inject HTML into the output area & show controls ---
-                reportOutputArea.innerHTML = allPagesHtml;
-                reportOutputArea.style.display = 'block'; // <-- Show the report area
-                reportStatus.textContent = `Generated ${sortedSessionKeys.length} room reports.`;
-                reportControls.classList.remove('hidden');
-
-            } catch (e) {
-                console.error("Error generating print report:", e);
-                reportStatus.textContent = "An error occurred while generating the report.";
-                reportControls.classList.remove('hidden');
-                
-            } finally {
-                // --- 4. Reset main button ---
-                generateReportButton.disabled = false;
-                generateReportButton.textContent = "Generate Room-wise Report";
-            }
-        });
-
-        // --- 2. Event listener for the "Print" button ---
-        finalPrintButton.addEventListener('click', () => {
-            window.print();
-        });
-
-        // --- 3. Event listener for the "Clear" button ---
-        clearReportButton.addEventListener('click', () => {
-            reportOutputArea.innerHTML = "";
-            reportOutputArea.style.display = 'none'; // <-- Hide the report area
-            reportControls.classList.add('hidden');
-        });
-    </script>
-
-</body>
-</html>
+                                # 2. If it fails, try a more generic (but constrained) fallback
+                                if not datetime_match:
+                                    try:
+                                        # Looks for "Date" ... (0-100 chars) ... "DD.MM.YYYY" ... "HH:MM PM"
+                                        datetime_match = re.search(
+                                            r'Date[\s\S]{0,100}?(\d{2}\.\d{2}\.\d{4})[\s\S]{0,100}?(\d{1,2}:\d{2}\s*PM|002:0 0PM)', 
+                                            page_text, 
+                                            re.DOTALL | re.IGNORECASE
+                                        )
+                                    except Exception:
+                                        pass # Fallback also failed
+                                # --- *** END ROBUST LOGIC *** ---
+                                                        
+                                if datetime_match:
+                                    new_date_val = datetime_match.group(1).strip()
+                                    if new_date_val != date_val:
+                                        date_val = new_date_val
+                                    
+                                    new_time_val = datetime_match.group(2).strip()
+                                    if "002:0 0PM" in new_time_val: 

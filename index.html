@@ -28,29 +28,27 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* --- PRINT STYLES --- */
+        /* --- PRINT STYLES (FIXED) --- */
         @media print {
-            /* Hide the entire app, only show the print area */
-            body > div, body > py-config, body > py-script, #report-controls {
-                display: none;
+            /* Hide the main app container and all other non-report elements */
+            #main-app-container, body > py-config, body > py-script, #report-controls {
+                display: none !important; /* Be forceful */
             }
             
-            /* Show ONLY the report content */
-            #report-output-area, #report-output-area * {
-                visibility: visible;
-                display: block;
-            }
-
+            /* Show ONLY the report content area and ensure it's visible */
             #report-output-area {
-                position: absolute;
-                left: 0;
-                top: 0;
+                display: block !important;
+                visibility: visible !important;
+                position: static; /* Use static positioning for print flow */
                 width: 100%;
-                overflow-y: visible; /* Show all content for printing */
+                overflow-y: visible;
             }
 
+            /* Make sure each page is visible and breaks correctly */
             .print-page {
-                page-break-after: always; /* Each report on a new page */
+                display: block !important;
+                visibility: visible !important;
+                page-break-after: always;
                 page-break-inside: avoid;
                 width: 100%;
                 padding: 1cm;
@@ -58,8 +56,10 @@
                 box-shadow: none;
                 border: none;
                 margin: 0;
+                /* Let the internal table/div elements render normally */
             }
             
+            /* The rest of the styles are for formatting the page */
             h1, h2 {
                 text-align: center;
                 color: black;
@@ -149,7 +149,7 @@
 
     </style>
 </head>
-<body class="bg-gray-100 font-sans flex items-center justify-center min-h-screen">
+<body class="bg-gray-100 font-sans">
     
     <!-- Define Python Environment (REVERTED to minimal set) -->
     <py-config>
@@ -157,7 +157,7 @@
     </py-config>
 
     <!-- Main App Container -->
-    <div id="main-app-container" class="container max-w-2xl mx-auto p-4" style="display: block;">
+    <div id="main-app-container" class="container max-w-2xl mx-auto p-4 min-h-screen" style="display: block;">
         <div class="bg-white p-8 rounded-lg shadow-xl w-full">
             
             <header class="mb-6">
@@ -235,14 +235,19 @@
                     </button>
                 </div>
             </div>
-
-            <!-- 4. NEW: Report Output Area (not a modal) -->
-            <div id="report-output-area" class="mt-6 w-full">
-                <!-- Report pages will be injected here -->
-            </div>
             
         </div>
     </div>
+
+    <!-- 
+      *** STRUCTURAL FIX ***
+      The Report Output Area is now OUTSIDE the main app container.
+      This allows print styles to hide the app and show the report.
+    -->
+    <div id="report-output-area" class="mt-6 w-full" style="display: none;">
+        <!-- Report pages will be injected here -->
+    </div>
+
 
     <!-- The Python Script (REVERTED to old working logic, merged with new report features) -->
     <py-script>
@@ -319,6 +324,7 @@
                 status_div.innerHTML = ""
                 report_controls.classList.add("hidden")
                 report_output_area.innerHTML = ""
+                report_output_area.style.display = 'none' # Hide on new run
                 # ---
                                 
                 log_message("Starting extraction...")
@@ -668,6 +674,7 @@
 
                 // --- 3. Inject HTML into the output area & show controls ---
                 reportOutputArea.innerHTML = allPagesHtml;
+                reportOutputArea.style.display = 'block'; // <-- Show the report area
                 reportStatus.textContent = `Generated ${sortedSessionKeys.length} room reports.`;
                 reportControls.classList.remove('hidden');
 
@@ -691,6 +698,7 @@
         // --- 3. Event listener for the "Clear" button ---
         clearReportButton.addEventListener('click', () => {
             reportOutputArea.innerHTML = "";
+            reportOutputArea.style.display = 'none'; // <-- Hide the report area
             reportControls.classList.add('hidden');
         });
     </script>

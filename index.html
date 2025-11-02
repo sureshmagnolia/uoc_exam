@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nominal Roll Extractor (V4)</title>
+    <title>Nominal Roll Extractor (V6)</title>
     
     <!-- Load Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -91,7 +91,7 @@
                 text-align: center;
             }
             
-            /* NEW: Page break helper */
+            /* Page break helper (no longer needed, but kept for legacy) */
             .print-page-break {
                 page-break-after: always;
                 border: 0;
@@ -210,7 +210,7 @@
         <div class="bg-white p-8 rounded-lg shadow-xl w-full">
             
             <header class="mb-6">
-                <h1 class="text-3xl font-bold text-gray-800">Nominal Roll Extractor (V4)</h1>
+                <h1 class="text-3xl font-bold text-gray-800">Nominal Roll Extractor (V6)</h1>
                 <p class="text-gray-600 mt-2">
                     Upload multiple Nominal Roll PDFs at once to extract all student data, assign rooms, and print unified reports.
                 </p>
@@ -631,71 +631,48 @@
                 });
 
                 let allPagesHtml = '';
+                let totalPagesGenerated = 0;
                 // --- USE NUMERIC SORT KEY ---
                 const sortedSessionKeys = Object.keys(sessions).sort((a, b) => {
                     return getNumericSortKey(a).localeCompare(getNumericSortKey(b));
                 });
 
+                // --- *** REVISED PAGE BREAK LOGIC (V6) *** ---
                 sortedSessionKeys.forEach(key => {
                     const session = sessions[key];
-                    
+                    const studentsPerPage = 20;
+
+                    // --- 1. Define Common Page Elements ---
                     let courseSummaryHtml = '';
                     for (const [courseName, count] of Object.entries(session.courseCounts)) {
                         const shortCourseName = courseName.split(' ').slice(0, 4).join(' ') + (courseName.split(' ').length > 4 ? '...' : '');
                         courseSummaryHtml += `<div style="font-weight: bold;">${shortCourseName}: ${count} Student(s)</div>`;
                     }
-
-                    let tableRowsHtml = '';
-                    let previousCourseName = ""; 
-
-                    session.students.forEach((student, index) => {
-                        const tableCourseName = student.Course.split(' ').slice(0, 4).join(' ') + (student.Course.split(' ').length > 4 ? '...' : '');
-                        
-                        let displayCourseName;
-                        if (tableCourseName === previousCourseName) {
-                            displayCourseName = '"';
-                        } else {
-                            displayCourseName = tableCourseName;
-                            previousCourseName = tableCourseName;
-                        }
-
-                        tableRowsHtml += `
-                            <tr>
-                                <td class="sl-col">${index + 1}</td>
-                                <td class="course-col">${displayCourseName}</td>
-                                <td class="reg-col">${student['Register Number']}</td>
-                                <td class="name-col">${student.Name}</td>
-                                <td class="signature-col"></td>
-                            </tr>
-                        `;
-                        
-                        // --- *** Page Break Logic *** ---
-                        // This checks if the *next* student (index + 1) is the 21st student (index == 19)
-                        // Wait, no, index + 1 is the student number. So (index + 1) === 20 is the 20th student.
-                        // This code runs *after* the 20th student's row is added.
-                        if ((index + 1) === 20 && session.students.length > 20) {
-                             tableRowsHtml += `
-                                </tbody>
-                            </table>
-                            <div class="print-page-break"></div>
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th class="sl-col">Sl No</th>
-                                        <th class="course-col">Course</th>
-                                        <th class="reg-col">Register Number</th>
-                                        <th class="name-col">Name</th>
-                                        <th class="signature-col">Signature</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                            `;
-                            // Reset course tracker for new page
-                            previousCourseName = ""; 
-                        }
-                    });
                     
-                    // --- Invigilator Footer ---
+                    const pageHeaderHtml = `
+                        <h1>University of Calicut</h1>
+                        <h2>${session.Date} &nbsp;|&nbsp; ${session.Time} &nbsp;|&nbsp; ${session.Room}</h2>
+                        <div class="course-summary">
+                            ${courseSummaryHtml}
+                        </div>
+                    `;
+                    
+                    const tableHeaderHtml = `
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th class="sl-col">Sl No</th>
+                                    <th class="course-col">Course</th>
+                                    <th class="reg-col">Register Number</th>
+                                    <th class="name-col">Name</th>
+                                    <th class="signature-col">Signature</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `; // Note: tbody is opened
+                    
+                    const tableCloseHtml = `</tbody></table>`;
+                    
                     const invigilatorFooterHtml = `
                         <div class="invigilator-footer">
                             <div><strong>Answer Booklets Received:</strong> _________________</div>
@@ -706,40 +683,83 @@
                             </div>
                         </div>
                     `;
+
+                    // --- 2. Helper function to generate table rows for a student list ---
+                    let previousCourseName = ""; // Use a shared var, reset when needed
                     
-                    // Assemble the full page
-                    allPagesHtml += `
-                        <div class="print-page">
-                            <h1>University of Calicut</h1>
-                            <h2>${session.Date} &nbsp;|&nbsp; ${session.Time} &nbsp;|&nbsp; ${session.Room}</h2>
+                    function generateTableRows(studentList) {
+                        let rowsHtml = '';
+                        studentList.forEach((student) => { // 'index' is not needed here
+                            const studentNumber = student.originalIndex + 1; // Get the original Sl.No.
+                            const tableCourseName = student.Course.split(' ').slice(0, 4).join(' ') + (student.Course.split(' ').length > 4 ? '...' : '');
                             
-                            <div class="course-summary">
-                                ${courseSummaryHtml}
-                            </div>
-                            
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th class="sl-col">Sl No</th>
-                                        <th class="course-col">Course</th>
-                                        <th class="reg-col">Register Number</th>
-                                        <th class="name-col">Name</th>
-                                        <th class="signature-col">Signature</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${tableRowsHtml}
-                                </tbody>
-                            </table>
-                            
-                            ${invigilatorFooterHtml}
-                        </div>
-                    `;
+                            let displayCourseName;
+                            if (tableCourseName === previousCourseName) {
+                                displayCourseName = '"';
+                            } else {
+                                displayCourseName = tableCourseName;
+                                previousCourseName = tableCourseName;
+                            }
+
+                            rowsHtml += `
+                                <tr>
+                                    <td class="sl-col">${studentNumber}</td>
+                                    <td class="course-col">${displayCourseName}</td>
+                                    <td class="reg-col">${student['Register Number']}</td>
+                                    <td class="name-col">${student.Name}</td>
+                                    <td class="signature-col"></td>
+                                </tr>
+                            `;
+                        });
+                        return rowsHtml;
+                    }
+                    
+                    // --- 3. Slice students and add original index ---
+                    const studentsWithIndex = session.students.map((student, index) => ({
+                        ...student,
+                        originalIndex: index // We need this to keep the Sl.No. correct
+                    }));
+                    
+                    const studentsPage1 = studentsWithIndex.slice(0, studentsPerPage);
+                    const studentsPage2 = studentsWithIndex.slice(studentsPerPage);
+
+                    // --- 4. Build Page 1 ---
+                    previousCourseName = ""; // Reset for page 1
+                    const tableRowsPage1 = generateTableRows(studentsPage1);
+                    
+                    allPagesHtml += `<div class="print-page">`;
+                    allPagesHtml += pageHeaderHtml;
+                    allPagesHtml += tableHeaderHtml;
+                    allPagesHtml += tableRowsPage1;
+                    allPagesHtml += tableCloseHtml;
+                    
+                    if (studentsPage2.length === 0) {
+                        // This is the only page, so add footer
+                        allPagesHtml += invigilatorFooterHtml;
+                    }
+                    
+                    allPagesHtml += `</div>`; // Close page 1
+                    totalPagesGenerated++;
+                    
+                    // --- 5. Build Page 2 (if necessary) ---
+                    if (studentsPage2.length > 0) {
+                        previousCourseName = ""; // Reset for page 2
+                        const tableRowsPage2 = generateTableRows(studentsPage2);
+                        
+                        allPagesHtml += `<div class="print-page">`;
+                        allPagesHtml += tableHeaderHtml; // NO page header
+                        allPagesHtml += tableRowsPage2;
+                        allPagesHtml += tableCloseHtml;
+                        allPagesHtml += invigilatorFooterHtml; // Footer ALWAYS on last page
+                        allPagesHtml += `</div>`; // Close page 2
+                        totalPagesGenerated++;
+                    }
                 });
+                // --- *** END REVISED LOGIC (V6) *** ---
 
                 reportOutputArea.innerHTML = allPagesHtml;
                 reportOutputArea.style.display = 'block'; 
-                reportStatus.textContent = `Generated ${sortedSessionKeys.length} room reports.`;
+                reportStatus.textContent = `Generated ${totalPagesGenerated} total pages for ${sortedSessionKeys.length} room sessions.`;
                 reportControls.classList.remove('hidden');
 
             } catch (e) {

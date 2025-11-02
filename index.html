@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nominal Roll Extractor (V6)</title>
+    <title>Nominal Roll Extractor (V7)</title>
     
     <!-- Load Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -105,11 +105,14 @@
             }
             th, td {
                 border: 1px solid black;
-                padding: 2px; /* Tighter padding */
+                /* --- CHANGED: Increased vertical padding for signature --- */
+                padding: 8px 3px; 
                 text-align: left;
                 word-wrap: break-word; /* Wrap long text */
             }
             th {
+                /* --- CHANGED: Apply same padding to header for alignment --- */
+                padding: 8px 3px;
                 background-color: #eee;
             }
             
@@ -158,11 +161,14 @@
         }
         .print-page th, .print-page td {
             border: 1px solid black;
-            padding: 2px; /* Tighter padding */
+            /* --- CHANGED: Increased vertical padding for signature --- */
+            padding: 8px 3px;
             text-align: left;
             word-wrap: break-word;
         }
         .print-page th {
+            /* --- CHANGED: Apply same padding to header for alignment --- */
+            padding: 8px 3px;
             background-color: #eee;
         }
         /* Optimized column widths */
@@ -210,7 +216,7 @@
         <div class="bg-white p-8 rounded-lg shadow-xl w-full">
             
             <header class="mb-6">
-                <h1 class="text-3xl font-bold text-gray-800">Nominal Roll Extractor (V6)</h1>
+                <h1 class="text-3xl font-bold text-gray-800">Nominal Roll Extractor (V7)</h1>
                 <p class="text-gray-600 mt-2">
                     Upload multiple Nominal Roll PDFs at once to extract all student data, assign rooms, and print unified reports.
                 </p>
@@ -637,7 +643,7 @@
                     return getNumericSortKey(a).localeCompare(getNumericSortKey(b));
                 });
 
-                // --- *** REVISED PAGE BREAK LOGIC (V6) *** ---
+                // --- *** REVISED PAGE BREAK LOGIC (V7) *** ---
                 sortedSessionKeys.forEach(key => {
                     const session = sessions[key];
                     const studentsPerPage = 20;
@@ -755,7 +761,7 @@
                         totalPagesGenerated++;
                     }
                 });
-                // --- *** END REVISED LOGIC (V6) *** ---
+                // --- *** END REVISED LOGIC (V7) *** ---
 
                 reportOutputArea.innerHTML = allPagesHtml;
                 reportOutputArea.style.display = 'block'; 

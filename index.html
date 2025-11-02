@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nominal Roll Extractor (Batch Version)</title>
+    <title>Nominal Roll Extractor (V4)</title>
     
     <!-- Load Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -210,7 +210,7 @@
         <div class="bg-white p-8 rounded-lg shadow-xl w-full">
             
             <header class="mb-6">
-                <h1 class="text-3xl font-bold text-gray-800">Nominal Roll Extractor (Batch Version)</h1>
+                <h1 class="text-3xl font-bold text-gray-800">Nominal Roll Extractor (V4)</h1>
                 <p class="text-gray-600 mt-2">
                     Upload multiple Nominal Roll PDFs at once to extract all student data, assign rooms, and print unified reports.
                 </p>
@@ -669,7 +669,10 @@
                             </tr>
                         `;
                         
-                        // --- *** NEW 20/10 Page Break Logic *** ---
+                        // --- *** Page Break Logic *** ---
+                        // This checks if the *next* student (index + 1) is the 21st student (index == 19)
+                        // Wait, no, index + 1 is the student number. So (index + 1) === 20 is the 20th student.
+                        // This code runs *after* the 20th student's row is added.
                         if ((index + 1) === 20 && session.students.length > 20) {
                              tableRowsHtml += `
                                 </tbody>
@@ -707,7 +710,7 @@
                     // Assemble the full page
                     allPagesHtml += `
                         <div class="print-page">
-                            <h1>Government Victoria College Palakkad</h1>
+                            <h1>University of Calicut</h1>
                             <h2>${session.Date} &nbsp;|&nbsp; ${session.Time} &nbsp;|&nbsp; ${session.Room}</h2>
                             
                             <div class="course-summary">
@@ -765,4 +768,3 @@
 
 </body>
 </html>
-

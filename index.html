@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Updated Title -->
-    <title>UOC Exam Management V60</title>
+    <title>UOC Exam Management V61</title>
     
     <!-- Load Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -543,31 +543,41 @@
         </div>
     </div>
     
-    <!-- *** (V58) "QP Codes" View *** -->
+    <!-- *** (V61) "QP Codes" View - Now Session Aware *** -->
     <div id="view-qpcodes" class="container max-w-2xl mx-auto p-4 min-h-screen hidden">
         <div class="bg-white p-8 rounded-lg shadow-xl w-full">
             <h1 class="text-3xl font-bold text-gray-800 mb-6">QP Code Settings</h1>
             
             <div id="qpcode-content-wrapper" class="hidden">
-                <p class="text-gray-600 mb-4">
-                    Assign a Question Paper (QP) Code to each course. This code will be used in the Absentee Statement.
-                    Settings are saved automatically as you type.
-                </p>
-            
-                <!-- Dynamic Form Container -->
-                <div class="space-y-4">
-                    <!-- Header for the form -->
-                    <div class="flex items-center gap-3 px-2">
-                        <label class="font-semibold text-gray-700 w-2/3">Course Name</label>
-                        <label class="font-semibold text-gray-700 w-1/3">QP Code</label>
-                    </div>
-                    
-                    <!-- Container where course rows will be injected -->
-                    <div id="qp-code-container" class="space-y-2 max-h-96 overflow-y-auto pr-2">
-                        <!-- Rows will be added by JavaScript -->
-                    </div>
+                <!-- V61: Session Selector for QP Codes -->
+                <div class="mb-4">
+                    <label for="session-select-qp" class="block text-sm font-medium text-gray-700 mb-1">Select Exam Session:</label>
+                    <select id="session-select-qp" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm">
+                        <option value="">-- Select a Session --</option>
+                    </select>
                 </div>
-                <div id="qp-code-status" class="text-sm text-green-600 font-medium text-center h-5 mt-4"></div>
+
+                <div id="qp-entry-section" class="hidden">
+                    <p class="text-gray-600 mb-4">
+                        Assign a Question Paper (QP) Code to each course. This code will be used in the Absentee Statement.
+                        Settings are saved automatically as you type.
+                    </p>
+                
+                    <!-- Dynamic Form Container -->
+                    <div class="space-y-4">
+                        <!-- Header for the form -->
+                        <div class="flex items-center gap-3 px-2">
+                            <label class="font-semibold text-gray-700 w-2/3">Course Name</label>
+                            <label class="font-semibold text-gray-700 w-1/3">QP Code</label>
+                        </div>
+                        
+                        <!-- Container where course rows will be injected -->
+                        <div id="qp-code-container" class="space-y-2 max-h-96 overflow-y-auto pr-2">
+                            <!-- Rows will be added by JavaScript -->
+                        </div>
+                    </div>
+                    <div id="qp-code-status" class="text-sm text-green-600 font-medium text-center h-5 mt-4"></div>
+                </div>
 
             </div>
             
@@ -1064,7 +1074,8 @@
                             # V57: FIX - Robust check for "New Format"
                             # Check for the unique, quoted, CSV-style header.
                             page1_text_flat = page1_text.replace("\n", "")
-                            if '"SI.No","Reg.No","Name"' in page1_text_flat or '"SI.No" ,"Reg.No" ,"Name"' in page1_text_flat:
+                            # V57: Now using Reg.No, Name, D.O.B check
+                            if '"SI.No","Reg.No","Name","D.O.B"' in page1_text_flat or '"SI.No" ,"Reg.No" ,"Name" ,"D.O.B"' in page1_text_flat:
                                 # This is DEFINITELY the NEW format
                                 is_new_format = True
                                 file_date, file_time, file_course = extract_new_format_header(page1_text)
@@ -1184,7 +1195,7 @@
                 js.disable_absentee_tab(False) # V56: Enable absentee tab
                 js.disable_qpcode_tab(False) # V58: Enable QP Code tab
                 js.populate_session_dropdown() # V56: Populate dropdown
-                js.populate_qp_code_list() # V58: Populate QP code list
+                js.populate_qp_code_session_dropdown() # V61: Populate QP Code dropdown
                                 
                 log_message("Success! Your combined files are ready.")
             
@@ -1203,7 +1214,7 @@
             
     </py-script>
 
-    <!-- *** JAVASCRIPT FOR ALL UI (V60) *** -->
+    <!-- *** JAVASCRIPT FOR ALL UI (V61) *** -->
     <script>
         // --- Global localStorage Key ---
         const ROOM_CONFIG_KEY = 'examRoomConfig';
@@ -1292,6 +1303,8 @@
         // --- (V58) Get references to QP Code elements ---
         const qpcodeLoader = document.getElementById('qpcode-loader');
         const qpcodeContentWrapper = document.getElementById('qpcode-content-wrapper');
+        const sessionSelectQP = document.getElementById('session-select-qp'); // V61
+        const qpEntrySection = document.getElementById('qp-entry-section'); // V61
         const qpCodeContainer = document.getElementById('qp-code-container');
         const qpCodeStatus = document.getElementById('qp-code-status');
 
@@ -2296,9 +2309,9 @@
                 disable_absentee_tab(false);
                 populate_session_dropdown();
                 
-                // V58: Enable and populate QP Code tab
-                disable_qpcode_tab(False);
-                populate_qp_code_list();
+                // V61: Enable and populate QP Code tab
+                disable_qpcode_tab(false);
+                populate_qp_code_session_dropdown();
 
             } catch (e) {
                 console.error("Error parsing CSV:", e);
@@ -2487,7 +2500,7 @@
             renderAbsenteeList();
         }
         
-        // --- (V58) NEW QP CODE LOGIC ---
+        // --- (V61) NEW QP CODE LOGIC (Session-Aware) ---
         
         function disable_qpcode_tab(disabled) {
             navQPCodes.disabled = disabled;
@@ -2505,8 +2518,9 @@
         function loadQPCodes() {
             qpCodeMap = JSON.parse(localStorage.getItem(QP_CODE_LIST_KEY) || '{}');
         }
-
-        function populate_qp_code_list() {
+        
+        // V61: Populates the QP Code session dropdown
+        function populate_qp_code_session_dropdown() {
             try {
                 if (allStudentData.length === 0) {
                      allStudentData = JSON.parse(jsonDataStore.innerHTML || '[]');
@@ -2516,36 +2530,86 @@
                     return;
                 }
                 
-                // Get unique course names (V60: these are now normalized)
-                const courses = new Set(allStudentData.map(s => s.Course));
-                allUniqueCourses = Array.from(courses).sort();
+                // Get unique sessions (same as absentee tab)
+                const sessions = new Set(allStudentData.map(s => `${s.Date} | ${s.Time}`));
+                allStudentSessions = Array.from(sessions).sort();
                 
-                // Load saved codes
-                loadQPCodes();
+                sessionSelectQP.innerHTML = '<option value="">-- Select a Session --</option>'; // Clear
                 
-                // Populate the UI
-                qpCodeContainer.innerHTML = ''; // Clear old
-                allUniqueCourses.forEach(courseName => {
-                    const savedCode = qpCodeMap[courseName] || "";
-                    qpCodeContainer.innerHTML += `
-                        <div class="flex items-center gap-3 p-2 border-b border-gray-200">
-                            <label class="font-medium text-gray-700 w-2/3 text-sm">${courseName}</label>
-                            <input type="text" 
-                                   class="qp-code-input block w-1/3 p-2 border border-gray-300 rounded-md shadow-sm text-sm" 
-                                   value="${savedCode}" 
-                                   data-course="${courseName}" 
-                                   placeholder="Enter QP Code">
-                        </div>
-                    `;
+                // Find today's session
+                const today = new Date();
+                const todayStr = today.toLocaleDateString('en-GB').replace(/\//g, '.'); // DD.MM.YYYY
+                let defaultSession = "";
+                
+                allStudentSessions.forEach(session => {
+                    sessionSelectQP.innerHTML += `<option value="${session}">${session}</option>`;
+                    if (session.startsWith(todayStr)) {
+                        defaultSession = session;
+                    }
                 });
+                
+                if (defaultSession) {
+                    sessionSelectQP.value = defaultSession;
+                    sessionSelectQP.dispatchEvent(new Event('change')); // Trigger change to load course list
+                }
 
             } catch (e) {
-                console.error("Failed to populate QP Code list:", e);
+                console.error("Failed to populate QP sessions:", e);
                 disable_qpcode_tab(true);
             }
         }
+
+        // V61: Event listener for the QP Code session dropdown
+        sessionSelectQP.addEventListener('change', () => {
+            const sessionKey = sessionSelectQP.value;
+            if (sessionKey) {
+                qpEntrySection.classList.remove('hidden');
+                render_qp_code_list(sessionKey);
+            } else {
+                qpEntrySection.classList.add('hidden');
+                qpCodeContainer.innerHTML = '';
+                qpCodeStatus.textContent = '';
+            }
+        });
         
-        // Event delegation for saving QP codes
+        // V61: Renders the course list for the selected session
+        function render_qp_code_list(sessionKey) {
+            
+            // 1. Filter students for this specific session
+            const [date, time] = sessionKey.split(' | ');
+            const sessionStudents = allStudentData.filter(s => s.Date === date && s.Time === time);
+            
+            // 2. Get unique courses for this session
+            const sessionCourses = new Set(sessionStudents.map(s => s.Course));
+            const uniqueCoursesArray = Array.from(sessionCourses).sort();
+            
+            // 3. Load saved codes
+            loadQPCodes();
+            
+            // 4. Populate the UI
+            qpCodeContainer.innerHTML = ''; // Clear old
+            
+            if (uniqueCoursesArray.length === 0) {
+                qpCodeContainer.innerHTML = '<p class="text-center text-gray-500">No courses found for this session.</p>';
+                return;
+            }
+
+            uniqueCoursesArray.forEach(courseName => {
+                const savedCode = qpCodeMap[courseName] || "";
+                qpCodeContainer.innerHTML += `
+                    <div class="flex items-center gap-3 p-2 border-b border-gray-200">
+                        <label class="font-medium text-gray-700 w-2/3 text-sm">${courseName}</label>
+                        <input type="text" 
+                               class="qp-code-input block w-1/3 p-2 border border-gray-300 rounded-md shadow-sm text-sm" 
+                               value="${savedCode}" 
+                               data-course="${courseName}" 
+                               placeholder="Enter QP Code">
+                    </div>
+                `;
+            });
+        }
+        
+        // Event delegation for saving QP codes (Remains the same, saves universally)
         qpCodeContainer.addEventListener('input', (e) => {
             if (e.target.classList.contains('qp-code-input')) {
                 const courseName = e.target.dataset.course;
@@ -2572,4 +2636,3 @@
 
 </body>
 </html>
-

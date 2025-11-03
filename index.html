@@ -1,13 +1,14 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Updated Title -->
-    <title>UOC Exam Management V70</title>
+    <title>UOC Exam Management V90 (Fixes)</title>
     
     <!-- Load Tailwind CSS for styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn-tailwindcss.vercel.app/"></script>
     
     <!-- Load PyScript -->
     <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
@@ -29,22 +30,86 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* --- Navigation Styles --- */
+        /* --- Navigation Styles (V87: Rounder, Bigger) --- */
         .nav-button {
-            @apply py-2 px-3 rounded text-sm font-medium transition-colors;
+            /* Base styles for all nav buttons */
+            /* V87: More rounded, more padding, bolder font */
+            @apply py-2.5 px-5 rounded-t-xl text-sm font-semibold transition-all duration-200 text-white shadow; 
         }
         .nav-button-active {
-            @apply bg-gray-900 text-white;
+            /* Active state: Taller, lighter bg, dark text */
+            @apply shadow-lg scale-105 transform -translate-y-1; 
         }
         .nav-button-inactive {
-            @apply text-gray-300 hover:bg-gray-700 hover:text-white;
+            /* Inactive state: Darker bg, white text, slight fade */
+            @apply opacity-90 hover:opacity-100 transform;
+        }
+
+        /* V83: Main Nav Bar Adjustment */
+        #top-banner {
+            background-color: #4f46e5; /* Indigo-600 */
+        }
+        #main-nav-tabs {
+            /* V86: New background and padding for spacing */
+            background-color: #1f2937; /* gray-800 */
+            width: 100%;
+            padding-top: 4px; /* Space for rounded tabs to lift */
+        }
+
+        /* V86: Unique Button Colors */
+        #nav-extractor {
+            background-color: #2563eb; /* blue-600 */
+        }
+        #nav-extractor.nav-button-active {
+            background-color: #dbeafe; /* blue-100 */
+            color: #1d4ed8; /* blue-700 */
+        }
+
+        #nav-settings {
+            background-color: #16a34a; /* green-600 */
+        }
+        #nav-settings.nav-button-active {
+            background-color: #dcfce7; /* green-100 */
+            color: #15803d; /* green-700 */
+        }
+
+        #nav-room-settings {
+            background-color: #9333ea; /* purple-600 */
+        }
+        #nav-room-settings.nav-button-active {
+            background-color: #f3e8ff; /* purple-100 */
+            color: #7e22ce; /* purple-700 */
+        }
+
+        #nav-qpcodes {
+            background-color: #ca8a04; /* yellow-600 */
+        }
+        #nav-qpcodes.nav-button-active {
+            background-color: #fef9c3; /* yellow-100 */
+            color: #a16207; /* yellow-700 */
+        }
+
+        #nav-reports {
+            background-color: #dc2626; /* red-600 */
+        }
+        #nav-reports.nav-button-active {
+            background-color: #fee2e2; /* red-100 */
+            color: #b91c1c; /* red-700 */
+        }
+
+        #nav-absentees {
+            background-color: #db2777; /* pink-600 */
+        }
+        #nav-absentees.nav-button-active {
+            background-color: #fce7f3; /* pink-100 */
+            color: #be185d; /* pink-700 */
         }
 
 
         /* --- PRINT STYLES --- */
         @media print {
             /* Hide the main app container and all other non-report elements */
-            #main-nav, #view-extractor, #view-settings, #view-reports, #view-absentees, #view-qpcodes, body > py-config, body > py-script, #report-controls {
+            #main-nav, #view-extractor, #view-settings, #view-reports, #view-absentees, #view-qpcodes, #view-room-settings, body > py-config, body > py-script, #report-controls {
                 display: none !important; /* Be forceful */
             }
             
@@ -124,7 +189,8 @@
             table {
                 width: 100%;
                 border-collapse: collapse;
-                font-size: 9pt; 
+                /* V71: Reduced font size */
+                font-size: 8.5pt; 
             }
             th, td {
                 border: 1px solid black;
@@ -137,6 +203,11 @@
                 background-color: #eee;
             }
             
+            /* V90 FIX: Add break-before: avoid to tables to keep with headers */
+            .print-table {
+                break-before: avoid;
+            }
+
             .sl-col { width: 5%; }
             .course-col { width: 30%; } 
             .reg-col { width: 20%; }
@@ -150,6 +221,11 @@
             .q-paper-table tfoot td { font-weight: bold; }
             
             /* --- (V29) Day-wise Report Styles --- */
+            /* V89: Added rule to keep header with table */
+            .print-header-group {
+                break-inside: avoid;
+            }
+            
             .print-page-daywise h1 { font-size: 14pt; }
             .print-page-daywise h2 { font-size: 12pt; margin-bottom: 0.5rem; }
             .print-page-daywise .column-container {
@@ -165,6 +241,8 @@
                 border-collapse: collapse;
                 /* V32: Font size decreased */
                 font-size: 6pt; 
+                /* V90 FIX: Add break-before: avoid to tables to keep with headers */
+                break-before: avoid;
             }
             .daywise-report-table th,
             .daywise-report-table td {
@@ -183,6 +261,8 @@
                 border-collapse: collapse;
                 font-size: 10pt;
                 margin-top: 1rem;
+                /* V90 FIX: Add break-before: avoid to tables to keep with headers */
+                break-before: avoid;
             }
             .absentee-report-table th,
             .absentee-report-table td {
@@ -231,6 +311,8 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             color: black;
             box-sizing: border-box; 
+            /* V71: Reduce base font size for better fitting */
+            font-size: 9pt; 
         }
         .print-page h1 {
             font-size: 16pt;
@@ -271,7 +353,7 @@
         .print-page table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 9pt;
+            font-size: 8.5pt; /* V71: Reduced font size for better fit */
         }
         .print-page th, .print-page td {
             border: 1px solid black;
@@ -297,6 +379,11 @@
         .print-page .q-paper-table tfoot td { font-weight: bold; }
         
         /* --- (V29) Day-wise Report Styles --- */
+        /* V89: This applies on-screen too, which is fine */
+        .print-header-group {
+            break-inside: avoid;
+        }
+        
         .print-page-daywise h1 { font-size: 14pt; }
         .print-page-daywise h2 { font-size: 12pt; margin-bottom: 0.5rem; }
         .print-page-daywise .column-container {
@@ -419,20 +506,23 @@
 </head>
 <body class="bg-gray-100 font-sans">
     
-    <!-- *** Main Navigation Bar (V58 Update: QP Codes) *** -->
-    <nav id="main-nav" class="bg-gray-800 text-white p-4 sticky top-0 z-50">
-        <div class="container max-w-2xl mx-auto flex justify-between items-center">
-            <!-- V60: Title Update -->
-            <h1 class="text-lg font-bold text-white bg-red-600 px-3 py-1 rounded-md shadow-md">UOC Exam Management (V60)</h1>
-            
-            <!-- Navigation buttons on the right -->
-            <div class="flex gap-4">
-                <button id="nav-extractor" class="nav-button nav-button-active">Main Extractor</button>
-                <button id="nav-settings" class="nav-button nav-button-inactive">Room Settings</button>
-                <button id="nav-qpcodes" class="nav-button nav-button-inactive">QP Codes</button>
-                <button id="nav-reports" class="nav-button nav-button-inactive">Reports</button>
-                <button id="nav-absentees" class="nav-button nav-button-inactive">Absentees</button>
-            </div>
+    <!-- *** Main Navigation Bar (V83: UPDATED STRUCTURE) *** -->
+    <nav id="main-nav" class="bg-indigo-600 text-white sticky top-0 z-50 shadow-lg">
+        <!-- V83: Top Banner (Spanning Width, Centered Title) -->
+        <div id="top-banner" class="w-full bg-indigo-700 text-center py-2">
+            <!-- V90: Updated Title -->
+            <h1 class="text-xl font-extrabold tracking-wider text-white">UOC Exam Management (V90)</h1>
+        </div>
+        
+        <!-- V83: Navigation Tabs (Below Banner) -->
+        <!-- V86: Added justify-center and gap-2 for spacing -->
+        <div id="main-nav-tabs" class="container max-w-2xl mx-auto flex justify-center gap-2">
+            <button id="nav-extractor" class="nav-button nav-button-active">Main Extractor</button>
+            <button id="nav-settings" class="nav-button nav-button-inactive">Settings</button>
+            <button id="nav-room-settings" class="nav-button nav-button-inactive">Room Settings</button> 
+            <button id="nav-qpcodes" class="nav-button nav-button-inactive">QP Codes</button>
+            <button id="nav-reports" class="nav-button nav-button-inactive">Reports</button>
+            <button id="nav-absentees" class="nav-button nav-button-inactive">Absentees</button>
         </div>
     </nav>
 
@@ -473,28 +563,6 @@
                 </button>
             </div>
             
-            <!-- V67: CSV Upload Section (Shifted from Reports) -->
-            <div class="bg-gray-50 border border-gray-200 p-4 rounded-md mt-6">
-                <h4 class="font-semibold text-gray-800">3. Load Corrected Data (Optional)</h4>
-                <p class="text-sm text-gray-600 mt-1 mb-3">
-                    Upload a corrected `Combined_Nominal_Roll.csv` file to overwrite the extracted data.
-                    This is your base data source for all reports.
-                </p>
-                <div class="flex items-center gap-2">
-                    <input type="file" id="corrected-csv-upload" accept=".csv" class="block w-full text-sm text-gray-500
-                                  file:mr-4 file:py-2 file:px-4
-                                  file:rounded-md file:border-0
-                                  file:text-sm file:font-semibold
-                                  file:bg-green-50 file:text-green-700
-                                  hover:file:bg-green-100"/>
-                    <button id="load-csv-button" class="inline-flex justify-center items-center rounded-md border border-transparent bg-gray-600 py-2 px-3 text-sm font-medium text-white shadow-sm hover:bg-gray-700">
-                        Load CSV
-                    </button>
-                </div>
-                <span id="csv-load-status" class="text-sm font-medium text-green-600 mt-2 block h-5"></span>
-            </div>
-            <!-- END V67 Shifted Section -->
-
 
             <!-- Output & Download Area -->
             <div class="mt-6">
@@ -517,20 +585,62 @@
                 <div id="csv-download-container"></div>
             </div>
             
+            <!-- V67: CSV Upload Section (Shifted to bottom) -->
+            <div class="bg-gray-50 border border-gray-200 p-4 rounded-md mt-6">
+                <h4 class="font-semibold text-gray-800">3. Load Corrected Data (Optional)</h4>
+                <p class="text-sm text-gray-600 mt-1 mb-3">
+                    Upload a corrected `Combined_Nominal_Roll.csv` file to overwrite the extracted data.
+                    This is your base data source for all reports.
+                </p>
+                <div class="flex items-center gap-2">
+                    <input type="file" id="corrected-csv-upload" accept=".csv" class="block w-full text-sm text-gray-500
+                                  file:mr-4 file:py-2 file:px-4
+                                  file:rounded-md file:border-0
+                                  file:text-sm file:font-semibold
+                                  file:bg-green-50 file:text-green-700
+                                  hover:file:bg-green-100"/>
+                    <button id="load-csv-button" class="inline-flex justify-center items-center rounded-md border border-transparent bg-gray-600 py-2 px-3 text-sm font-medium text-white shadow-sm hover:bg-gray-700">
+                        Load CSV
+                    </button>
+                </div>
+                <span id="csv-load-status" class="text-sm font-medium text-green-600 mt-2 block h-5"></span>
+            </div>
+            <!-- END V67 Shifted Section -->
+
         </div>
     </div>
     
-    <!-- *** "Room Settings" View (V48 - COLLEGE NAME ADDED) *** -->
+    <!-- *** "Settings" View (V82: CONSOLIDATED SETTINGS) *** -->
     <div id="view-settings" class="container max-w-2xl mx-auto p-4 min-h-screen hidden">
         <div class="bg-white p-8 rounded-lg shadow-xl w-full">
-            <h1 class="text-3xl font-bold text-gray-800 mb-6">Room Capacity Settings</h1>
+            <h1 class="text-3xl font-bold text-gray-800 mb-6">General Settings</h1>
             
-            <!-- V48: College Name Input -->
-            <div class="mb-6">
-                <label for="college-name-input" class="block text-sm font-medium text-gray-700 mb-1">College Name (for Reports)</label>
-                <input type="text" id="college-name-input" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm" placeholder="e.g., University of Calicut">
+            <!-- General Settings (College Name & Reset) -->
+            <div class="bg-red-50 border border-red-200 p-4 rounded-lg mb-6">
+                 <h2 class="text-xl font-bold text-gray-800 mb-4 pb-2 border-b border-gray-300">
+                    College Name
+                </h2>
+                <!-- V48: College Name Input -->
+                <div class="mb-6">
+                    <label for="college-name-input" class="block text-sm font-medium text-gray-700 mb-1">College Name (for Reports)</label>
+                    <input type="text" id="college-name-input" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm" placeholder="e.g., University of Calicut">
+                </div>
+                 <h2 class="text-xl font-bold text-gray-800 mb-4 pb-2 border-b border-gray-300">
+                    Master Reset
+                </h2>
+                 <!-- V68: Master Reset Button -->
+                <button id="master-reset-button" class="w-full inline-flex justify-center items-center rounded-md border border-red-700 bg-red-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-red-700 mt-2">
+                    Master Reset: Clear ALL Local Data
+                </button>
             </div>
-            
+        </div>
+    </div>
+
+    <!-- *** "Room Settings" View (V83: SPLIT FROM SETTINGS) *** -->
+    <div id="view-room-settings" class="container max-w-2xl mx-auto p-4 min-h-screen hidden">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-full">
+             <h1 class="text-3xl font-bold text-gray-800 mb-6">Room Capacity & Location</h1>
+
             <p class="text-gray-600 mb-4">
                 Define the number of students per room. This list is automatically saved to your browser.
                 If a capacity is left blank, it will default to 30 when saved.
@@ -632,17 +742,18 @@
                 <div class="flex flex-col sm:flex-row gap-4 mb-3">
                     <!-- Radio Button Toggle -->
                     <div class="flex items-center">
-                        <input type="radio" id="filter-all" name="report-filter" value="all" checked class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
+                        <input type="radio" id="filter-all" name="report-filter" value="all" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
                         <label for="filter-all" class="ml-2 text-sm text-gray-700 font-medium">All Sessions (Bulk Print)</label>
                     </div>
                     <div class="flex items-center">
-                        <input type="radio" id="filter-session" name="report-filter" value="session" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
+                        <!-- V81: Specific Session is now default -->
+                        <input type="radio" id="filter-session" name="report-filter" value="session" checked class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
                         <label for="filter-session" class="ml-2 text-sm text-gray-700 font-medium">Specific Session</label>
                     </div>
                 </div>
                 
                 <!-- Session Dropdown (Initially Hidden) -->
-                <div id="reports-session-dropdown-container" class="hidden">
+                <div id="reports-session-dropdown-container" class="">
                     <select id="reports-session-select" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm">
                         <option value="">-- Select a Session --</option>
                     </select>
@@ -754,7 +865,7 @@
         packages = ["pandas", "pdfplumber==0.9.0"]
     </py-config>
     
-    <!-- *** Python Script (V64 - COURSE NORMALIZER) *** -->
+    <!-- *** Python Script (V74 - FINAL STABLE PARSING/PERSISTENCE) *** -->
     <py-script>
         import pandas as pd
         import pdfplumber
@@ -1159,7 +1270,7 @@
                                     log_status(f"No students found on page.", is_error=False, file_name=file_name, page=page_num)
                             
                             log_message(f"Found {total_students_in_file} students in this file.")
-                            # --- END V40 STATEFUL LOGIC ---
+                            # --- END V44 STATEFUL LOGIC ---
 
                     except Exception as e:
                         error_msg = f"CRITICAL ERROR processing file. Skipping this file. Details: {e}"
@@ -1251,7 +1362,7 @@
             
     </py-script>
 
-    <!-- *** JAVASCRIPT FOR ALL UI (V67) *** -->
+    <!-- *** JAVASCRIPT FOR ALL UI (V90) *** -->
     <script>
         // --- Global localStorage Key ---
         const ROOM_CONFIG_KEY = 'examRoomConfig';
@@ -1277,7 +1388,8 @@
         
         // --- (V58) Global var for QP Code data ---
         let allUniqueCourses = [];
-        let qpCodeMap = {}; // Holds { "Course Name": "QPCode" }
+        // V89: This is the master map that holds ALL codes for ALL sessions
+        let qpCodeMap = {}; 
 
         // --- Get references to all Report elements ---
         const generateReportButton = document.getElementById('generate-report-button');
@@ -1295,13 +1407,15 @@
         const viewQPCodes = document.getElementById('view-qpcodes'); // V58
         const viewReports = document.getElementById('view-reports');
         const viewAbsentees = document.getElementById('view-absentees'); // V56
+        const viewRoomSettings = document.getElementById('view-room-settings'); // V83
         const navExtractor = document.getElementById('nav-extractor');
         const navSettings = document.getElementById('nav-settings');
         const navQPCodes = document.getElementById('nav-qpcodes'); // V58
         const navReports = document.getElementById('nav-reports');
         const navAbsentees = document.getElementById('nav-absentees'); // V56
-        const allNavButtons = [navExtractor, navSettings, navQPCodes, navReports, navAbsentees]; // V58
-        const allViews = [viewExtractor, viewSettings, viewQPCodes, viewReports, viewAbsentees]; // V58
+        const navRoomSettings = document.getElementById('nav-room-settings'); // V83
+        const allNavButtons = [navExtractor, navSettings, navRoomSettings, navQPCodes, navReports, navAbsentees]; // V83
+        const allViews = [viewExtractor, viewSettings, viewRoomSettings, viewQPCodes, viewReports, viewAbsentees]; // V83
         
         // --- (V26) Get references to NEW Room Settings elements ---
         const collegeNameInput = document.getElementById('college-name-input'); // V48
@@ -1355,11 +1469,14 @@
         const reportsSessionSelect = document.getElementById('reports-session-select');
 
 
-        // --- V64 FIX: Aggressive Key Cleaning Function ---
+        // --- V81 FIX: Aggressive Key Cleaning Function (Fixes 1st/Last course) ---
         function cleanCourseKey(courseName) {
             if (typeof courseName !== 'string') return '';
-            // V69 FIX: Replace ALL whitespace and other non-alphanumeric chars (except -) with a single space, then trim.
-            let cleaned = courseName.replace(/[^\w\s-]/g, '').toUpperCase();
+            // Remove all non-standard chars (including BOM, non-breaking spaces, and control chars)
+            let cleaned = courseName.replace(/[\ufeff\u00A0\u200B\u200C\u200D\u200E\u200F\uFEFF]/g, ' ').toUpperCase(); 
+            // Remove ALL non-alphanumeric chars (except spaces, - ( ) [ ] / & , ; .)
+            cleaned = cleaned.replace(/[^\w\s\-\(\)\[\]\/&,;.]/g, ''); 
+            // Replace multiple spaces with one, then trim
             return cleaned.replace(/\s+/g, ' ').trim();
         }
         
@@ -1373,13 +1490,17 @@
         }
         
         // --- (V28) Helper function to create a new room row HTML (with location) ---
-        function createRoomRowHtml(roomName, capacity, location) {
+        function createRoomRowHtml(roomName, capacity, location, isLast = false) {
+            const removeButtonHtml = isLast ? 
+                `<button class="remove-room-button ml-auto text-sm text-red-600 hover:text-red-800 font-medium">&times; Remove</button>` : 
+                `<div class="w-[84px]"></div>`; // Placeholder for alignment
+            
             return `
-                <div class="room-row flex items-center gap-3 p-2 border-b border-gray-200">
+                <div class="room-row flex items-center gap-3 p-2 border-b border-gray-200" data-room-name="${roomName}">
                     <label class="room-name-label font-medium text-gray-700 w-24 shrink-0">${roomName}:</label>
                     <input type="number" class="room-capacity-input block w-20 p-2 border border-gray-300 rounded-md shadow-sm text-sm" value="${capacity}" min="1" placeholder="30">
                     <input type="text" class="room-location-input block flex-grow p-2 border border-gray-300 rounded-md shadow-sm text-sm" value="${location}" placeholder="e.g., Commerce Block">
-                    <button class="remove-room-button ml-auto text-sm text-red-600 hover:text-red-800 font-medium">&times; Remove</button>
+                    ${removeButtonHtml}
                 </div>
             `;
         }
@@ -1403,7 +1524,7 @@
                 }
             }
             
-            // (V28) Store this in the global var for report generation
+            // (V28) Store in global var for report generation
             currentRoomConfig = roomConfig; 
             
             let roomNames = [];
@@ -1412,14 +1533,12 @@
             if (Object.keys(roomConfig).length === 0) {
                 // *** (V27): Default to 30 rooms ***
                 console.log("Using default room config (30 rooms of 30)");
-                roomNames = Array.from({length: 30}, (_, i) => `Room ${i + 1}`);
-                roomCapacities = Array(30).fill(30);
-                
-                // (V28) Also update the global config to reflect this default
-                currentRoomConfig = {};
+                config = {};
                 for (let i = 1; i <= 30; i++) {
-                    currentRoomConfig[`Room ${i}`] = { capacity: 30, location: "" };
+                    config[`Room ${i}`] = { capacity: 30, location: "" };
                 }
+                localStorage.setItem(ROOM_CONFIG_KEY, JSON.stringify(config));
+                currentRoomConfig = config; // Update global var
             } else {
                 console.log("Using saved room config:", roomConfig);
                 const sortedRoomKeys = Object.keys(roomConfig).sort((a, b) => {
@@ -1582,16 +1701,19 @@
                     }
                     
                     const pageHeaderHtml = `
-                        <h1>${currentCollegeName}</h1> <!-- V48: Use college name -->
-                        <h2>${session.Date} &nbsp;|&nbsp; ${session.Time} &nbsp;|&nbsp; ${session.Room}</h2>
-                        ${locationHtml} <!-- (V28) Added location here -->
-                        <div class="course-summary">
-                            ${courseSummaryHtml}
+                        <!-- V89: Wrap headers in group to prevent page break -->
+                        <div class="print-header-group">
+                            <h1>${currentCollegeName}</h1> <!-- V48: Use college name -->
+                            <h2>${session.Date} &nbsp;|&nbsp; ${session.Time} &nbsp;|&nbsp; ${session.Room}</h2>
+                            ${locationHtml} <!-- (V28) Added location here -->
+                            <div class="course-summary">
+                                ${courseSummaryHtml}
+                            </div>
                         </div>
                     `;
                     
                     const tableHeaderHtml = `
-                        <table>
+                        <table class="print-table">
                             <thead>
                                 <tr>
                                     <th class="sl-col">Sl No</th>
@@ -1610,7 +1732,7 @@
                             <div><strong>Answer Booklets Used:</strong> _________________</div>
                             <div><strong>Answer Booklets Returned (Balance):</strong> _________________</div>
                             <div class="signature">
-                                Invigilator Signature
+                                Chief Superintendent
                             </div>
                         </div>
                     `;
@@ -1622,7 +1744,8 @@
                             const studentNumber = student.originalIndex + 1; 
                             const tableCourseName = student.Course; // V38: Show full course name
                             // V70: Truncate Course Name to 4 words for column 1
-                            const truncatedCourseName = tableCourseName.split(/\s+/).slice(0, 4).join(' ') + (tableCourseName.split(/\s+/).length > 4 ? '...' : '');
+                            const words = tableCourseName.split(/\s+/);
+                            const truncatedCourseName = words.slice(0, 4).join(' ') + (words.length > 4 ? '...' : '');
                             
                             let displayCourseName = (truncatedCourseName === previousCourseName) ? '"' : truncatedCourseName;
                             if (truncatedCourseName !== previousCourseName) previousCourseName = truncatedCourseName;
@@ -1715,7 +1838,7 @@
                 processed_rows_with_rooms.forEach(student => {
                     const key = `${student.Date}_${student.Time}_${student['Room No']}`;
                     if (!roomSessions[key]) {
-                        sessions[key] = {
+                        roomSessions[key] = {
                             Date: student.Date,
                             Time: student.Time,
                             Room: student['Room No'],
@@ -1724,6 +1847,8 @@
                     }
                     roomSessions[key].students.push(student);
                 });
+                
+                const daySessions = {}; // V72 FIX: Added definition here
 
                 // 4. Create new flat list with SlNoInRoom
                 let flatStudentList = [];
@@ -1746,7 +1871,6 @@
                 });
 
                 // 6. Group this sorted list by Day/Session
-                const daySessions = {};
                 flatStudentList.forEach(student => {
                     const key = `${student.Date}_${student.Time}`;
                     if (!daySessions[key]) {
@@ -1762,9 +1886,10 @@
                 // 7. Build the HTML
                 let allPagesHtml = '';
                 let totalPagesGenerated = 0;
-                const STUDENTS_PER_COLUMN = 120; // (V31) Adjusted for 2 columns
-                const COLUMNS_PER_PAGE = 2; // (V31) Changed from 3
-                const STUDENTS_PER_PAGE = STUDENTS_PER_COLUMN * COLUMNS_PER_PAGE; // 240
+                // V77: Updated for better fit (35 per column)
+                const STUDENTS_PER_COLUMN = 35; 
+                const COLUMNS_PER_PAGE = 2; 
+                const STUDENTS_PER_PAGE = STUDENTS_PER_COLUMN * COLUMNS_PER_PAGE; 
 
                 // (V30) Helper to build a table for a column, NOW WITH COURSE GROUPING
                 function buildColumnTable(studentChunk) {
@@ -1837,10 +1962,13 @@
 
                         allPagesHtml += `
                             <div class="print-page print-page-daywise">
-                                <!-- V49: Title Updated -->
-                                <h1>Seating Details for Candidates</h1>
-                                <!-- V48: Use college name -->
-                                <h2>${currentCollegeName} &nbsp;|&nbsp; ${session.Date} &nbsp;|&nbsp; ${session.Time}</h2>
+                                <!-- V89: Wrap headers in group to prevent page break -->
+                                <div class="print-header-group">
+                                    <!-- V49: Title Updated -->
+                                    <h1>Seating Details for Candidates</h1>
+                                    <!-- V48: Use college name -->
+                                    <h2>${currentCollegeName} &nbsp;|&nbsp; ${session.Date} &nbsp;|&nbsp; ${session.Time}</h2>
+                                </div>
                                 <div class="column-container">
                                     <div class="column">
                                         ${buildColumnTable(col1Students)}
@@ -1926,15 +2054,20 @@
                     totalPages++;
                     const courseData = courses[courseKey];
                     // V64 FIX: Use the clean key for lookup
-                    const qpCode = qpCodeMap[courseKey] || "____"; 
+                    // V89: Load session-specific codes
+                    const sessionCodes = qpCodeMap[sessionKey] || {};
+                    const qpCode = sessionCodes[courseKey] || "____"; 
                     
                     // V57: Add page break logic. Each course is a new page.
                     allPagesHtml += `
                         <div class="print-page">
                             <!-- V57: Header repeated on each page -->
-                            <h1>${currentCollegeName}</h1>
-                            <h2>Absentee Statement</h2>
-                            <h3>${date} &nbsp;|&nbsp; ${time}</h3>
+                            <!-- V89: Wrap headers in group to prevent page break -->
+                            <div class="print-header-group">
+                                <h1>${currentCollegeName}</h1>
+                                <h2>Absentee Statement</h2>
+                                <h3>${date} &nbsp;|&nbsp; ${time}</h3>
+                            </div>
                         
                             <table class="absentee-report-table">
                                 <thead>
@@ -2020,7 +2153,7 @@
             lastGeneratedRoomData.forEach(row => {
                 // (V28) Get location for this row
                 const roomInfo = currentRoomConfig[row['Room No']];
-                const location = (roomInfo && roomInfo.location) ? row[header].toString() : "";
+                const location = (roomInfo && roomInfo.location) ? roomInfo.location.toString() : "";
                 row['Location'] = location; // Add it to the row object for mapping
                 
                 const values = headers.map(header => {
@@ -2051,7 +2184,9 @@
         navQPCodes.addEventListener('click', () => showView(viewQPCodes, navQPCodes)); // V58
         navReports.addEventListener('click', () => showView(viewReports, navReports));
         navAbsentees.addEventListener('click', () => showView(viewAbsentees, navAbsentees)); // V56
-        
+        // V82: New tab structure
+        document.getElementById('nav-room-settings').addEventListener('click', () => showView(document.getElementById('view-room-settings'), document.getElementById('nav-room-settings')));
+
         function showView(viewToShow, buttonToActivate) {
             allViews.forEach(view => view.classList.add('hidden'));
             allNavButtons.forEach(btn => {
@@ -2077,9 +2212,11 @@
                 
                 // Save Room Config
                 const newConfig = {};
+                // V79: Get all rows, re-read and save
                 const roomRows = roomConfigContainer.querySelectorAll('.room-row');
                 
                 roomRows.forEach(row => {
+                    // V79: Read current values (name label is the source of truth for the room key)
                     const roomName = row.querySelector('.room-name-label').textContent.replace(':', '').trim();
                     let capacity = parseInt(row.querySelector('.room-capacity-input').value, 10);
                     let location = row.querySelector('.room-location-input').value.trim();
@@ -2090,7 +2227,7 @@
                     }
                     
                     if (roomName) {
-                        // (V28) Save as an object
+                        // V79: Re-save all rooms with new sequential names and updated data
                         newConfig[roomName] = {
                             capacity: capacity,
                             location: location
@@ -2104,7 +2241,7 @@
                 roomConfigStatus.textContent = "Settings saved successfully!";
                 setTimeout(() => { roomConfigStatus.textContent = ""; }, 2000);
                 
-                // Reload the form to show normalized data (e.g., show the '30' in blank fields)
+                // V79: RE-RENDER the list to fix numbering and apply UX rules (remove button on last row only)
                 loadRoomConfig();
                 
             } catch (e) {
@@ -2113,11 +2250,11 @@
             }
         });
 
-        // --- (V48) Load data into dynamic form (with College Name) ---
+        // --- (V79) Load data into dynamic form (with UX Fix) ---
         function loadRoomConfig() {
             // V48: Load College Name
             currentCollegeName = localStorage.getItem(COLLEGE_NAME_KEY) || "University of Calicut";
-            collegeNameInput.value = currentCollegeName;
+            if (collegeNameInput) collegeNameInput.value = currentCollegeName; // V82: Check for existence since it moved
             
             // Load Room Config
             let savedConfigJson = localStorage.getItem(ROOM_CONFIG_KEY);
@@ -2156,9 +2293,11 @@
                 return numA - numB;
             });
             
-            sortedKeys.forEach(roomName => {
+            // V79: Add rows, determining if 'isLast' is true
+            sortedKeys.forEach((roomName, index) => {
                 const roomData = config[roomName];
-                const rowHtml = createRoomRowHtml(roomName, roomData.capacity, roomData.location);
+                const isLast = (index === sortedKeys.length - 1);
+                const rowHtml = createRoomRowHtml(roomName, roomData.capacity, roomData.location, isLast);
                 roomConfigContainer.insertAdjacentHTML('beforeend', rowHtml);
             });
         }
@@ -2180,14 +2319,28 @@
                 newName = `Room ${lastNum + 1}`;
             }
             
-            const newRowHtml = createRoomRowHtml(newName, 30, ""); // Default to 30, no location
+            // V79: Before adding new row, remove remove button from the current last row
+            const currentLastRow = roomConfigContainer.lastElementChild;
+            if (currentLastRow) {
+                const removeButton = currentLastRow.querySelector('.remove-room-button');
+                if (removeButton) {
+                    const placeholder = document.createElement('div');
+                    placeholder.className = 'w-[84px]'; // Match the button width for alignment
+                    removeButton.parentNode.replaceChild(placeholder, removeButton);
+                }
+            }
+
+            const newRowHtml = createRoomRowHtml(newName, 30, "", true); // Add new row as the last row
             roomConfigContainer.insertAdjacentHTML('beforeend', newRowHtml);
         });
         
-        // --- (V26) Remove Room Button (Event Delegation) ---
+        // --- (V79) Remove Room Button (Event Delegation for all rows) ---
         roomConfigContainer.addEventListener('click', (e) => {
             if (e.target.classList.contains('remove-room-button')) {
                 e.target.closest('.room-row').remove();
+                
+                // Re-save configuration to update the room names and persist the deletion
+                saveRoomConfigButton.click(); // Triggers re-saving and re-rendering to fix numbering and buttons
             }
         });
         
@@ -2252,11 +2405,14 @@
                     
                     const pageHtml = `
                         <div class="print-page">
-                            <h1>${currentCollegeName}</h1> <!-- V48: Use college name -->
-                            <h2>Question Paper Summary</h2>
-                            <h3>${session.Date} &nbsp;|&nbsp; ${session.Time}</h3>
+                            <!-- V89: Wrap headers in group to prevent page break -->
+                            <div class="print-header-group">
+                                <h1>${currentCollegeName}</h1> <!-- V48: Use college name -->
+                                <h2>Question Paper Summary</h2>
+                                <h3>${session.Date} &nbsp;|&nbsp; ${session.Time}</h3>
+                            </div>
                             
-                            <table class="q-paper-table">
+                            <table class="q-paper-table print-table">
                                 <thead>
                                     <tr>
                                         <th class="sl-col">Sl No</th>
@@ -2323,8 +2479,8 @@
             };
             reader.onerror = () => {
                 csvLoadStatus.textContent = "Error reading file.";
-                document.getElementById('pdf-file').disabled = false;
-                document.getElementById('run-button').disabled = false;
+                document.getElementById('pdf-file').disabled = true;
+                document.getElementById('run-button').disabled = true;
             };
             reader.readAsText(file);
         });
@@ -2485,8 +2641,11 @@
                 
                 // V68: Ensure report filters are visible and default set
                 reportFilterSection.classList.remove('hidden');
-                filterAllRadio.checked = true;
-                reportsSessionDropdownContainer.classList.add('hidden');
+                // V81: Set Specific Session as default
+                filterSessionRadio.checked = true;
+                reportsSessionDropdownContainer.classList.remove('hidden');
+                // Ensure the report select box defaults to today's session if found
+                reportsSessionSelect.value = defaultSession || reportsSessionSelect.options[1]?.value || "all";
 
             } catch (e) {
                 console.error("Failed to populate sessions:", e);
@@ -2547,15 +2706,24 @@
             absenteeSearchInput.value = student['Register Number'];
             autocompleteResults.classList.add('hidden');
             
-            // Perform allocation to find room
-            const allocatedData = performRoomAllocation([student]);
-            const allocatedStudent = allocatedData[0];
-            const roomInfo = currentRoomConfig[allocatedStudent['Room No']];
+            // V87 FIX: Allocate rooms for the *entire* session to find the correct room
+            const sessionKey = sessionSelect.value;
+            const [date, time] = sessionKey.split(' | ');
+            const sessionStudents = allStudentData.filter(s => s.Date === date && s.Time === time);
+            
+            // Perform allocation on the *entire* session
+            const allocatedSessionData = performRoomAllocation(sessionStudents);
+            
+            // Find our selected student in the allocated list
+            const allocatedStudent = allocatedSessionData.find(s => s['Register Number'] === student['Register Number']);
+            
+            const roomNo = allocatedStudent ? allocatedStudent['Room No'] : 'N/A';
+            const roomInfo = currentRoomConfig[roomNo];
             const location = (roomInfo && roomInfo.location) ? `(${roomInfo.location})` : "";
             
             selectedStudentName.textContent = student.Name;
             selectedStudentCourse.textContent = student.Course;
-            selectedStudentRoom.textContent = `Room: ${allocatedStudent['Room No']} ${location}`;
+            selectedStudentRoom.textContent = `Room: ${roomNo} ${location}`; // Use the correctly allocated room
             selectedStudentDetails.classList.remove('hidden');
         }
         
@@ -2598,17 +2766,36 @@
         }
         
         function renderAbsenteeList() {
+            const sessionKey = sessionSelect.value;
             currentAbsenteeListDiv.innerHTML = "";
+            
             if (currentAbsenteeList.length === 0) {
                 currentAbsenteeListDiv.innerHTML = `<em class="text-gray-500">No absentees marked for this session.</em>`;
                 return;
             }
-            
+
+            // V81 FIX: Allocate rooms for the entire session first to get correct room numbers
+            const [date, time] = sessionKey.split(' | ');
+            const sessionStudents = allStudentData.filter(s => s.Date === date && s.Time === time);
+            const allocatedSessionData = performRoomAllocation(sessionStudents);
+            const allocatedMap = allocatedSessionData.reduce((map, s) => {
+                map[s['Register Number']] = s['Room No'];
+                return map;
+            }, {});
+
             currentAbsenteeList.forEach(regNo => {
+                const room = allocatedMap[regNo] || 'N/A'; // Get the correct room from the map
+                const roomInfo = currentRoomConfig[room];
+                const location = (roomInfo && roomInfo.location) ? `(${roomInfo.location})` : "";
+                const roomDisplay = `${room} ${location}`;
+                
                 const item = document.createElement('div');
                 item.className = 'flex justify-between items-center p-2 bg-white border border-gray-200 rounded';
-                item.innerHTML = `<span class="font-medium">${regNo}</span>
-                                  <button class="text-xs text-red-600 hover:text-red-800 font-medium">&times; Remove</button>`;
+                item.innerHTML = `
+                    <span class="font-medium">${regNo}</span>
+                    <span class="text-sm text-gray-500">${roomDisplay}</span>
+                    <button class="text-xs text-red-600 hover:text-red-800 font-medium">&times; Remove</button>
+                `;
                 item.querySelector('button').onclick = () => removeAbsentee(regNo);
                 currentAbsenteeListDiv.appendChild(item);
             });
@@ -2620,7 +2807,7 @@
             renderAbsenteeList();
         }
         
-        // --- (V61) NEW QP CODE LOGIC (Session-Aware) ---
+        // --- (V89) NEW QP CODE LOGIC (DIFFERENT STRATEGY) ---
         
         function disable_qpcode_tab(disabled) {
             navQPCodes.disabled = disabled;
@@ -2635,6 +2822,7 @@
             }
         }
         
+        // V89: Loads the *entire* QP code map from localStorage into the global var
         function loadQPCodes() {
             qpCodeMap = JSON.parse(localStorage.getItem(QP_CODE_LIST_KEY) || '{}');
         }
@@ -2704,111 +2892,131 @@
             const sessionCourses = new Set(sessionStudents.map(s => s.Course));
             const uniqueCoursesArray = Array.from(sessionCourses).sort();
             
-            // 3. Load saved codes
+            // 3. V89: Load *all* codes, then get the ones for *this* session
             loadQPCodes();
+            const sessionCodes = qpCodeMap[sessionKey] || {};
             
             // 4. Populate the UI
-            qpCodeContainer.innerHTML = ''; // Clear old
+            const htmlChunks = [];
             
             if (uniqueCoursesArray.length === 0) {
                 qpCodeContainer.innerHTML = '<p class="text-center text-gray-500">No courses found for this session.</p>';
-                saveQpCodesButton.disabled = true; // V62: Disable save button
+                saveQpCodesButton.disabled = true; 
                 return;
             }
 
             uniqueCoursesArray.forEach(courseName => {
-                // V64 FIX: Ensure the lookup key is always trimmed
-                const trimmedCourseName = cleanCourseKey(courseName); // V68: Use aggressive cleaner
-                const savedCode = qpCodeMap[trimmedCourseName] || "";
+                const cleanKey = cleanCourseKey(courseName);
+
+                // V90 FIX: If the course name cleans to an empty string,
+                // don't render an input for it as it cannot be saved.
+                if (!cleanKey) {
+                    console.warn(`Skipping QP code input for un-keyable course: ${courseName}`);
+                    return; // Skip this iteration
+                }
                 
-                qpCodeContainer.innerHTML += `
+                // V89: Look up the code in the session-specific map
+                const savedCode = sessionCodes[cleanKey] || "";
+                
+                htmlChunks.push(`
                     <div class="flex items-center gap-3 p-2 border-b border-gray-200">
                         <label class="font-medium text-gray-700 w-2/3 text-sm">${courseName}</label>
                         <input type="text" 
                                class="qp-code-input block w-1/3 p-2 border border-gray-300 rounded-md shadow-sm text-sm" 
                                value="${savedCode}" 
-                               data-course="${trimmedCourseName}" 
+                               data-course="${cleanKey}" 
                                placeholder="Enter QP Code">
                     </div>
-                `;
+                `);
             });
-            saveQpCodesButton.disabled = false; // V62: Enable save button once list is rendered
-            qpCodeStatus.textContent = ''; // V62: Clear status on new load
+            
+            qpCodeContainer.innerHTML = htmlChunks.join('');
+            
+            saveQpCodesButton.disabled = false;
+            qpCodeStatus.textContent = ''; // Clear status on new load
         }
         
-        // V62: Manual Save Button Handler
-        saveQpCodesButton.addEventListener('click', () => {
-            // 1. Iterate over all visible inputs and update the global map
-            const qpInputs = qpCodeContainer.querySelectorAll('.qp-code-input');
-            
-            // V63 FIX: Iterating over all inputs and ensuring keys are clean
-            let saveCount = 0;
-            
-            qpInputs.forEach(input => {
-                // V64 FIX: Ensure the key (from data-course) is consistently trimmed
-                // data-course is already clean from render_qp_code_list
-                const courseName = input.dataset.course; 
-                const qpCode = input.value.trim();
+        // V89: NEW SAVE STRATEGY
+saveQpCodesButton.addEventListener('click', () => {
+    const sessionKey = sessionSelectQP.value;
+    if (!sessionKey) {
+        alert("No session selected.");
+        return;
+    }
+    
+    loadQPCodes(); 
+    
+    const thisSessionCodes = {};
+    
+    const qpInputs = qpCodeContainer.querySelectorAll('.qp-code-input');
+    
+    qpInputs.forEach(input => {
+        const courseKey = input.dataset.course;
+        const qpCode = input.value.trim();
+        if (courseKey) {
+            thisSessionCodes[courseKey] = qpCode;  // Save ALL
+        }
+    });
 
-                if (courseName) {
-                    qpCodeMap[courseName] = qpCode; 
-                    saveCount++;
-                }
-            });
+    qpCodeMap[sessionKey] = thisSessionCodes;
+    localStorage.setItem(QP_CODE_LIST_KEY, JSON.stringify(qpCodeMap));
 
-            // 2. Commit the global map (which was just updated) to localStorage
-            localStorage.setItem(QP_CODE_LIST_KEY, JSON.stringify(qpCodeMap));
+    qpCodeStatus.classList.remove('text-red-600');
+    qpCodeStatus.classList.add('text-green-600');
+    qpCodeStatus.textContent = `QP Codes saved successfully!`;
+    setTimeout(() => { qpCodeStatus.textContent = ""; }, 2000);
+});
 
-            // 3. Show success message
-            qpCodeStatus.classList.remove('text-red-600');
-            qpCodeStatus.classList.add('text-green-600');
-            qpCodeStatus.textContent = `QP Codes saved successfully!`;
-            setTimeout(() => { qpCodeStatus.textContent = ""; }, 2000);
-        });
-
-        // V62: Input listener now just updates map and displays pending status
+        // V89: NEW INPUT STRATEGY
+        // The input listener is now *only* for user feedback.
+        // It does NOT update any data.
         qpCodeContainer.addEventListener('input', (e) => {
             if (e.target.classList.contains('qp-code-input')) {
-                // V64 FIX: Ensure the key (from data-course) is consistently trimmed
-                const courseName = e.target.dataset.course; 
-                const qpCode = e.target.value.trim();
-                
-                if (courseName) {
-                    // Update global map immediately (in memory)
-                    qpCodeMap[courseName] = qpCode;
-                    
-                    // Show pending status
-                    qpCodeStatus.classList.remove('text-green-600');
-                    qpCodeStatus.classList.add('text-red-600');
-                    qpCodeStatus.textContent = 'Unsaved changes... Click SAVE QP CODES to commit.';
-                }
+                // Show pending status
+                qpCodeStatus.classList.remove('text-green-600');
+                qpCodeStatus.classList.add('text-red-600');
+                qpCodeStatus.textContent = 'Unsaved changes... Click SAVE QP CODES to commit.';
+            }
+        });
+
+        
+        // --- V68: Report Filter Logic ---
+        filterSessionRadio.addEventListener('change', () => {
+            if (filterSessionRadio.checked) {
+                reportsSessionDropdownContainer.classList.remove('hidden');
+                reportsSessionSelect.value = reportsSessionSelect.options[1]?.value || ""; // Default to first session
+            }
+        });
+
+        filterAllRadio.addEventListener('change', () => {
+            if (filterAllRadio.checked) {
+                reportsSessionDropdownContainer.classList.add('hidden');
+                reportsSessionSelect.value = reportsSessionSelect.options[0]?.value || "all"; // Reset to All
             }
         });
 
         // --- V68: Master Reset Button Logic ---
         document.addEventListener('DOMContentLoaded', () => {
-            const masterResetButton = document.createElement('button');
-            masterResetButton.id = 'master-reset-button';
-            masterResetButton.className = 'w-full inline-flex justify-center items-center rounded-md border border-red-700 bg-red-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-red-700 mt-6';
-            masterResetButton.textContent = 'Master Reset: Clear ALL Local Data';
+            const masterResetButton = document.getElementById('master-reset-button');
             
-            document.querySelector('#view-settings > .bg-white').appendChild(masterResetButton);
-            
-            masterResetButton.addEventListener('click', () => {
-                const step1 = confirm('WARNING: This will clear ALL saved data (Rooms, College Name, Absentees, QP Codes, and Base Data) from your browser. Continue?');
-                if (!step1) return;
-                
-                const step2 = confirm('ARE YOU ABSOLUTELY SURE? This action cannot be undone.');
-                if (step2) {
-                    localStorage.clear();
-                    alert('All local data cleared. The application will now reload.');
-                    window.location.reload();
-                }
-            });
+            if (masterResetButton) {
+                masterResetButton.addEventListener('click', () => {
+                    // V70 FIX: Use alert/confirm instead of modal due to iframe constraints
+                    const step1 = confirm('WARNING: This will clear ALL saved data (Rooms, College Name, Absentees, QP Codes, and Base Data) from your browser. Continue?');
+                    if (!step1) return;
+                    
+                    const step2 = confirm('ARE YOU ABSOLUTELY SURE? This action cannot be undone.');
+                    if (step2) {
+                        localStorage.clear();
+                        alert('All local data cleared. The application will now reload.');
+                        window.location.reload();
+                    }
+                });
+            }
         });
 
 
-        // --- (V65) Initial Data Load on Startup ---
+        // --- V65: Initial Data Load on Startup ---
         function loadInitialData() {
             // 1. Load configuration and UI elements (Room settings, college name)
             loadRoomConfig();
@@ -2900,21 +3108,6 @@
             }
         });
 
-        // --- V68: Report Filter Logic ---
-        filterSessionRadio.addEventListener('change', () => {
-            if (filterSessionRadio.checked) {
-                reportsSessionDropdownContainer.classList.remove('hidden');
-                reportsSessionSelect.value = reportsSessionSelect.options[1]?.value || ""; // Default to first session
-            }
-        });
-
-        filterAllRadio.addEventListener('change', () => {
-            if (filterAllRadio.checked) {
-                reportsSessionDropdownContainer.classList.add('hidden');
-                reportsSessionSelect.value = reportsSessionSelect.options[0]?.value || "all"; // Reset to All
-            }
-        });
-
         // --- Run on initial page load ---
         loadInitialData(); // V65: Run this first!
 
@@ -2922,3 +3115,4 @@
 
 </body>
 </html>
+

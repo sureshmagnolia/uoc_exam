@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Updated Title -->
-    <title>UOC Exam Management V88</title>
+    <title>UOC Exam Management V91</title>
     
     <!-- Load Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -32,6 +32,7 @@
         /* --- V87: New Navigation Styles --- */
         .nav-button {
             /* Base styles for all nav buttons */
+            /* V87: More rounded, more padding, bolder font */
             @apply py-2.5 px-5 rounded-t-lg text-sm font-semibold transition-all duration-200 text-white shadow;
         }
         .nav-button-active {
@@ -490,7 +491,7 @@
         <!-- V87: Top Banner (Spanning Width, Centered Title) -->
         <div id="top-banner" class="w-full bg-indigo-700 text-center py-2">
             <!-- V88: Title Update -->
-            <h1 class="text-xl font-extrabold tracking-wider text-white">UOC Exam Management (V88)</h1>
+            <h1 class="text-xl font-extrabold tracking-wider text-white">UOC Exam Management (V87)</h1>
         </div>
         
         <!-- V87: Navigation Tabs (Below Banner) -->
@@ -942,9 +943,8 @@
             course_name_clean = course_name.strip().replace('\n', ' ')
             
             # 1. Find the Code.
-            # Covers (ECO5B07), [BCM5B07], BOT3CJ201
             # V87: More robust regex to find 3 letters, 1 num, 1 letter, 2 nums
-            code_match = re.search(r'([A-Z]{3}\d[A-Z]\d{2})', course_name_clean, re.IGNORECASE)
+            code_match = re.search(r'([A-Z]{3}\d[A-Z]\d{2,})', course_name_clean, re.IGNORECASE)
             
             course_code = "UNKNOWN"
             if code_match:
@@ -1455,7 +1455,7 @@
         const reportsSessionSelect = document.getElementById('reports-session-select');
 
         
-        // --- V87: Using Course Code as key, this is no longer needed ---
+        // --- V87: This function is no longer needed as we use the Course Code key ---
         // function cleanCourseKey(courseName) { ... }
         
         

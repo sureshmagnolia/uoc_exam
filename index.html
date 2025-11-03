@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Updated Title -->
-    <title>UOC Exam Management V91</title>
+    <title>UOC Exam Management V84</title>
     
     <!-- Load Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -29,82 +29,25 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* --- V87: New Navigation Styles --- */
+        /* --- Navigation Styles (V83: Tab-based structure) --- */
         .nav-button {
-            /* Base styles for all nav buttons */
-            /* V87: More rounded, more padding, bolder font */
-            @apply py-2.5 px-5 rounded-t-lg text-sm font-semibold transition-all duration-200 text-white shadow;
+            @apply py-2 px-4 rounded-t-lg text-sm font-medium transition-colors;
         }
         .nav-button-active {
-            /* Active state: Taller, lighter bg, dark text */
-            @apply shadow-lg scale-105 transform -translate-y-1;
+            @apply bg-white text-gray-900 shadow-md;
         }
         .nav-button-inactive {
-            /* Inactive state: Darker bg, white text, slight fade */
-            @apply opacity-90 hover:opacity-100 transform;
+            @apply text-gray-300 hover:bg-gray-700 hover:text-white;
         }
 
         /* V83: Main Nav Bar Adjustment */
-        #top-banner {
+        #main-nav {
             background-color: #4f46e5; /* Indigo-600 */
         }
-        #main-nav-tabs {
-            /* V86: New background and padding for spacing */
-            background-color: #1f2937; /* gray-800 */
-            width: 100%;
-            padding-top: 4px; /* Space for rounded tabs to lift */
+        #top-banner {
+            @apply bg-indigo-700 text-white p-2;
         }
-
-        /* V87: Unique Button Colors */
-        #nav-extractor {
-            background-color: #2563eb; /* blue-600 */
-        }
-        #nav-extractor.nav-button-active {
-            background-color: #dbeafe; /* blue-100 */
-            color: #1d4ed8; /* blue-700 */
-        }
-
-        #nav-settings {
-            background-color: #16a34a; /* green-600 */
-        }
-        #nav-settings.nav-button-active {
-            background-color: #dcfce7; /* green-100 */
-            color: #15803d; /* green-700 */
-        }
-
-        #nav-room-settings {
-            background-color: #9333ea; /* purple-600 */
-        }
-        #nav-room-settings.nav-button-active {
-            background-color: #f3e8ff; /* purple-100 */
-            color: #7e22ce; /* purple-700 */
-        }
-
-        #nav-qpcodes {
-            background-color: #ca8a04; /* yellow-600 */
-        }
-        #nav-qpcodes.nav-button-active {
-            background-color: #fef9c3; /* yellow-100 */
-            color: #a16207; /* yellow-700 */
-        }
-
-        #nav-reports {
-            background-color: #dc2626; /* red-600 */
-        }
-        #nav-reports.nav-button-active {
-            background-color: #fee2e2; /* red-100 */
-            color: #b91c1c; /* red-700 */
-        }
-
-        #nav-absentees {
-            background-color: #db2777; /* pink-600 */
-        }
-        #nav-absentees.nav-button-active {
-            background-color: #fce7f3; /* pink-100 */
-            color: #be185d; /* pink-700 */
-        }
-
-
+        
         /* --- PRINT STYLES --- */
         @media print {
             /* Hide the main app container and all other non-report elements */
@@ -486,22 +429,21 @@
 </head>
 <body class="bg-gray-100 font-sans">
     
-    <!-- *** Main Navigation Bar (V87: UPDATED STRUCTURE) *** -->
-    <nav id="main-nav" class="bg-indigo-600 text-white sticky top-0 z-50 shadow-lg">
-        <!-- V87: Top Banner (Spanning Width, Centered Title) -->
-        <div id="top-banner" class="w-full bg-indigo-700 text-center py-2">
-            <!-- V88: Title Update -->
-            <h1 class="text-xl font-extrabold tracking-wider text-white">UOC Exam Management (V87)</h1>
-        </div>
-        
-        <!-- V87: Navigation Tabs (Below Banner) -->
-        <div id="main-nav-tabs" class="container max-w-2xl mx-auto flex justify-center gap-2">
-            <button id="nav-extractor" class="nav-button nav-button-active">Main Extractor</button>
-            <button id="nav-settings" class="nav-button nav-button-inactive">Settings</button>
-            <button id="nav-room-settings" class="nav-button nav-button-inactive">Room Settings</button> 
-            <button id="nav-qpcodes" class="nav-button nav-button-inactive">QP Codes</button>
-            <button id="nav-reports" class="nav-button nav-button-inactive">Reports</button>
-            <button id="nav-absentees" class="nav-button nav-button-inactive">Absentees</button>
+    <!-- *** Main Navigation Bar (V58 Update: QP Codes) *** -->
+    <nav id="main-nav" class="bg-gray-800 text-white p-4 sticky top-0 z-50">
+        <div class="container max-w-2xl mx-auto flex justify-between items-center">
+            <!-- V60: Title Update -->
+            <h1 class="text-lg font-bold text-white bg-red-600 px-3 py-1 rounded-md shadow-md">UOC Exam Management (V82)</h1>
+            
+            <!-- Navigation buttons on the right -->
+            <div class="flex gap-4">
+                <button id="nav-extractor" class="nav-button nav-button-active">Main Extractor</button>
+                <button id="nav-settings" class="nav-button nav-button-inactive">Settings</button>
+                <button id="nav-room-settings" class="nav-button nav-button-inactive">Room Settings</button> <!-- V83: ADDED -->
+                <button id="nav-qpcodes" class="nav-button nav-button-inactive">QP Codes</button>
+                <button id="nav-reports" class="nav-button nav-button-inactive">Reports</button>
+                <button id="nav-absentees" class="nav-button nav-button-inactive">Absentees</button>
+            </div>
         </div>
     </nav>
 
@@ -516,10 +458,10 @@
             <div class="bg-indigo-50 border border-indigo-200 p-4 rounded-md mb-6">
                 <h4 class="font-semibold text-gray-800">How to Use:</h4>
                 <ol class="list-decimal list-inside text-sm text-gray-700 mt-2 space-y-1">
-                    <li>Go to **Settings** to set your College Name.</li>
                     <li>Go to **Room Settings** and define capacities and locations. Save changes.</li>
                     <li>Click 'Select PDF Files' and choose 1 or 100+ PDF files.</li>
                     <li>Click 'Run Batch Extraction'. Check the **Status Log** for errors.</li>
+                    <li>Click 'Download Combined_Nominal_Roll.csv' for raw data.</li>
                     <li>(Optional) Go to **QP Codes** to assign codes to each course.</li>
                     <li>Go to **Reports** to generate seating lists, day-wise lists, and question paper counts.</li>
                     <li>Go to **Absentees** to mark absentees and generate the final statement.</li>
@@ -589,38 +531,37 @@
         </div>
     </div>
     
-    <!-- *** "Settings" View (V87: Renamed to General Settings) *** -->
+    <!-- *** "Settings" View (V82: CONSOLIDATED SETTINGS) *** -->
     <div id="view-settings" class="container max-w-2xl mx-auto p-4 min-h-screen hidden">
         <div class="bg-white p-8 rounded-lg shadow-xl w-full">
             <h1 class="text-3xl font-bold text-gray-800 mb-6">General Settings</h1>
             
-            <!-- V48: College Name Input -->
-            <div class="mb-6">
-                <label for="college-name-input" class="block text-sm font-medium text-gray-700 mb-1">College Name (for Reports)</label>
-                <input type="text" id="college-name-input" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm" placeholder="e.g., University of Calicut">
-                <button id="save-college-name-button" class="mt-2 inline-flex justify-center items-center rounded-md border border-transparent bg-indigo-600 py-2 px-3 text-sm font-medium text-white shadow-sm hover:bg-indigo-700">
-                    Save College Name
+            <!-- General Settings (College Name & Reset) -->
+            <div class="bg-red-50 border border-red-200 p-4 rounded-lg mb-6">
+                 <h2 class="text-xl font-bold text-gray-800 mb-4 pb-2 border-b border-gray-300">
+                    College Name
+                </h2>
+                <!-- V48: College Name Input -->
+                <div class="mb-6">
+                    <label for="college-name-input" class="block text-sm font-medium text-gray-700 mb-1">College Name (for Reports)</label>
+                    <input type="text" id="college-name-input" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm" placeholder="e.g., University of Calicut">
+                </div>
+                 <h2 class="text-xl font-bold text-gray-800 mb-4 pb-2 border-b border-gray-300">
+                    Master Reset
+                </h2>
+                 <!-- V68: Master Reset Button -->
+                <button id="master-reset-button" class="w-full inline-flex justify-center items-center rounded-md border border-red-700 bg-red-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-red-700 mt-2">
+                    Master Reset: Clear ALL Local Data
                 </button>
-                <span id="college-name-status" class="text-sm text-green-600 font-medium ml-3 h-5"></span>
-
             </div>
-            
-            <hr class="my-6">
-
-            <!-- V68: Master Reset Button -->
-            <h2 class="text-xl font-bold text-red-600 mb-2">Master Reset</h2>
-            <p class="text-sm text-gray-600 mb-3">This will permanently delete ALL saved data (Rooms, College Name, Absentees, QP Codes, and Base Data) from your browser.</p>
-             <button id="master-reset-button" class="w-full inline-flex justify-center items-center rounded-md border border-red-700 bg-red-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-red-700">
-                Master Reset: Clear ALL Local Data
-            </button>
         </div>
     </div>
-    
-    <!-- *** "Room Settings" View (V87: NEW TAB) *** -->
+
+    <!-- *** "Room Settings" View (V83: SPLIT FROM SETTINGS) *** -->
     <div id="view-room-settings" class="container max-w-2xl mx-auto p-4 min-h-screen hidden">
         <div class="bg-white p-8 rounded-lg shadow-xl w-full">
-            <h1 class="text-3xl font-bold text-gray-800 mb-6">Room Capacity & Location</h1>
-            
+             <h1 class="text-3xl font-bold text-gray-800 mb-6">Room Capacity & Location</h1>
+
             <p class="text-gray-600 mb-4">
                 Define the number of students per room. This list is automatically saved to your browser.
                 If a capacity is left blank, it will default to 30 when saved.
@@ -845,7 +786,7 @@
         packages = ["pandas", "pdfplumber==0.9.0"]
     </py-config>
     
-    <!-- *** Python Script (V87 - COURSE CODE AS KEY) *** -->
+    <!-- *** Python Script (V74 - FINAL STABLE PARSING/PERSISTENCE) *** -->
     <py-script>
         import pandas as pd
         import pdfplumber
@@ -937,38 +878,35 @@
                 console.log(f"Sort Error: Could not parse Date '{row['Date']}' or Time '{row['Time']}'. Error: {e}")
                 return (datetime.min, datetime.min)
         
-        # --- V87: COURSE NAME & CODE NORMALIZER ---
+        # --- V60: COURSE NAME NORMALIZER ---
         def normalize_course_name(course_name):
             """Attempts to find a course code and standardize the name."""
-            course_name_clean = course_name.strip().replace('\n', ' ')
+            course_name = course_name.strip().replace('\n', ' ')
             
-            # 1. Find the Code.
-            # V87: More robust regex to find 3 letters, 1 num, 1 letter, 2 nums
-            code_match = re.search(r'([A-Z]{3}\d[A-Z]\d{2,})', course_name_clean, re.IGNORECASE)
-            
-            course_code = "UNKNOWN"
+            # 1. Regex to find a course code, e.g., (ECO5B07) or [BCM5B07]
+            # This looks for 3 letters, a number, a letter, and 2 numbers
+            code_match = re.search(r'[\[\(-]{2}([A-Z]{3}\d[A-Z]\d{2,})[\]\)-]{2}', course_name, re.IGNORECASE)
+            if not code_match:
+                code_match = re.search(r'([A-Z]{3}\d[A-Z]\d{2,})', course_name, re.IGNORECASE)
+
             if code_match:
-                course_code = code_match.group(1).upper()
+                code = code_match.group(1).upper()
+                
+                # 2. Extract the "clean name" part
+                # Take everything before the match, or before common markers
+                clean_name = course_name
+                stop_markers = ['(', '[', '/']
+                for marker in stop_markers:
+                    if marker in clean_name:
+                        clean_name = clean_name.split(marker)[0]
+                
+                clean_name = clean_name.strip().replace('--', '').replace(':', '').upper()
+                
+                # 3. Rebuild the standardized name
+                return f"{clean_name}--({code})"
             
-            # 2. Clean the Name part.
-            clean_name = course_name_clean
-            
-            # Remove all codes and metadata
-            clean_name = re.sub(r'\[.*?\]', '', clean_name)     # Remove [BOTANY 2024 SYLLABUS]
-            clean_name = re.sub(r'\(.*?\)', '', clean_name)     # Remove (CORE) or (CCSS) or (ECO5B07)
-            clean_name = re.sub(r'--\s*$', '', clean_name)      # Remove trailing --
-            clean_name = re.sub(r'\s*/\s*\d{4}', '', clean_name) # Remove /2019
-            
-            # Remove the code itself if it's at the start
-            if clean_name.upper().startswith(course_code):
-                clean_name = clean_name[len(course_code):]
-            
-            # Final cleanup
-            clean_name = clean_name.replace('--', ' ').replace('-', ' ').replace(':', ' ').strip()
-            clean_name = re.sub(r'\s+', ' ', clean_name).strip().upper()
-            
-            # V87: Return BOTH parts
-            return clean_name, course_code
+            # If no code found, just return the cleaned-up original
+            return re.sub(r'\s+', ' ', course_name).strip().upper()
 
         # --- V40: STATEFUL PARSER for the "NEW" PDF format ---
         def extract_new_format_header(page_text):
@@ -1271,13 +1209,12 @@
                 log_message(f"Found {len(all_exam_rows)} total candidates from {total_files} file(s).")
                 await asyncio.sleep(0)
                 
-                # --- 4. V87: NORMALIZE COURSE NAMES & EXTRACT CODES ---
-                log_message("Normalizing course names and extracting codes...")
+                # --- 4. V60: NORMALIZE COURSE NAMES ---
+                log_message("Normalizing course names...")
                 normalized_rows = []
                 for row in all_exam_rows:
-                    normalized_name, course_code = normalize_course_name(row['Course'])
-                    row['Course'] = normalized_name
-                    row['Course Code'] = course_code # V87: Add the new key
+                    normalized_course = normalize_course_name(row['Course'])
+                    row['Course'] = normalized_course
                     normalized_rows.append(row)
                 all_exam_rows = normalized_rows
                 log_message("Course names normalized.")
@@ -1294,15 +1231,14 @@
                 
                 # --- 6. Q-PAPER REPORT SUMMARY ---
                 log_message("Generating question paper summary...")
-                # V87: Group by the new Course Code as well
-                q_paper_df = df.groupby(['Date', 'Time', 'Course', 'Course Code']).size().reset_index(name='Student Count')
+                # V38: Group by all fields to get unique course names
+                q_paper_df = df.groupby(['Date', 'Time', 'Course']).size().reset_index(name='Student Count')
                 q_paper_summary_json = q_paper_df.to_json(orient='records')
                 q_paper_data_store.innerHTML = q_paper_summary_json
                 log_message("Question paper summary generated.")
 
                 # --- 7. Create CSV and enable buttons ---
-                # V87: Add Course Code to the CSV
-                df_csv = df[['Date', 'Time', 'Course', 'Course Code', 'Register Number', 'Name']]
+                df_csv = df[['Date', 'Time', 'Course', 'Register Number', 'Name']]
                 csv_data = df_csv.to_csv(index=False, encoding='utf-8')
                 
                 blob = Blob.new([csv_data], {type: "text/csv;charset=utf-8"})
@@ -1347,7 +1283,7 @@
             
     </py-script>
 
-    <!-- *** JAVASCRIPT FOR ALL UI (V87) *** -->
+    <!-- *** JAVASCRIPT FOR ALL UI (V80) *** -->
     <script>
         // --- Global localStorage Key ---
         const ROOM_CONFIG_KEY = 'examRoomConfig';
@@ -1373,7 +1309,7 @@
         
         // --- (V58) Global var for QP Code data ---
         let allUniqueCourses = [];
-        let qpCodeMap = {}; // Holds { "Course Code": "QPCode" } V87: Key is now Course Code
+        let qpCodeMap = {}; // Holds { "Course Name": "QPCode" }
 
         // --- Get references to all Report elements ---
         const generateReportButton = document.getElementById('generate-report-button');
@@ -1403,8 +1339,6 @@
         
         // --- (V26) Get references to NEW Room Settings elements ---
         const collegeNameInput = document.getElementById('college-name-input'); // V48
-        const saveCollegeNameButton = document.getElementById('save-college-name-button'); // V87
-        const collegeNameStatus = document.getElementById('college-name-status'); // V87
         const roomConfigContainer = document.getElementById('room-config-container');
         const addRoomButton = document.getElementById('add-room-button');
         const saveRoomConfigButton = document.getElementById('save-room-config-button');
@@ -1454,9 +1388,17 @@
         const reportsSessionDropdownContainer = document.getElementById('reports-session-dropdown-container');
         const reportsSessionSelect = document.getElementById('reports-session-select');
 
-        
-        // --- V87: This function is no longer needed as we use the Course Code key ---
-        // function cleanCourseKey(courseName) { ... }
+
+        // --- V81 FIX: Aggressive Key Cleaning Function (Fixes 1st/Last course) ---
+        function cleanCourseKey(courseName) {
+            if (typeof courseName !== 'string') return '';
+            // Remove all non-standard chars (including BOM, non-breaking spaces, and control chars)
+            let cleaned = courseName.replace(/[\ufeff\u00A0\u200B\u200C\u200D\u200E\u200F\uFEFF]/g, ' ').toUpperCase(); 
+            // Remove ALL non-alphanumeric chars (except spaces, - ( ) [ ] / & , ; .)
+            cleaned = cleaned.replace(/[^\w\s\-\(\)\[\]\/&,;.]/g, ''); 
+            // Replace multiple spaces with one, then trim
+            return cleaned.replace(/\s+/g, ' ').trim();
+        }
         
         
         // --- Helper function to numerically sort room keys ---
@@ -1469,10 +1411,9 @@
         
         // --- (V28) Helper function to create a new room row HTML (with location) ---
         function createRoomRowHtml(roomName, capacity, location, isLast = false) {
-            // V79: Only show remove button if it's the last row
             const removeButtonHtml = isLast ? 
                 `<button class="remove-room-button ml-auto text-sm text-red-600 hover:text-red-800 font-medium">&times; Remove</button>` : 
-                `<div class="w-20"></div>`; // Placeholder to keep alignment
+                `<div class="w-[84px]"></div>`; // Placeholder for alignment
             
             return `
                 <div class="room-row flex items-center gap-3 p-2 border-b border-gray-200" data-room-name="${roomName}">
@@ -1512,23 +1453,23 @@
             if (Object.keys(roomConfig).length === 0) {
                 // *** (V27): Default to 30 rooms ***
                 console.log("Using default room config (30 rooms of 30)");
-                let config = {}; // V79: Use local var for default creation
+                config = {};
                 for (let i = 1; i <= 30; i++) {
                     config[`Room ${i}`] = { capacity: 30, location: "" };
                 }
                 localStorage.setItem(ROOM_CONFIG_KEY, JSON.stringify(config));
                 currentRoomConfig = config; // Update global var
+            } else {
+                console.log("Using saved room config:", roomConfig);
+                const sortedRoomKeys = Object.keys(roomConfig).sort((a, b) => {
+                    const numA = parseInt(a.replace(/\D/g, ''), 10) || 0;
+                    const numB = parseInt(b.replace(/\D/g, ''), 10) || 0;
+                    return numA - numB;
+                });
+                roomNames = sortedRoomKeys;
+                // (V28) Get capacity from the new object structure
+                roomCapacities = sortedRoomKeys.map(key => roomConfig[key].capacity);
             }
-            
-            // This part is now just for the allocation function, not for rendering
-            const sortedRoomKeys = Object.keys(currentRoomConfig).sort((a, b) => {
-                const numA = parseInt(a.replace(/\D/g, ''), 10) || 0;
-                const numB = parseInt(b.replace(/\D/g, ''), 10) || 0;
-                return numA - numB;
-            });
-            roomNames = sortedRoomKeys;
-            roomCapacities = sortedRoomKeys.map(key => currentRoomConfig[key].capacity);
-            
             return { roomNames, roomCapacities };
         }
         
@@ -1680,19 +1621,16 @@
                     }
                     
                     const pageHeaderHtml = `
-                        <!-- V89: Wrap headers in group to prevent page break -->
-                        <div class="print-header-group">
-                            <h1>${currentCollegeName}</h1> <!-- V48: Use college name -->
-                            <h2>${session.Date} &nbsp;|&nbsp; ${session.Time} &nbsp;|&nbsp; ${session.Room}</h2>
-                            ${locationHtml} <!-- (V28) Added location here -->
-                            <div class="course-summary">
-                                ${courseSummaryHtml}
-                            </div>
+                        <h1>${currentCollegeName}</h1> <!-- V48: Use college name -->
+                        <h2>${session.Date} &nbsp;|&nbsp; ${session.Time} &nbsp;|&nbsp; ${session.Room}</h2>
+                        ${locationHtml} <!-- (V28) Added location here -->
+                        <div class="course-summary">
+                            ${courseSummaryHtml}
                         </div>
                     `;
                     
                     const tableHeaderHtml = `
-                        <table class="print-table">
+                        <table>
                             <thead>
                                 <tr>
                                     <th class="sl-col">Sl No</th>
@@ -1941,13 +1879,10 @@
 
                         allPagesHtml += `
                             <div class="print-page print-page-daywise">
-                                <!-- V89: Wrap headers in group to prevent page break -->
-                                <div class="print-header-group">
-                                    <!-- V49: Title Updated -->
-                                    <h1>Seating Details for Candidates</h1>
-                                    <!-- V48: Use college name -->
-                                    <h2>${currentCollegeName} &nbsp;|&nbsp; ${session.Date} &nbsp;|&nbsp; ${session.Time}</h2>
-                                </div>
+                                <!-- V49: Title Updated -->
+                                <h1>Seating Details for Candidates</h1>
+                                <!-- V48: Use college name -->
+                                <h2>${currentCollegeName} &nbsp;|&nbsp; ${session.Date} &nbsp;|&nbsp; ${session.Time}</h2>
                                 <div class="column-container">
                                     <div class="column">
                                         ${buildColumnTable(col1Students)}
@@ -2004,11 +1939,11 @@
                 const courses = {};
                 for (const student of sessionStudents) {
                     const courseDisplay = student.Course;
-                    const courseKey = student['Course Code']; // V87: Use the reliable Course Code
+                    const courseKey = cleanCourseKey(courseDisplay); // V64 FIX: Ensure course key is aggressively cleaned
                     
                     if (!courses[courseKey]) {
                         courses[courseKey] = {
-                            name: courseDisplay, // Store the display name
+                            name: courseDisplay,
                             present: [],
                             absent: []
                         };
@@ -2032,21 +1967,18 @@
                 for (const courseKey of sortedCourseKeys) {
                     totalPages++;
                     const courseData = courses[courseKey];
-                    // V87: Use the Course Code (key) for lookup
+                    // V64 FIX: Use the clean key for lookup
                     const qpCode = qpCodeMap[courseKey] || "____"; 
                     
                     // V57: Add page break logic. Each course is a new page.
                     allPagesHtml += `
                         <div class="print-page">
                             <!-- V57: Header repeated on each page -->
-                            <!-- V89: Wrap headers in group to prevent page break -->
-                            <div class="print-header-group">
-                                <h1>${currentCollegeName}</h1>
-                                <h2>Absentee Statement</h2>
-                                <h3>${date} &nbsp;|&nbsp; ${time}</h3>
-                            </div>
+                            <h1>${currentCollegeName}</h1>
+                            <h2>Absentee Statement</h2>
+                            <h3>${date} &nbsp;|&nbsp; ${time}</h3>
                         
-                            <table class="absentee-report-table print-table">
+                            <table class="absentee-report-table">
                                 <thead>
                                     <tr>
                                         <!-- V58: Added QP Code -->
@@ -2124,7 +2056,7 @@
             }
             
             // (V28) Add Location to CSV
-            const headers = ['Date', 'Time', 'Course', 'Course Code', 'Register Number', 'Name', 'Room No', 'Location'];
+            const headers = ['Date', 'Time', 'Course', 'Register Number', 'Name', 'Room No', 'Location'];
             let csvContent = headers.join(",") + "\n";
             
             lastGeneratedRoomData.forEach(row => {
@@ -2158,11 +2090,12 @@
         // --- NAVIGATION VIEW-SWITCHING LOGIC ---
         navExtractor.addEventListener('click', () => showView(viewExtractor, navExtractor));
         navSettings.addEventListener('click', () => showView(viewSettings, navSettings));
-        navRoomSettings.addEventListener('click', () => showView(viewRoomSettings, navRoomSettings)); // V83
         navQPCodes.addEventListener('click', () => showView(viewQPCodes, navQPCodes)); // V58
         navReports.addEventListener('click', () => showView(viewReports, navReports));
         navAbsentees.addEventListener('click', () => showView(viewAbsentees, navAbsentees)); // V56
-        
+        // V82: New tab structure
+        document.getElementById('nav-room-settings').addEventListener('click', () => showView(document.getElementById('view-room-settings'), document.getElementById('nav-room-settings')));
+
         function showView(viewToShow, buttonToActivate) {
             allViews.forEach(view => view.classList.add('hidden'));
             allNavButtons.forEach(btn => {
@@ -2176,42 +2109,49 @@
             clearReport(); // Always clear reports when switching views
         }
 
-        // --- (V87) NEW SETTINGS & ROOMS LOGIC (Split Tabs) ---
+        // --- (V48) NEW ROOM SETTINGS LOGIC (with College Name) ---
         
-        // --- Save College Name Button ---
-        saveCollegeNameButton.addEventListener('click', () => {
-            const collegeName = collegeNameInput.value.trim() || "University of Calicut";
-            localStorage.setItem(COLLEGE_NAME_KEY, collegeName);
-            currentCollegeName = collegeName; // Update global var
-            
-            collegeNameStatus.textContent = "College Name Saved!";
-            setTimeout(() => { collegeNameStatus.textContent = ""; }, 2000);
-        });
-
-        // --- Save Room Config Button ---
+        // --- (V48) Save from dynamic form (uses new object structure) ---
         saveRoomConfigButton.addEventListener('click', () => {
             try {
+                // V48: Save College Name
+                const collegeName = collegeNameInput.value.trim() || "University of Calicut";
+                localStorage.setItem(COLLEGE_NAME_KEY, collegeName);
+                currentCollegeName = collegeName; // Update global var
+                
+                // Save Room Config
                 const newConfig = {};
+                // V79: Get all rows, re-read and save
                 const roomRows = roomConfigContainer.querySelectorAll('.room-row');
                 
                 roomRows.forEach(row => {
+                    // V79: Read current values (name label is the source of truth for the room key)
                     const roomName = row.querySelector('.room-name-label').textContent.replace(':', '').trim();
                     let capacity = parseInt(row.querySelector('.room-capacity-input').value, 10);
                     let location = row.querySelector('.room-location-input').value.trim();
                     
-                    if (isNaN(capacity) || capacity <= 0) capacity = 30;
+                    // Default to 30 if blank or invalid
+                    if (isNaN(capacity) || capacity <= 0) {
+                        capacity = 30;
+                    }
                     
                     if (roomName) {
-                        newConfig[roomName] = { capacity: capacity, location: location };
+                        // V79: Re-save all rooms with new sequential names and updated data
+                        newConfig[roomName] = {
+                            capacity: capacity,
+                            location: location
+                        };
                     }
                 });
                 
                 localStorage.setItem(ROOM_CONFIG_KEY, JSON.stringify(newConfig));
                 
+                // Show success message
                 roomConfigStatus.textContent = "Settings saved successfully!";
                 setTimeout(() => { roomConfigStatus.textContent = ""; }, 2000);
                 
-                loadRoomConfig(); // Re-render the list
+                // V79: RE-RENDER the list to fix numbering and apply UX rules (remove button on last row only)
+                loadRoomConfig();
                 
             } catch (e) {
                 roomConfigStatus.textContent = "Error saving settings.";
@@ -2219,11 +2159,11 @@
             }
         });
 
-        // --- (V87) Load data into dynamic form (no college name) ---
+        // --- (V79) Load data into dynamic form (with UX Fix) ---
         function loadRoomConfig() {
-            // Load College Name (into its own input)
+            // V48: Load College Name
             currentCollegeName = localStorage.getItem(COLLEGE_NAME_KEY) || "University of Calicut";
-            collegeNameInput.value = currentCollegeName;
+            if (collegeNameInput) collegeNameInput.value = currentCollegeName; // V82: Check for existence since it moved
             
             // Load Room Config
             let savedConfigJson = localStorage.getItem(ROOM_CONFIG_KEY);
@@ -2240,10 +2180,12 @@
                 config = {};
             }
             
+            // (V28) Store in global var for other functions to use
             currentRoomConfig = config;
             
             if (Object.keys(config).length === 0) {
-                // Default to 30 rooms
+                // *** (V27): Default to 30 rooms ***
+                console.log("Using default room config (30 rooms of 30)");
                 config = {};
                 for (let i = 1; i <= 30; i++) {
                     config[`Room ${i}`] = { capacity: 30, location: "" };
@@ -2292,7 +2234,7 @@
                 const removeButton = currentLastRow.querySelector('.remove-room-button');
                 if (removeButton) {
                     const placeholder = document.createElement('div');
-                    placeholder.className = 'w-20'; // Match the button width for alignment
+                    placeholder.className = 'w-[84px]'; // Match the button width for alignment
                     removeButton.parentNode.replaceChild(placeholder, removeButton);
                 }
             }
@@ -2372,14 +2314,11 @@
                     
                     const pageHtml = `
                         <div class="print-page">
-                            <!-- V89: Wrap headers in group to prevent page break -->
-                            <div class="print-header-group">
-                                <h1>${currentCollegeName}</h1> <!-- V48: Use college name -->
-                                <h2>Question Paper Summary</h2>
-                                <h3>${session.Date} &nbsp;|&nbsp; ${session.Time}</h3>
-                            </div>
+                            <h1>${currentCollegeName}</h1> <!-- V48: Use college name -->
+                            <h2>Question Paper Summary</h2>
+                            <h3>${session.Date} &nbsp;|&nbsp; ${session.Time}</h3>
                             
-                            <table class="q-paper-table print-table">
+                            <table class="q-paper-table">
                                 <thead>
                                     <tr>
                                         <th class="sl-col">Sl No</th>
@@ -2446,8 +2385,8 @@
             };
             reader.onerror = () => {
                 csvLoadStatus.textContent = "Error reading file.";
-                document.getElementById('pdf-file').disabled = false;
-                document.getElementById('run-button').disabled = false;
+                document.getElementById('pdf-file').disabled = true;
+                document.getElementById('run-button').disabled = true;
             };
             reader.readAsText(file);
         });
@@ -2463,12 +2402,11 @@
                 const dateIndex = headers.indexOf('Date');
                 const timeIndex = headers.indexOf('Time');
                 const courseIndex = headers.indexOf('Course');
-                const courseCodeIndex = headers.indexOf('Course Code'); // V87
                 const regNumIndex = headers.indexOf('Register Number');
                 const nameIndex = headers.indexOf('Name');
 
-                if (regNumIndex === -1 || nameIndex === -1 || courseIndex === -1 || courseCodeIndex === -1) {
-                    csvLoadStatus.textContent = "Error: CSV must contain 'Date', 'Time', 'Course', 'Course Code', 'Register Number', and 'Name' headers.";
+                if (regNumIndex === -1 || nameIndex === -1 || courseIndex === -1) {
+                    csvLoadStatus.textContent = "Error: CSV must contain 'Register Number', 'Name', and 'Course' headers.";
                     csvLoadStatus.classList.add('text-red-600');
                     csvLoadStatus.classList.remove('text-green-600');
                     // V67: Re-enable PDF inputs
@@ -2495,8 +2433,7 @@
                     const student = {
                         'Date': values[dateIndex],
                         'Time': values[timeIndex],
-                        'Course': values[courseIndex], // V87: Clean Display Name
-                        'Course Code': values[courseCodeIndex], // V87: Clean Key
+                        'Course': values[courseIndex], // V60: This name should be normalized already
                         'Register Number': values[regNumIndex],
                         'Name': values[nameIndex]
                     };
@@ -2675,24 +2612,15 @@
             absenteeSearchInput.value = student['Register Number'];
             autocompleteResults.classList.add('hidden');
             
-            // V87 FIX: Allocate rooms for the *entire* session to find the correct room
-            const sessionKey = sessionSelect.value;
-            const [date, time] = sessionKey.split(' | ');
-            const sessionStudents = allStudentData.filter(s => s.Date === date && s.Time === time);
-            
-            // Perform allocation on the *entire* session
-            const allocatedSessionData = performRoomAllocation(sessionStudents);
-            
-            // Find our selected student in the allocated list
-            const allocatedStudent = allocatedSessionData.find(s => s['Register Number'] === student['Register Number']);
-            
-            const roomNo = allocatedStudent ? allocatedStudent['Room No'] : 'N/A';
-            const roomInfo = currentRoomConfig[roomNo];
+            // Perform allocation to find room
+            const allocatedData = performRoomAllocation([student]);
+            const allocatedStudent = allocatedData[0];
+            const roomInfo = currentRoomConfig[allocatedStudent['Room No']];
             const location = (roomInfo && roomInfo.location) ? `(${roomInfo.location})` : "";
             
             selectedStudentName.textContent = student.Name;
             selectedStudentCourse.textContent = student.Course;
-            selectedStudentRoom.textContent = `Room: ${roomNo} ${location}`; // Use the correctly allocated room
+            selectedStudentRoom.textContent = `Room: ${allocatedStudent['Room No']} ${location}`;
             selectedStudentDetails.classList.remove('hidden');
         }
         
@@ -2776,7 +2704,7 @@
             renderAbsenteeList();
         }
         
-        // --- (V87) NEW QP CODE LOGIC (Using Course Code as Key) ---
+        // --- (V61) NEW QP CODE LOGIC (Session-Aware) ---
         
         function disable_qpcode_tab(disabled) {
             navQPCodes.disabled = disabled;
@@ -2792,7 +2720,6 @@
         }
         
         function loadQPCodes() {
-            // V87: This map uses Course Code as the key
             qpCodeMap = JSON.parse(localStorage.getItem(QP_CODE_LIST_KEY) || '{}');
         }
         
@@ -2850,7 +2777,7 @@
             }
         });
         
-        // V87: Renders the course list for the selected session
+        // V61: Renders the course list for the selected session
         function render_qp_code_list(sessionKey) {
             
             // 1. Filter students for this specific session
@@ -2858,8 +2785,8 @@
             const sessionStudents = allStudentData.filter(s => s.Date === date && s.Time === time);
             
             // 2. Get unique courses for this session
-            // V87: Use a Map to get unique codes->names
-            const sessionCourses = new Map(sessionStudents.map(s => [s['Course Code'], s.Course]));
+            const sessionCourses = new Set(sessionStudents.map(s => s.Course));
+            const uniqueCoursesArray = Array.from(sessionCourses).sort();
             
             // 3. Load saved codes
             loadQPCodes();
@@ -2867,17 +2794,16 @@
             // 4. Populate the UI
             qpCodeContainer.innerHTML = ''; // Clear old
             
-            if (sessionCourses.size === 0) {
+            if (uniqueCoursesArray.length === 0) {
                 qpCodeContainer.innerHTML = '<p class="text-center text-gray-500">No courses found for this session.</p>';
-                saveQpCodesButton.disabled = true; 
+                saveQpCodesButton.disabled = true; // V62: Disable save button
                 return;
             }
 
-            // Sort by Course Code
-            const sortedCourses = [...sessionCourses.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-
-            sortedCourses.forEach(([courseCode, courseName]) => {
-                const savedCode = qpCodeMap[courseCode] || "";
+            uniqueCoursesArray.forEach(courseName => {
+                // V74 FIX: Ensure the lookup key is always aggressively cleaned
+                const cleanKey = cleanCourseKey(courseName);
+                const savedCode = qpCodeMap[cleanKey] || "";
                 
                 qpCodeContainer.innerHTML += `
                     <div class="flex items-center gap-3 p-2 border-b border-gray-200">
@@ -2885,28 +2811,30 @@
                         <input type="text" 
                                class="qp-code-input block w-1/3 p-2 border border-gray-300 rounded-md shadow-sm text-sm" 
                                value="${savedCode}" 
-                               data-course-code="${courseCode}" 
+                               data-course="${cleanKey}" 
                                placeholder="Enter QP Code">
                     </div>
                 `;
             });
-            saveQpCodesButton.disabled = false; // Enable save button
-            qpCodeStatus.textContent = ''; // Clear status on new load
+            saveQpCodesButton.disabled = false; // V62: Enable save button once list is rendered
+            qpCodeStatus.textContent = ''; // V62: Clear status on new load
         }
         
-        // V87: Manual Save Button Handler (uses Course Code)
+        // V62: Manual Save Button Handler
         saveQpCodesButton.addEventListener('click', () => {
             // 1. Iterate over all visible inputs and update the global map
             const qpInputs = qpCodeContainer.querySelectorAll('.qp-code-input');
             
+            // V63 FIX: Iterating over all inputs and ensuring keys are clean
             let saveCount = 0;
             
             qpInputs.forEach(input => {
-                const courseCode = input.dataset.courseCode; // V87: Use the reliable code
+                // V74 FIX: The data-course attribute is already clean, so use it as the key
+                const courseName = input.dataset.course; 
                 const qpCode = input.value.trim();
 
-                if (courseCode) {
-                    qpCodeMap[courseCode] = qpCode; // Save to global map
+                if (courseName) {
+                    qpCodeMap[courseName] = qpCode; 
                     saveCount++;
                 }
             });
@@ -2921,13 +2849,22 @@
             setTimeout(() => { qpCodeStatus.textContent = ""; }, 2000);
         });
 
-        // V87: Input listener now just shows pending status
+        // V62: Input listener now just updates map and displays pending status
         qpCodeContainer.addEventListener('input', (e) => {
             if (e.target.classList.contains('qp-code-input')) {
-                // Show pending status
-                qpCodeStatus.classList.remove('text-green-600');
-                qpCodeStatus.classList.add('text-red-600');
-                qpCodeStatus.textContent = 'Unsaved changes... Click SAVE QP CODES to commit.';
+                // V74 FIX: Use the clean key from data-course
+                const courseName = e.target.dataset.course; 
+                const qpCode = e.target.value.trim();
+                
+                if (courseName) {
+                    // Update global map immediately (in memory)
+                    qpCodeMap[courseName] = qpCode;
+                    
+                    // Show pending status
+                    qpCodeStatus.classList.remove('text-green-600');
+                    qpCodeStatus.classList.add('text-red-600');
+                    qpCodeStatus.textContent = 'Unsaved changes... Click SAVE QP CODES to commit.';
+                }
             }
         });
 
@@ -3025,7 +2962,7 @@
         }
         
         // V67: Disable CSV input on load if data is loaded, and enable PDF button
-        if (jsonDataStore.innerHTML && JSON.parse(jsonDataStore.innerHTML || '[]').length > 0) {
+        if (jsonDataStore.innerHTML && JSON.parse(jsonDataStore.innerHTML).length > 0) {
             correctedCsvUpload.disabled = false;
             loadCsvButton.disabled = false;
             document.getElementById('pdf-file').disabled = false;
@@ -3067,4 +3004,3 @@
 
 </body>
 </html>
-

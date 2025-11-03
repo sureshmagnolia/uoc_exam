@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Updated Title -->
-    <title>UOC Exam Management V66</title>
+    <title>UOC Exam Management V67</title>
     
     <!-- Load Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -436,7 +436,7 @@
         </div>
     </nav>
 
-    <!-- *** "Extractor" View (V21 Update: Title Added) *** -->
+    <!-- *** "Extractor" View (V67: CSV Upload Shifted Here) *** -->
     <div id="view-extractor" class="container max-w-2xl mx-auto p-4 min-h-screen">
         <div class="bg-white p-8 rounded-lg shadow-xl w-full">
             
@@ -472,6 +472,29 @@
                     <span id="button-text">2. Run Batch Extraction</span>
                 </button>
             </div>
+            
+            <!-- V67: CSV Upload Section (Shifted from Reports) -->
+            <div class="bg-gray-50 border border-gray-200 p-4 rounded-md mt-6">
+                <h4 class="font-semibold text-gray-800">3. Load Corrected Data (Optional)</h4>
+                <p class="text-sm text-gray-600 mt-1 mb-3">
+                    Upload a corrected `Combined_Nominal_Roll.csv` file to overwrite the extracted data.
+                    This is your base data source for all reports.
+                </p>
+                <div class="flex items-center gap-2">
+                    <input type="file" id="corrected-csv-upload" accept=".csv" class="block w-full text-sm text-gray-500
+                                  file:mr-4 file:py-2 file:px-4
+                                  file:rounded-md file:border-0
+                                  file:text-sm file:font-semibold
+                                  file:bg-green-50 file:text-green-700
+                                  hover:file:bg-green-100"/>
+                    <button id="load-csv-button" class="inline-flex justify-center items-center rounded-md border border-transparent bg-gray-600 py-2 px-3 text-sm font-medium text-white shadow-sm hover:bg-gray-700">
+                        Load CSV
+                    </button>
+                </div>
+                <span id="csv-load-status" class="text-sm font-medium text-green-600 mt-2 block h-5"></span>
+            </div>
+            <!-- END V67 Shifted Section -->
+
 
             <!-- Output & Download Area -->
             <div class="mt-6">
@@ -594,35 +617,13 @@
         </div>
     </div>
     
-    <!-- *** "Reports" View (V33 Update: Added CSV Upload) *** -->
+    <!-- *** "Reports" View (V33 Update: Removed CSV Upload) *** -->
     <div id="view-reports" class="container max-w-2xl mx-auto p-4 min-h-screen hidden">
         <div class="bg-white p-8 rounded-lg shadow-xl w-full">
             <h1 class="text-3xl font-bold text-gray-800 mb-6">Reports</h1>
             
-            <!-- V33: New CSV Upload Section -->
-            <div class="bg-gray-50 border border-gray-200 p-4 rounded-md mb-6">
-                <h4 class="font-semibold text-gray-800">Load Corrected Data (Optional)</h4>
-                <p class="text-sm text-gray-600 mt-1 mb-3">
-                    If the PDF extraction had errors, you can upload a corrected `Combined_Nominal_Roll.csv` file here.
-                    All reports will then be based on your uploaded file.
-                </p>
-                <div class="flex items-center gap-2">
-                    <input type="file" id="corrected-csv-upload" accept=".csv" class="block w-full text-sm text-gray-500
-                                  file:mr-4 file:py-2 file:px-4
-                                  file:rounded-md file:border-0
-                                  file:text-sm file:font-semibold
-                                  file:bg-indigo-50 file:text-indigo-700
-                                  hover:file:bg-indigo-100"/>
-                    <button id="load-csv-button" class="inline-flex justify-center items-center rounded-md border border-transparent bg-gray-600 py-2 px-3 text-sm font-medium text-white shadow-sm hover:bg-gray-700">
-                        Load CSV
-                    </button>
-                </div>
-                <span id="csv-load-status" class="text-sm font-medium text-green-600 mt-2 block h-5"></span>
-            </div>
-            <!-- END V33 Section -->
-
             <p class="text-gray-600 mb-4">
-                Generate reports based on the last batch extraction. (Buttons are enabled after extraction or CSV load.)
+                Generate reports based on the last loaded data. (Buttons are enabled after extraction or CSV load.)
             </p>
             <div class="space-y-4">
                 <button id="generate-report-button" class="w-full inline-flex justify-center items-center rounded-md border border-transparent bg-blue-600 py-3 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50" disabled>
@@ -2232,6 +2233,10 @@
                 return;
             }
             
+            // V67: Disable PDF input while CSV is being processed/loaded
+            document.getElementById('pdf-file').disabled = true;
+            document.getElementById('run-button').disabled = true;
+
             const reader = new FileReader();
             reader.onload = (event) => {
                 const csvText = event.target.result;
@@ -2239,6 +2244,8 @@
             };
             reader.onerror = () => {
                 csvLoadStatus.textContent = "Error reading file.";
+                document.getElementById('pdf-file').disabled = false;
+                document.getElementById('run-button').disabled = false;
             };
             reader.readAsText(file);
         });
@@ -2261,6 +2268,9 @@
                     csvLoadStatus.textContent = "Error: CSV must contain 'Register Number', 'Name', and 'Course' headers.";
                     csvLoadStatus.classList.add('text-red-600');
                     csvLoadStatus.classList.remove('text-green-600');
+                    // V67: Re-enable PDF inputs
+                    document.getElementById('pdf-file').disabled = false;
+                    document.getElementById('run-button').disabled = false;
                     return;
                 }
 
@@ -2328,12 +2338,20 @@
                 // V61: Enable and populate QP Code tab
                 disable_qpcode_tab(false);
                 populate_qp_code_session_dropdown();
+                
+                // V67: Disable CSV input while PDF input is enabled (since CSV is the new source)
+                document.getElementById('pdf-file').disabled = false;
+                document.getElementById('run-button').disabled = false;
+
 
             } catch (e) {
                 console.error("Error parsing CSV:", e);
                 csvLoadStatus.textContent = "Error parsing CSV file. See console for details.";
                 csvLoadStatus.classList.add('text-red-600');
                 csvLoadStatus.classList.remove('text-green-600');
+                // V67: Re-enable PDF inputs
+                document.getElementById('pdf-file').disabled = false;
+                document.getElementById('run-button').disabled = false;
             }
         }
         
@@ -2641,7 +2659,7 @@
             let saveCount = 0;
             
             qpInputs.forEach(input => {
-                // V63/V64 FIX: Ensure the key (from data-course) is consistently trimmed
+                // V64 FIX: Ensure the key (from data-course) is consistently trimmed
                 const courseName = input.dataset.course.trim(); 
                 const qpCode = input.value.trim();
 
@@ -2664,7 +2682,7 @@
         // V62: Input listener now just updates map and displays pending status
         qpCodeContainer.addEventListener('input', (e) => {
             if (e.target.classList.contains('qp-code-input')) {
-                // V63/V64 FIX: Ensure the key (from data-course) is consistently trimmed
+                // V64 FIX: Ensure the key (from data-course) is consistently trimmed
                 const courseName = e.target.dataset.course.trim(); 
                 const qpCode = e.target.value.trim();
                 
@@ -2736,6 +2754,42 @@
             }
         }
         
+        // V67: Disable CSV input on load if data is loaded, and enable PDF button
+        if (jsonDataStore.innerHTML && JSON.parse(jsonDataStore.innerHTML).length > 0) {
+            correctedCsvUpload.disabled = false;
+            loadCsvButton.disabled = false;
+            document.getElementById('pdf-file').disabled = false;
+            document.getElementById('run-button').disabled = false;
+        } else {
+             // If no data is loaded, keep reports disabled, but enable PDF/CSV inputs
+            document.getElementById('pdf-file').disabled = false;
+            document.getElementById('run-button').disabled = false;
+            correctedCsvUpload.disabled = false;
+            loadCsvButton.disabled = false;
+        }
+        
+        // V67: Prevent user from trying to run extraction if CSV load is active
+        document.getElementById('pdf-file').addEventListener('change', () => {
+            if (document.getElementById('pdf-file').files.length > 0) {
+                correctedCsvUpload.disabled = true;
+                loadCsvButton.disabled = true;
+            } else {
+                correctedCsvUpload.disabled = false;
+                loadCsvButton.disabled = false;
+            }
+        });
+        
+        // V67: Prevent user from trying to load CSV if PDF is selected
+        correctedCsvUpload.addEventListener('change', () => {
+            if (correctedCsvUpload.files.length > 0) {
+                document.getElementById('pdf-file').disabled = true;
+                document.getElementById('run-button').disabled = true;
+            } else {
+                document.getElementById('pdf-file').disabled = false;
+                document.getElementById('run-button').disabled = false;
+            }
+        });
+
         // --- Run on initial page load ---
         loadInitialData(); // V65: Run this first!
 

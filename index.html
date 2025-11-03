@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Updated Title -->
-    <title>UOC Exam Management V9.9</title>
+    <title>UOC Exam Management V9.5</title>
     
     <!-- Load Tailwind CSS for styling -->
     <script src="https://cdn-tailwindcss.vercel.app/"></script>
@@ -114,6 +114,13 @@
                 margin: 0.5cm; /* Minimal margin */
             }
             
+            /* V100 FIX: Ensure body and app background is white/transparent to remove shadows */
+            body, #report-output-area {
+                background-color: white !important;
+                background: white !important;
+                color: black !important;
+            }
+
             /* Hide the main app container and all other non-report elements */
             #main-nav, #view-extractor, #view-settings, #view-reports, #view-absentees, #view-qpcodes, #view-room-settings, body > py-config, body > py-script, #report-controls {
                 display: none !important; /* Be forceful */
@@ -263,8 +270,10 @@
             .daywise-report-table {
                 width: 100%;
                 border-collapse: collapse;
-                /* V32: Font size decreased */
-                font-size: 6pt; 
+                /* V100 FIX: Increased font size for better readability/fit */
+                font-size: 7pt; 
+                /* V100 FIX: Removed fixed layout in print media to allow natural column width adjustment */
+                table-layout: auto; 
                 /* V90 FIX: Add break-before: avoid to tables to keep with headers */
                 break-before: avoid;
             }
@@ -327,7 +336,9 @@
 
         /* --- Report styles for the *viewer* (on-screen) --- */
         .print-page {
-            background: white;
+            /* V100 FIX: Removed background-color: white to ensure print media rules take over, */
+            /* but kept the shadow for the on-screen preview look. */
+            background: #ffffff;
             width: 210mm; 
             min-height: 297mm; 
             padding: 2cm;

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Updated Title -->
-    <title>UOC Exam Management V9.3</title>
+    <title>UOC Exam Management V9.1</title>
     
     <!-- Load Tailwind CSS for styling -->
     <script src="https://cdn-tailwindcss.vercel.app/"></script>
@@ -1671,6 +1671,9 @@
             await new Promise(resolve => setTimeout(resolve, 50));
 
             try {
+                // *** V91 FIX: Refresh college name from local storage ***
+                currentCollegeName = localStorage.getItem(COLLEGE_NAME_KEY) || "University of Calicut";
+                
                 // 1. Get FILTERED RAW student data
                 const data = getFilteredReportData('room-wise');
 
@@ -1732,7 +1735,7 @@
                         courseSummaryHtml += `<div style="font-weight: bold;">${courseName}: ${count} Student(s)</div>`; // V38: Show full course name
                     }
                     
-                    // *** COLLEGE NAME IS CORRECTLY LOADED IN currentCollegeName GLOBAL VAR ***
+                    // *** COLLEGE NAME IS CORRECTLY REFLECTED HERE ***
                     const pageHeaderHtml = `
                         <!-- V89: Wrap headers in group to prevent page break -->
                         <div class="print-header-group">
@@ -1758,7 +1761,7 @@
                             </thead>
                             <tbody>
                     `; 
-                    const tableCloseHtml = `</tbody></table>`;
+                    const tableCloseHtml = `</div>`;
                     const invigilatorFooterHtml = `
                         <div class="invigilator-footer">
                             <div><strong>Answer Booklets Received:</strong> _________________</div>
@@ -1806,7 +1809,7 @@
 
                     previousCourseName = ""; 
                     const tableRowsPage1 = generateTableRows(studentsPage1);
-                    allPagesHtml += `<div class="print-page">${pageHeaderHtml}${tableHeaderHtml}${tableRowsPage1}${tableCloseHtml}`;
+                    allPagesHtml += `<div class="print-page">${pageHeaderHtml}${tableHeaderHtml}${tableRowsPage1}</tbody></table>`; // FIX: Moved </tbody></table>
                     if (studentsPage2.length === 0) allPagesHtml += invigilatorFooterHtml;
                     allPagesHtml += `</div>`; 
                     totalPagesGenerated++;
@@ -1814,7 +1817,7 @@
                     if (studentsPage2.length > 0) {
                         previousCourseName = ""; 
                         const tableRowsPage2 = generateTableRows(studentsPage2);
-                        allPagesHtml += `<div class="print-page">${tableHeaderHtml}${tableRowsPage2}${tableCloseHtml}${invigilatorFooterHtml}</div>`; 
+                        allPagesHtml += `<div class="print-page">${tableHeaderHtml}${tableRowsPage2}</tbody></table>${invigilatorFooterHtml}</div>`; // FIX: Moved </tbody></table>
                         totalPagesGenerated++;
                     }
                 });
@@ -1856,6 +1859,9 @@
             await new Promise(resolve => setTimeout(resolve, 50));
 
             try {
+                // *** V91 FIX: Refresh college name from local storage ***
+                currentCollegeName = localStorage.getItem(COLLEGE_NAME_KEY) || "University of Calicut";
+                
                 // 1. Get FILTERED RAW student data
                 const data = getFilteredReportData('day-wise');
 
@@ -2046,6 +2052,9 @@
             await new Promise(resolve => setTimeout(resolve, 50));
             
             try {
+                // *** V91 FIX: Refresh college name from local storage ***
+                currentCollegeName = localStorage.getItem(COLLEGE_NAME_KEY) || "University of Calicut";
+                
                 // V68: Get Filtered data
                 const filteredData = getFilteredReportData('q-paper');
                 
@@ -2155,6 +2164,9 @@
             await new Promise(resolve => setTimeout(resolve, 50));
             
             try {
+                // *** V91 FIX: Refresh college name from local storage ***
+                currentCollegeName = localStorage.getItem(COLLEGE_NAME_KEY) || "University of Calicut";
+                
                 // 1. Get all students for this session
                 const [date, time] = sessionKey.split(' | ');
                 const sessionStudents = allStudentData.filter(s => s.Date === date && s.Time === time);

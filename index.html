@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Updated Title -->
-    <title>UOC Exam Management V9.5</title>
+    <title>UOC Exam Management V9.9</title>
     
     <!-- Load Tailwind CSS for styling -->
     <script src="https://cdn-tailwindcss.vercel.app/"></script>
@@ -133,6 +133,9 @@
                 position: static; /* Use static positioning for print flow */
                 width: 100%;
                 overflow-y: visible;
+                /* V101 FIX: Reset margin and padding to prevent interference with page breaks */
+                margin: 0 !important;
+                padding: 0 !important;
             }
 
             /* Make sure each page is visible and breaks correctly */
@@ -148,7 +151,8 @@
                 box-sizing: border-box;
                 box-shadow: none;
                 border: none;
-                margin: 0;
+                /* V101 FIX: Add !important to guarantee margin reset */
+                margin: 0 !important;
             }
 
             /* V93 FIX: Final page should not have a page break */
@@ -912,7 +916,7 @@
 
 
     <!-- *** Report Output Area *** -->
-    <div id="report-output-area" class="mt-6 w-full" style="display: none;">
+    <div id="report-output-area" class- ="mt-6 w-full" style="display: none;">
         <!-- Report pages will be injected here -->
     </div>
     

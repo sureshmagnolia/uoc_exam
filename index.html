@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Updated Title -->
-    <title>UOC Exam Management V68</title>
+    <title>UOC Exam Management V70</title>
     
     <!-- Load Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -1358,9 +1358,9 @@
         // --- V64 FIX: Aggressive Key Cleaning Function ---
         function cleanCourseKey(courseName) {
             if (typeof courseName !== 'string') return '';
-            // 1. Replace all whitespace (including \n, \t, \u00a0) with a single space
-            // 2. Trim leading/trailing spaces
-            return courseName.replace(/\s+/g, ' ').trim();
+            // V69 FIX: Replace ALL whitespace and other non-alphanumeric chars (except -) with a single space, then trim.
+            let cleaned = courseName.replace(/[^\w\s-]/g, '').toUpperCase();
+            return cleaned.replace(/\s+/g, ' ').trim();
         }
         
         
@@ -1384,22 +1384,25 @@
             `;
         }
         
-        // --- (V48) Updated Room Config Loading (handles College Name) ---
+        // --- (V69) FIX: Robust Room Config Loading (handles NULL) ---
         function getRoomCapacitiesFromStorage() {
             // V48: Load College Name
             currentCollegeName = localStorage.getItem(COLLEGE_NAME_KEY) || "University of Calicut";
-            collegeNameInput.value = currentCollegeName; // Update UI
+            if (collegeNameInput) collegeNameInput.value = currentCollegeName; // Update UI (check for null since it might not be visible)
             
             // Load Room Config
-            let savedConfigJson = localStorage.getItem(ROOM_CONFIG_KEY) || "{}"; 
-            let roomConfig;
-            try {
-                config = JSON.parse(savedConfigJson);
-            } catch (e) {
-                console.error("Error parsing room config from localStorage:", e);
-                roomConfig = {};
+            let savedConfigJson = localStorage.getItem(ROOM_CONFIG_KEY);
+            let roomConfig = {}; // V69: Initialize to empty object to prevent crash
+            
+            if (savedConfigJson) {
+                try {
+                    roomConfig = JSON.parse(savedConfigJson);
+                } catch (e) {
+                    console.error("Error parsing room config from localStorage:", e);
+                    // roomConfig already {}
+                }
             }
-
+            
             // (V28) Store this in the global var for report generation
             currentRoomConfig = roomConfig; 
             
@@ -1495,9 +1498,8 @@
                 return data;
             } else if (filterSessionRadio.checked) {
                 const sessionKey = reportsSessionSelect.value;
-                if (!sessionKey) {
-                    alert("Please select a session to generate the report.");
-                    return [];
+                if (!sessionKey || sessionKey === 'all') { // Fallback if somehow 'all' is selected here
+                    return data; 
                 }
                 const [date, time] = sessionKey.split(' | ');
                 
@@ -1619,8 +1621,11 @@
                         studentList.forEach((student) => { 
                             const studentNumber = student.originalIndex + 1; 
                             const tableCourseName = student.Course; // V38: Show full course name
-                            let displayCourseName = (tableCourseName === previousCourseName) ? '"' : tableCourseName;
-                            if (tableCourseName !== previousCourseName) previousCourseName = tableCourseName;
+                            // V70: Truncate Course Name to 4 words for column 1
+                            const truncatedCourseName = tableCourseName.split(/\s+/).slice(0, 4).join(' ') + (tableCourseName.split(/\s+/).length > 4 ? '...' : '');
+                            
+                            let displayCourseName = (truncatedCourseName === previousCourseName) ? '"' : truncatedCourseName;
+                            if (truncatedCourseName !== previousCourseName) previousCourseName = truncatedCourseName;
 
                             rowsHtml += `
                                 <tr>
@@ -1891,34 +1896,37 @@
                 // 3. Group students by Course
                 const courses = {};
                 for (const student of sessionStudents) {
-                    const course = cleanCourseKey(student.Course); // V64 FIX: Ensure course key is aggressively cleaned
-                    if (!courses[course]) {
-                        courses[course] = {
+                    const courseDisplay = student.Course;
+                    const courseKey = cleanCourseKey(courseDisplay); // V64 FIX: Ensure course key is aggressively cleaned
+                    
+                    if (!courses[courseKey]) {
+                        courses[courseKey] = {
+                            name: courseDisplay,
                             present: [],
                             absent: []
                         };
                     }
                     
                     if (absenteeRegNos.has(student['Register Number'])) {
-                        courses[course].absent.push(student['Register Number']);
+                        courses[courseKey].absent.push(student['Register Number']);
                     } else {
-                        courses[course].present.push(student['Register Number']);
+                        courses[courseKey].present.push(student['Register Number']);
                     }
                 }
                 
                 // 4. Build Report Pages
                 let allPagesHtml = '';
                 let totalPages = 0;
-                const sortedCourses = Object.keys(courses).sort();
+                const sortedCourseKeys = Object.keys(courses).sort();
                 
                 // V58: Load QP codes
                 loadQPCodes(); // Ensure qpCodeMap is up-to-date
                 
-                for (const courseName of sortedCourses) {
+                for (const courseKey of sortedCourseKeys) {
                     totalPages++;
-                    const courseData = courses[courseName];
-                    // V64 FIX: Ensure lookup key is also aggressively cleaned
-                    const qpCode = qpCodeMap[cleanCourseKey(courseName)] || "____"; 
+                    const courseData = courses[courseKey];
+                    // V64 FIX: Use the clean key for lookup
+                    const qpCode = qpCodeMap[courseKey] || "____"; 
                     
                     // V57: Add page break logic. Each course is a new page.
                     allPagesHtml += `
@@ -1932,7 +1940,7 @@
                                 <thead>
                                     <tr>
                                         <!-- V58: Added QP Code -->
-                                        <th colspan="2">Course: ${courseName} &nbsp;&nbsp; [ QP Code: ${qpCode} ]</th>
+                                        <th colspan="2">Course: ${courseData.name} &nbsp;&nbsp; [ QP Code: ${qpCode} ]</th>
                                     </tr>
                                     <tr>
                                         <th>Status</th>
@@ -1967,7 +1975,7 @@
                 // 5. Show report and controls
                 reportOutputArea.innerHTML = allPagesHtml;
                 reportOutputArea.style.display = 'block'; 
-                reportStatus.textContent = `Generated ${totalPages} page(s) for ${sortedCourses.length} courses.`;
+                reportStatus.textContent = `Generated ${totalPages} page(s) for ${sortedCourseKeys.length} courses.`;
                 reportControls.classList.remove('hidden');
                 roomCsvDownloadContainer.innerHTML = ""; // This report has no CSV
 
@@ -2776,6 +2784,29 @@
                 }
             }
         });
+
+        // --- V68: Master Reset Button Logic ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const masterResetButton = document.createElement('button');
+            masterResetButton.id = 'master-reset-button';
+            masterResetButton.className = 'w-full inline-flex justify-center items-center rounded-md border border-red-700 bg-red-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-red-700 mt-6';
+            masterResetButton.textContent = 'Master Reset: Clear ALL Local Data';
+            
+            document.querySelector('#view-settings > .bg-white').appendChild(masterResetButton);
+            
+            masterResetButton.addEventListener('click', () => {
+                const step1 = confirm('WARNING: This will clear ALL saved data (Rooms, College Name, Absentees, QP Codes, and Base Data) from your browser. Continue?');
+                if (!step1) return;
+                
+                const step2 = confirm('ARE YOU ABSOLUTELY SURE? This action cannot be undone.');
+                if (step2) {
+                    localStorage.clear();
+                    alert('All local data cleared. The application will now reload.');
+                    window.location.reload();
+                }
+            });
+        });
+
 
         // --- (V65) Initial Data Load on Startup ---
         function loadInitialData() {

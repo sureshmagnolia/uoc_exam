@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nominal Roll Extractor (V7)</title>
+    <!-- Updated Title -->
+    <title>UOC Exam Management V88</title>
     
     <!-- Load Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -12,7 +13,7 @@
     <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
     <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
 
-    <!-- Custom Styles for Printing and Spinner -->
+    <!-- Custom Styles for Printing, Spinner, and Navigation -->
     <style>
         /* Loading Spinner Animation */
         .loader-spin {
@@ -28,10 +29,85 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* --- PRINT STYLES (FIXED) --- */
+        /* --- V87: New Navigation Styles --- */
+        .nav-button {
+            /* Base styles for all nav buttons */
+            @apply py-2.5 px-5 rounded-t-lg text-sm font-semibold transition-all duration-200 text-white shadow;
+        }
+        .nav-button-active {
+            /* Active state: Taller, lighter bg, dark text */
+            @apply shadow-lg scale-105 transform -translate-y-1;
+        }
+        .nav-button-inactive {
+            /* Inactive state: Darker bg, white text, slight fade */
+            @apply opacity-90 hover:opacity-100 transform;
+        }
+
+        /* V83: Main Nav Bar Adjustment */
+        #top-banner {
+            background-color: #4f46e5; /* Indigo-600 */
+        }
+        #main-nav-tabs {
+            /* V86: New background and padding for spacing */
+            background-color: #1f2937; /* gray-800 */
+            width: 100%;
+            padding-top: 4px; /* Space for rounded tabs to lift */
+        }
+
+        /* V87: Unique Button Colors */
+        #nav-extractor {
+            background-color: #2563eb; /* blue-600 */
+        }
+        #nav-extractor.nav-button-active {
+            background-color: #dbeafe; /* blue-100 */
+            color: #1d4ed8; /* blue-700 */
+        }
+
+        #nav-settings {
+            background-color: #16a34a; /* green-600 */
+        }
+        #nav-settings.nav-button-active {
+            background-color: #dcfce7; /* green-100 */
+            color: #15803d; /* green-700 */
+        }
+
+        #nav-room-settings {
+            background-color: #9333ea; /* purple-600 */
+        }
+        #nav-room-settings.nav-button-active {
+            background-color: #f3e8ff; /* purple-100 */
+            color: #7e22ce; /* purple-700 */
+        }
+
+        #nav-qpcodes {
+            background-color: #ca8a04; /* yellow-600 */
+        }
+        #nav-qpcodes.nav-button-active {
+            background-color: #fef9c3; /* yellow-100 */
+            color: #a16207; /* yellow-700 */
+        }
+
+        #nav-reports {
+            background-color: #dc2626; /* red-600 */
+        }
+        #nav-reports.nav-button-active {
+            background-color: #fee2e2; /* red-100 */
+            color: #b91c1c; /* red-700 */
+        }
+
+        #nav-absentees {
+            background-color: #db2777; /* pink-600 */
+        }
+        #nav-absentees.nav-button-active {
+            background-color: #fce7f3; /* pink-100 */
+            color: #be185d; /* pink-700 */
+        }
+
+
+        /* --- PRINT STYLES --- */
         @media print {
             /* Hide the main app container and all other non-report elements */
-            #main-app-container, body > py-config, body > py-script, #report-controls {
+            #main-nav, #view-extractor, #view-settings, #view-reports, #view-absentees, #view-qpcodes, #view-room-settings, body > py-config, body > py-script, #report-controls {
                 display: none !important; /* Be forceful */
             }
             
@@ -65,6 +141,7 @@
             }
             h1 { font-size: 16pt; font-weight: bold; margin-bottom: 0.5rem; }
             h2 { font-size: 14pt; font-weight: bold; margin-bottom: 1rem; }
+            h3 { font-size: 12pt; font-weight: bold; margin-bottom: 1rem; }
 
             .course-summary {
                 font-size: 11pt;
@@ -73,7 +150,17 @@
                 border: 1px solid #ccc;
             }
             
-            /* NEW: Footer for Invigilator */
+            /* (V28) Style for new location header */
+            .report-location-header {
+                font-size: 12pt;
+                font-weight: bold;
+                font-style: italic;
+                text-align: center;
+                margin-bottom: 0.5rem;
+                border-bottom: 1px solid #ccc;
+                padding-bottom: 0.5rem;
+            }
+            
             .invigilator-footer {
                 margin-top: 2rem;
                 padding-top: 1rem;
@@ -91,7 +178,6 @@
                 text-align: center;
             }
             
-            /* Page break helper (no longer needed, but kept for legacy) */
             .print-page-break {
                 page-break-after: always;
                 border: 0;
@@ -101,40 +187,116 @@
             table {
                 width: 100%;
                 border-collapse: collapse;
-                font-size: 9pt; /* Tighter font */
+                /* V71: Reduced font size */
+                font-size: 8.5pt; 
             }
             th, td {
                 border: 1px solid black;
-                /* --- CHANGED: Increased vertical padding for signature --- */
                 padding: 8px 3px; 
                 text-align: left;
-                word-wrap: break-word; /* Wrap long text */
+                word-wrap: break-word; 
             }
             th {
-                /* --- CHANGED: Apply same padding to header for alignment --- */
                 padding: 8px 3px;
                 background-color: #eee;
             }
             
-            /* Optimized column widths */
             .sl-col { width: 5%; }
-            .course-col { width: 30%; } /* Wider */
+            .course-col { width: 30%; } 
             .reg-col { width: 20%; }
             .name-col { width: 35%; }
-            .signature-col { width: 10%; } /* Narrower */
+            .signature-col { width: 10%; } 
+
+            /* --- Question Paper Report Table Styles --- */
+            .q-paper-table .sl-col { width: 10%; }
+            .q-paper-table .course-col { width: 70%; }
+            .q-paper-table .count-col { width: 20%; }
+            .q-paper-table tfoot td { font-weight: bold; }
+            
+            /* --- (V29) Day-wise Report Styles --- */
+            .print-page-daywise h1 { font-size: 14pt; }
+            .print-page-daywise h2 { font-size: 12pt; margin-bottom: 0.5rem; }
+            .print-page-daywise .column-container {
+                display: flex;
+                gap: 10px;
+            }
+            .print-page-daywise .column {
+                flex: 1;
+                min-width: 0; /* Prevents flex overflow */
+            }
+            .daywise-report-table {
+                width: 100%;
+                border-collapse: collapse;
+                /* V32: Font size decreased */
+                font-size: 6pt; 
+            }
+            .daywise-report-table th,
+            .daywise-report-table td {
+                border: 1px solid #999; /* Darker border for print */
+                padding: 2px;
+                text-align: left;
+                word-wrap: break-word;
+            }
+            .daywise-report-table th {
+                background: #eee;
+            }
+            
+            /* --- (V56) Absentee Report Styles --- */
+            .absentee-report-table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 10pt;
+                margin-top: 1rem;
+            }
+            .absentee-report-table th,
+            .absentee-report-table td {
+                border: 1px solid #000;
+                padding: 5px;
+                text-align: left;
+            }
+            .absentee-report-table th {
+                background-color: #eee;
+                font-weight: bold;
+            }
+            .absentee-report-table .regno-list {
+                /* V56: Use flex-wrap for register numbers */
+                display: flex;
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+            .absentee-report-table .regno-list span {
+                padding: 2px 4px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                background-color: #f9f9f9;
+            }
+            .absentee-footer {
+                margin-top: 4rem;
+                padding-top: 1rem;
+                font-size: 11pt;
+                font-weight: bold;
+                float: right;
+            }
+            .absentee-footer .signature {
+                margin-top: 4rem;
+                border-top: 1px solid black;
+                padding-top: 4px;
+            }
         }
         /* --- END PRINT STYLES --- */
 
         /* --- Report styles for the *viewer* (on-screen) --- */
         .print-page {
             background: white;
-            width: 210mm; /* A4 width */
-            min-height: 297mm; /* A4 height */
+            width: 210mm; 
+            min-height: 297mm; 
             padding: 2cm;
             margin: 1rem auto;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             color: black;
-            box-sizing: border-box; /* Include padding in width/height */
+            box-sizing: border-box; 
+            /* V71: Reduce base font size for better fitting */
+            font-size: 9pt; 
         }
         .print-page h1 {
             font-size: 16pt;
@@ -148,37 +310,155 @@
             text-align: center;
             margin-bottom: 1rem;
         }
+        .print-page h3 {
+            font-size: 12pt;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
         .print-page .course-summary {
             font-size: 11pt;
             margin-bottom: 1rem;
             padding: 0.5rem;
             border: 1px solid #ccc;
         }
+        
+        /* (V28) Style for new location header */
+        .report-location-header {
+            font-size: 12pt;
+            font-weight: bold;
+            font-style: italic;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 0.5rem;
+        }
+        
         .print-page table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 9pt; /* Tighter font */
+            font-size: 8.5pt; /* V71: Reduced font size for better fit */
         }
         .print-page th, .print-page td {
             border: 1px solid black;
-            /* --- CHANGED: Increased vertical padding for signature --- */
             padding: 8px 3px;
             text-align: left;
             word-wrap: break-word;
         }
         .print-page th {
-            /* --- CHANGED: Apply same padding to header for alignment --- */
             padding: 8px 3px;
             background-color: #eee;
         }
-        /* Optimized column widths */
+        
         .print-page .sl-col { width: 5%; }
-        .print-page .course-col { width: 30%; } /* Wider */
+        .print-page .course-col { width: 30%; } 
         .print-page .reg-col { width: 20%; }
         .print-page .name-col { width: 35%; }
-        .print-page .signature-col { width: 10%; } /* Narrower */
+        .print-page .signature-col { width: 10%; } 
         
-        /* NEW: Footer for Invigilator */
+        /* --- Question Paper Report Table Styles --- */
+        .print-page .q-paper-table .sl-col { width: 10%; }
+        .print-page .q-paper-table .course-col { width: 70%; }
+        .print-page .q-paper-table .count-col { width: 20%; }
+        .print-page .q-paper-table tfoot td { font-weight: bold; }
+        
+        /* --- (V29) Day-wise Report Styles --- */
+        .print-page-daywise h1 { font-size: 14pt; }
+        .print-page-daywise h2 { font-size: 12pt; margin-bottom: 0.5rem; }
+        .print-page-daywise .column-container {
+            display: flex;
+            gap: 10px;
+        }
+        .print-page-daywise .column {
+            flex: 1;
+            min-width: 0; /* Prevents flex overflow */
+        }
+        .daywise-report-table {
+            width: 100%;
+            border-collapse: collapse;
+            /* V32: Font size decreased */
+            font-size: 6pt; 
+            table-layout: fixed; /* Helps with column widths */
+        }
+        .daywise-report-table th,
+        .daywise-report-table td {
+            border: 1px solid #ccc; /* Lighter border for screen */
+            padding: 2px;
+            text-align: left;
+            word-wrap: break-word; /* Ensure long text wraps */
+        }
+        .daywise-report-table th {
+            background: #f0f0f0;
+        }
+        
+        /* --- (V56) Absentee Report Styles --- */
+        .absentee-report-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10pt;
+            margin-top: 1rem;
+        }
+        .absentee-report-table th,
+        .absentee-report-table td {
+            border: 1px solid #000;
+            padding: 5px;
+            text-align: left;
+            vertical-align: top;
+        }
+        .absentee-report-table th {
+            background-color: #eee;
+            font-weight: bold;
+        }
+        .absentee-report-table .regno-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            line-height: 1.6;
+        }
+        .absentee-report-table .regno-list span {
+            padding: 1px 4px;
+            border-radius: 4px;
+            background-color: #f4f4f4;
+        }
+        .absentee-footer {
+            margin-top: 4rem;
+            padding-top: 1rem;
+            font-size: 11pt;
+            font-weight: bold;
+            float: right;
+        }
+        .absentee-footer .signature {
+            margin-top: 4rem;
+            border-top: 1px solid black;
+            padding-top: 4px;
+        }
+
+        /* --- (V56) Autocomplete Styles --- */
+        .autocomplete-container {
+            position: relative;
+        }
+        .autocomplete-results {
+            position: absolute;
+            border: 1px solid #d1d5db;
+            background-color: #ffffff;
+            max-height: 200px;
+            overflow-y: auto;
+            width: 100%;
+            z-index: 10;
+            border-radius: 0 0 0.375rem 0.375rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .autocomplete-item {
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+        }
+        .autocomplete-item:hover, .autocomplete-item-active {
+            background-color: #f3f4f6;
+        }
+        .autocomplete-item strong {
+            color: #4f46e5;
+        }
+
         .invigilator-footer {
             margin-top: 2rem;
             padding-top: 1rem;
@@ -196,7 +476,6 @@
             text-align: center;
         }
 
-        /* NEW: Page break helper (only visible in print) */
         .print-page-break {
             display: none;
         }
@@ -206,31 +485,43 @@
 </head>
 <body class="bg-gray-100 font-sans">
     
-    <!-- Define Python Environment -->
-    <py-config>
-        packages = ["pandas", "pdfplumber==0.7.1"]
-    </py-config>
+    <!-- *** Main Navigation Bar (V87: UPDATED STRUCTURE) *** -->
+    <nav id="main-nav" class="bg-indigo-600 text-white sticky top-0 z-50 shadow-lg">
+        <!-- V87: Top Banner (Spanning Width, Centered Title) -->
+        <div id="top-banner" class="w-full bg-indigo-700 text-center py-2">
+            <!-- V88: Title Update -->
+            <h1 class="text-xl font-extrabold tracking-wider text-white">UOC Exam Management (V88)</h1>
+        </div>
+        
+        <!-- V87: Navigation Tabs (Below Banner) -->
+        <div id="main-nav-tabs" class="container max-w-2xl mx-auto flex justify-center gap-2">
+            <button id="nav-extractor" class="nav-button nav-button-active">Main Extractor</button>
+            <button id="nav-settings" class="nav-button nav-button-inactive">Settings</button>
+            <button id="nav-room-settings" class="nav-button nav-button-inactive">Room Settings</button> 
+            <button id="nav-qpcodes" class="nav-button nav-button-inactive">QP Codes</button>
+            <button id="nav-reports" class="nav-button nav-button-inactive">Reports</button>
+            <button id="nav-absentees" class="nav-button nav-button-inactive">Absentees</button>
+        </div>
+    </nav>
 
-    <!-- Main App Container -->
-    <div id="main-app-container" class="container max-w-2xl mx-auto p-4 min-h-screen" style="display: block;">
+    <!-- *** "Extractor" View (V67: CSV Upload Shifted Here) *** -->
+    <div id="view-extractor" class="container max-w-2xl mx-auto p-4 min-h-screen">
         <div class="bg-white p-8 rounded-lg shadow-xl w-full">
             
-            <header class="mb-6">
-                <h1 class="text-3xl font-bold text-gray-800">Nominal Roll Extractor (V7)</h1>
-                <p class="text-gray-600 mt-2">
-                    Upload multiple Nominal Roll PDFs at once to extract all student data, assign rooms, and print unified reports.
-                </p>
-            </header>
+            <!-- New Title as requested -->
+            <h1 class="text-3xl font-bold text-gray-800 mb-6">Data Extractor</h1>
 
             <!-- How to Use Instructions -->
             <div class="bg-indigo-50 border border-indigo-200 p-4 rounded-md mb-6">
                 <h4 class="font-semibold text-gray-800">How to Use:</h4>
                 <ol class="list-decimal list-inside text-sm text-gray-700 mt-2 space-y-1">
+                    <li>Go to **Settings** to set your College Name.</li>
+                    <li>Go to **Room Settings** and define capacities and locations. Save changes.</li>
                     <li>Click 'Select PDF Files' and choose 1 or 100+ PDF files.</li>
-                    <li>Click 'Run Batch Extraction'.</li>
-                    <li>Wait for the log to process all files (e.g., "Processing file 1/100...").</li>
-                    <li>Click 'Download Combined_Nominal_Roll.csv' for all data.</li>
-                    <li>Click 'Generate Room-wise Report' to create seating lists below.</li>
+                    <li>Click 'Run Batch Extraction'. Check the **Status Log** for errors.</li>
+                    <li>(Optional) Go to **QP Codes** to assign codes to each course.</li>
+                    <li>Go to **Reports** to generate seating lists, day-wise lists, and question paper counts.</li>
+                    <li>Go to **Absentees** to mark absentees and generate the final statement.</li>
                 </ol>
             </div>
             <!-- END HOW TO USE SECTION -->
@@ -239,18 +530,17 @@
             <div class="space-y-4">
                 <div>
                     <label for="pdf-file" class="block text-sm font-medium text-gray-700">1. Select PDF Files:</label>
-                    <!-- *** FIX HERE: Entire tag is on one line to prevent parsing errors *** -->
                     <input type="file" id="pdf-file" accept=".pdf" multiple class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"/>
                 </div>
                 
                 <button id="run-button" 
-                        py-click="run_extraction" 
+                        py-click="start_extraction" 
                         class="w-full inline-flex justify-center items-center rounded-md border border-transparent bg-indigo-600 py-3 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50">
-                    <!-- Loading spinner (hidden by default) -->
                     <span id="spinner" class="loader-spin -ml-1 mr-3 h-5 w-5 text-white hidden"></span>
                     <span id="button-text">2. Run Batch Extraction</span>
                 </button>
             </div>
+            
 
             <!-- Output & Download Area -->
             <div class="mt-6">
@@ -260,74 +550,364 @@
                 </div>
             </div>
 
-            <!-- Hidden data store for JSON -->
-            <div id="json-data-store" class="hidden"></div>
-            
+            <!-- (V18): Status Log -->
+            <div class="mt-6">
+                <h3 class="text-lg font-medium text-gray-900">Status Log:</h3>
+                <div id="status-log" class="w-full h-48 p-3 mt-2 bg-gray-100 border border-gray-300 text-gray-800 text-sm font-mono rounded-md overflow-y-auto">
+                    Waiting for extraction to complete...
+                </div>
+            </div>
+
+            <!-- Download area -->
             <div id="download-area" class="mt-6 space-y-3">
-                <!-- 1. Container for the CSV link (so it can be cleared) -->
                 <div id="csv-download-container"></div>
-                
-                <!-- 2. The print button is now separate and won't be cleared -->
-                <button id="generate-report-button" class="hidden w-full inline-flex justify-center items-center rounded-md border border-transparent bg-blue-600 py-3 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50">
-                    Generate Room-wise Report
-                </button>
             </div>
             
-            <!-- 3. NEW: Report controls (Print/Clear) will appear here -->
-            <div id="report-controls" class="mt-6 p-4 bg-gray-100 rounded-lg hidden">
-                <span id="report-status" class="text-sm font-medium text-gray-700"></span>
-                <div class="flex gap-2 mt-2">
-                    <button id="final-print-button" class="inline-flex justify-center items-center rounded-md border border-transparent bg-green-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-green-700">
-                        Print Report
-                    </button>
-                    <button id="clear-report-button" class="inline-flex justify-center items-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">
-                        Clear Report
+            <!-- V67: CSV Upload Section (Shifted to bottom) -->
+            <div class="bg-gray-50 border border-gray-200 p-4 rounded-md mt-6">
+                <h4 class="font-semibold text-gray-800">3. Load Corrected Data (Optional)</h4>
+                <p class="text-sm text-gray-600 mt-1 mb-3">
+                    Upload a corrected `Combined_Nominal_Roll.csv` file to overwrite the extracted data.
+                    This is your base data source for all reports.
+                </p>
+                <div class="flex items-center gap-2">
+                    <input type="file" id="corrected-csv-upload" accept=".csv" class="block w-full text-sm text-gray-500
+                                  file:mr-4 file:py-2 file:px-4
+                                  file:rounded-md file:border-0
+                                  file:text-sm file:font-semibold
+                                  file:bg-green-50 file:text-green-700
+                                  hover:file:bg-green-100"/>
+                    <button id="load-csv-button" class="inline-flex justify-center items-center rounded-md border border-transparent bg-gray-600 py-2 px-3 text-sm font-medium text-white shadow-sm hover:bg-gray-700">
+                        Load CSV
                     </button>
                 </div>
+                <span id="csv-load-status" class="text-sm font-medium text-green-600 mt-2 block h-5"></span>
+            </div>
+            <!-- END V67 Shifted Section -->
+
+        </div>
+    </div>
+    
+    <!-- *** "Settings" View (V87: Renamed to General Settings) *** -->
+    <div id="view-settings" class="container max-w-2xl mx-auto p-4 min-h-screen hidden">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-full">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6">General Settings</h1>
+            
+            <!-- V48: College Name Input -->
+            <div class="mb-6">
+                <label for="college-name-input" class="block text-sm font-medium text-gray-700 mb-1">College Name (for Reports)</label>
+                <input type="text" id="college-name-input" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm" placeholder="e.g., University of Calicut">
+                <button id="save-college-name-button" class="mt-2 inline-flex justify-center items-center rounded-md border border-transparent bg-indigo-600 py-2 px-3 text-sm font-medium text-white shadow-sm hover:bg-indigo-700">
+                    Save College Name
+                </button>
+                <span id="college-name-status" class="text-sm text-green-600 font-medium ml-3 h-5"></span>
+
+            </div>
+            
+            <hr class="my-6">
+
+            <!-- V68: Master Reset Button -->
+            <h2 class="text-xl font-bold text-red-600 mb-2">Master Reset</h2>
+            <p class="text-sm text-gray-600 mb-3">This will permanently delete ALL saved data (Rooms, College Name, Absentees, QP Codes, and Base Data) from your browser.</p>
+             <button id="master-reset-button" class="w-full inline-flex justify-center items-center rounded-md border border-red-700 bg-red-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-red-700">
+                Master Reset: Clear ALL Local Data
+            </button>
+        </div>
+    </div>
+    
+    <!-- *** "Room Settings" View (V87: NEW TAB) *** -->
+    <div id="view-room-settings" class="container max-w-2xl mx-auto p-4 min-h-screen hidden">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-full">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6">Room Capacity & Location</h1>
+            
+            <p class="text-gray-600 mb-4">
+                Define the number of students per room. This list is automatically saved to your browser.
+                If a capacity is left blank, it will default to 30 when saved.
+            </p>
+            
+            <!-- Dynamic Form Container -->
+            <div class="space-y-4">
+                <!-- Header for the form -->
+                <div class="flex items-center gap-3 px-2">
+                    <label class="font-semibold text-gray-700 w-24 shrink-0">Room Name</label>
+                    <label class="font-semibold text-gray-700 w-20">Capacity</label>
+                    <label class="font-semibold text-gray-700 flex-grow">Location (e.g., Commerce Block)</label>
+                </div>
+                
+                <!-- Container where room rows will be injected -->
+                <div id="room-config-container" class="space-y-2 max-h-96 overflow-y-auto pr-2">
+                    <!-- Rows will be added by JavaScript -->
+                </div>
+                
+                <!-- Add New Room Button -->
+                <button id="add-room-button" class="w-full inline-flex justify-center items-center rounded-md border border-dashed border-gray-400 bg-gray-50 py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-100">
+                    + Add New Room
+                </button>
+                
+                <hr class="my-4">
+                
+                <!-- Save Button -->
+                <button id="save-room-config-button" class="w-full inline-flex justify-center items-center rounded-md border border-transparent bg-indigo-600 py-3 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700">
+                    Save Room Settings
+                </button>
+                <div id="room-config-status" class="text-sm text-green-600 font-medium text-center h-5"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- *** (V61) "QP Codes" View - Now Session Aware *** -->
+    <div id="view-qpcodes" class="container max-w-2xl mx-auto p-4 min-h-screen hidden">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-full">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6">QP Code Settings</h1>
+            
+            <div id="qpcode-content-wrapper" class="hidden">
+                <!-- V61: Session Selector for QP Codes -->
+                <div class="mb-4">
+                    <label for="session-select-qp" class="block text-sm font-medium text-gray-700 mb-1">Select Exam Session:</label>
+                    <select id="session-select-qp" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm">
+                        <option value="">-- Select a Session --</option>
+                    </select>
+                </div>
+
+                <div id="qp-entry-section" class="hidden">
+                    <p class="text-gray-600 mb-4">
+                        Assign a Question Paper (QP) Code to each course. This code will be used in the Absentee Statement.
+                        **Click 'Save QP Codes' below to commit changes to local memory.**
+                    </p>
+                
+                    <!-- Dynamic Form Container -->
+                    <div class="space-y-4">
+                        <!-- Header for the form -->
+                        <div class="flex items-center gap-3 px-2">
+                            <label class="font-semibold text-gray-700 w-2/3">Course Name</label>
+                            <label class="font-semibold text-gray-700 w-1/3">QP Code</label>
+                        </div>
+                        
+                        <!-- Container where course rows will be injected -->
+                        <div id="qp-code-container" class="space-y-2 max-h-96 overflow-y-auto pr-2">
+                            <!-- Rows will be added by JavaScript -->
+                        </div>
+                    </div>
+                    <!-- V62: Status message for unsaved changes -->
+                    <div id="qp-code-status" class="text-sm text-green-600 font-medium text-center h-5 mt-4"></div>
+                    
+                    <!-- V62: NEW SAVE BUTTON -->
+                    <button id="save-qp-codes-button" class="w-full inline-flex justify-center items-center rounded-md border border-transparent bg-indigo-600 py-3 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 mt-4">
+                        Save QP Codes
+                    </button>
+                </div>
+
+            </div>
+            
+            <div id="qpcode-loader" class="text-center text-gray-600">
+                <p>Please run a data extraction or load a corrected CSV to enable this feature.</p>
             </div>
             
         </div>
     </div>
+    
+    <!-- *** "Reports" View (V68: Filter Added) *** -->
+    <div id="view-reports" class="container max-w-2xl mx-auto p-4 min-h-screen hidden">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-full">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6">Reports</h1>
+            
+            <p class="text-gray-600 mb-4">
+                Generate reports based on the last loaded data. (Buttons are enabled after extraction or CSV load.)
+            </p>
 
-    <!-- 
-      *** STRUCTURAL FIX ***
-      The Report Output Area is now OUTSIDE the main app container.
-      This allows print styles to hide the app and show the report.
-    -->
-    <div id="report-output-area" class="mt-6 w-full" style="display: none;">
-        <!-- Report pages will be injected here -->
+            <!-- V68: Report Filtering Options -->
+            <div id="report-filter-section" class="bg-gray-100 p-4 rounded-lg mb-6 hidden">
+                <h4 class="font-semibold text-gray-700 mb-2">Filter Reports By:</h4>
+                <div class="flex flex-col sm:flex-row gap-4 mb-3">
+                    <!-- Radio Button Toggle -->
+                    <div class="flex items-center">
+                        <input type="radio" id="filter-all" name="report-filter" value="all" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
+                        <label for="filter-all" class="ml-2 text-sm text-gray-700 font-medium">All Sessions (Bulk Print)</label>
+                    </div>
+                    <div class="flex items-center">
+                        <!-- V81: Specific Session is now default -->
+                        <input type="radio" id="filter-session" name="report-filter" value="session" checked class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
+                        <label for="filter-session" class="ml-2 text-sm text-gray-700 font-medium">Specific Session</label>
+                    </div>
+                </div>
+                
+                <!-- Session Dropdown (Initially Hidden) -->
+                <div id="reports-session-dropdown-container" class="">
+                    <select id="reports-session-select" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm">
+                        <option value="">-- Select a Session --</option>
+                    </select>
+                </div>
+            </div>
+            <!-- END V68 Filter Section -->
+
+
+            <div class="space-y-4">
+                <button id="generate-report-button" class="w-full inline-flex justify-center items-center rounded-md border border-transparent bg-blue-600 py-3 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50" disabled>
+                    Generate Room-wise Seating Report
+                </button>
+                
+                <!-- (V49) Renamed Button -->
+                <button id="generate-daywise-report-button" class="w-full inline-flex justify-center items-center rounded-md border border-transparent bg-blue-600 py-3 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 disabled:opacity-50" disabled>
+                    Generate Seating Details for Candidates (Compact)
+                </button>
+
+                <button id="generate-qpaper-report-button" class="w-full inline-flex justify-center items-center rounded-md border border-transparent bg-blue-600 py-3 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 disabled:opacity-50" disabled>
+                    Generate Question Paper Report
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- *** (V56) "Absentees" View *** -->
+    <div id="view-absentees" class="container max-w-2xl mx-auto p-4 min-h-screen hidden">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-full">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6">Mark Absentees</h1>
+            
+            <div id="absentee-content-wrapper" class="hidden">
+                <!-- Session Selector -->
+                <div class="mb-4">
+                    <label for="session-select" class="block text-sm font-medium text-gray-700 mb-1">Select Exam Session:</label>
+                    <select id="session-select" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm">
+                        <option value="">-- Select a Session --</option>
+                    </select>
+                </div>
+
+                <!-- Autocomplete Search -->
+                <div id="absentee-search-section" class="mb-6 hidden">
+                    <label for="absentee-search" class="block text-sm font-medium text-gray-700 mb-1">Search Register Number:</label>
+                    <div class="autocomplete-container">
+                        <input type="text" id="absentee-search" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm" placeholder="Type 3 chars...">
+                        <div id="autocomplete-results" class="autocomplete-results hidden"></div>
+                    </div>
+                    
+                    <!-- Selected Student Details -->
+                    <div id="selected-student-details" class="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-md hidden">
+                        <div class="font-medium text-gray-800" id="selected-student-name"></div>
+                        <div class="text-sm text-gray-600" id="selected-student-course"></div>
+                        <div class="text-sm text-gray-600" id="selected-student-room"></div>
+                        <button id="add-absentee-button" class="mt-2 w-full inline-flex justify-center items-center rounded-md border border-transparent bg-red-600 py-2 px-3 text-sm font-medium text-white shadow-sm hover:bg-red-700">
+                            Add to Absentee List
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Current Absentee List -->
+                <div id="absentee-list-section" class="hidden">
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Current Absentee List for this Session:</h3>
+                    <div id="current-absentee-list" class="min-h-[50px] bg-gray-50 border border-gray-200 rounded-md p-3 space-y-2">
+                        <!-- Absentees will be added here -->
+                    </div>
+                </div>
+                
+                <!-- Generate Report Button -->
+                <button id="generate-absentee-report-button" class="mt-6 w-full inline-flex justify-center items-center rounded-md border border-transparent bg-blue-600 py-3 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 disabled:opacity-50" disabled>
+                    Generate Absentee Statement
+                </button>
+            </div>
+            
+            <div id="absentee-loader" class="text-center text-gray-600">
+                <p>Please run a data extraction or load a corrected CSV on the "Reports" tab to enable this feature.</p>
+            </div>
+
+        </div>
     </div>
 
 
-    <!-- The Python Script (Batch Processing Version) -->
+    <!-- *** Report Controls *** -->
+    <div id="report-controls" class="container max-w-2xl mx-auto p-4 bg-gray-100 rounded-lg hidden">
+        <span id="report-status" class="text-sm font-medium text-gray-700"></span>
+        <div class="flex flex-wrap gap-2 mt-2">
+            <button id="final-print-button" class="flex-1 inline-flex justify-center items-center rounded-md border border-transparent bg-green-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-green-700">
+                Print Report
+            </button>
+            <button id="clear-report-button" class="flex-1 inline-flex justify-center items-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">
+                Clear Report
+            </button>
+            <div id="room-csv-download-container" class="w-full mt-2"></div>
+        </div>
+    </div>
+
+
+    <!-- *** Report Output Area *** -->
+    <div id="report-output-area" class="mt-6 w-full" style="display: none;">
+        <!-- Report pages will be injected here -->
+    </div>
+    
+    <!-- Hidden data stores for JSON -->
+    <div id="json-data-store" class="hidden"></div>
+    <div id="q-paper-data-store" class="hidden"></div>
+
+
+    <!-- Define Python Environment -->
+    <py-config>
+        <!-- V42: Downgraded to a pure-python version to fix pypdfium2 error -->
+        packages = ["pandas", "pdfplumber==0.9.0"]
+    </py-config>
+    
+    <!-- *** Python Script (V87 - COURSE CODE AS KEY) *** -->
     <py-script>
         import pandas as pd
         import pdfplumber
         import re
         import io
-        from js import document, console, URL, Blob, window
+        import js # V55: FIX - Import the main js module
+        from js import document, console, URL, Blob, window, localStorage # V55: FIX - Import specific parts
         import asyncio
         import json 
         import math 
         from datetime import datetime 
         
-        # Get references to our HTML elements
+        # --- Get references to our HTML elements ---
         status_div = document.getElementById("status")
+        status_log_div = document.getElementById("status-log")
+        
         csv_download_container = document.getElementById("csv-download-container")
         generate_report_button = document.getElementById("generate-report-button")
         json_data_store = document.getElementById("json-data-store")
         report_controls = document.getElementById("report-controls")
         report_output_area = document.getElementById("report-output-area")
         
+        q_paper_data_store = document.getElementById("q-paper-data-store")
+        generate_qpaper_report_button = document.getElementById("generate-qpaper-report-button")
+        
+        generate_daywise_report_button = document.getElementById("generate-daywise-report-button")
+        
         run_button = document.getElementById("run-button")
         spinner = document.getElementById("spinner")
         button_text = document.getElementById("button-text")
+        
+        # V56: Absentee view elements
+        absentee_loader = document.getElementById("absentee-loader")
+        absentee_content_wrapper = document.getElementById("absentee-content-wrapper")
+        # V58: QP Code view elements
+        qpcode_loader = document.getElementById("qpcode-loader")
+        qpcode_content_wrapper = document.getElementById("qpcode-content-wrapper")
+        
+        ROOM_CONFIG_KEY = 'examRoomConfig'
+        COLLEGE_NAME_KEY = 'examCollegeName' # V48: New key
+        BASE_DATA_KEY = 'examBaseData'; # V65: New key for persistent base data
 
         def log_message(message):
-            """Helper function to print messages to the HTML log."""
-            console.log(message)
+            """Helper function to print messages to the HTML (Processing) log."""
+            console.log(f"Process Log: {message}")
             status_div.innerHTML += f'<p class="mb-1">&gt; {message}</p>'
             status_div.scrollTop = status_div.scrollHeight
+
+        def log_status(message, is_error=False, file_name=None, page=None):
+            """Helper function to print messages to the HTML Status log."""
+            console.log(f"Status Log: {message}")
+            color = "text-red-600" if is_error else "text-green-700"
+            
+            prefix = ""
+            if file_name:
+                prefix += f"<strong>{file_name}</strong>"
+            if page:
+                prefix += f" (Page: {page})"
+            if prefix:
+                prefix += ": "
+
+            status_log_div.innerHTML += f'<p class="mb-1 {color}">&gt; {prefix}{message}</p>'
+            status_log_div.scrollTop = status_log_div.scrollHeight
 
         def show_loader(is_loading):
             """Shows or hides the loader and updates button text."""
@@ -343,25 +923,238 @@
         def get_sort_key(row):
             """Converts DD.MM.YYYY and HH:MM PM to a sortable format."""
             try:
+                # V38: Standardized on DD.MM.YYYY
                 date_obj = datetime.strptime(row['Date'], '%d.%m.%Y')
-                time_obj = datetime.strptime(row['Time'], '%I:%M %p')
+                # V44: Handle inconsistent time formatting
+                time_str = row['Time'].replace(" ", "")
+                if len(time_str) == 7: # "9:30 AM" -> "09:30 AM"
+                    time_str = "0" + time_str
+                
+                time_obj = datetime.strptime(time_str, '%I:%M%p')
                 return (date_obj, time_obj)
             except ValueError as e:
                 console.log(f"Sort Error: Could not parse Date '{row['Date']}' or Time '{row['Time']}'. Error: {e}")
-                return (datetime.min, datetime.min) 
+                return (datetime.min, datetime.min)
+        
+        # --- V87: COURSE NAME & CODE NORMALIZER ---
+        def normalize_course_name(course_name):
+            """Attempts to find a course code and standardize the name."""
+            course_name_clean = course_name.strip().replace('\n', ' ')
+            
+            # 1. Find the Code.
+            # Covers (ECO5B07), [BCM5B07], BOT3CJ201
+            # V87: More robust regex to find 3 letters, 1 num, 1 letter, 2 nums
+            code_match = re.search(r'([A-Z]{3}\d[A-Z]\d{2})', course_name_clean, re.IGNORECASE)
+            
+            course_code = "UNKNOWN"
+            if code_match:
+                course_code = code_match.group(1).upper()
+            
+            # 2. Clean the Name part.
+            clean_name = course_name_clean
+            
+            # Remove all codes and metadata
+            clean_name = re.sub(r'\[.*?\]', '', clean_name)     # Remove [BOTANY 2024 SYLLABUS]
+            clean_name = re.sub(r'\(.*?\)', '', clean_name)     # Remove (CORE) or (CCSS) or (ECO5B07)
+            clean_name = re.sub(r'--\s*$', '', clean_name)      # Remove trailing --
+            clean_name = re.sub(r'\s*/\s*\d{4}', '', clean_name) # Remove /2019
+            
+            # Remove the code itself if it's at the start
+            if clean_name.upper().startswith(course_code):
+                clean_name = clean_name[len(course_code):]
+            
+            # Final cleanup
+            clean_name = clean_name.replace('--', ' ').replace('-', ' ').replace(':', ' ').strip()
+            clean_name = re.sub(r'\s+', ' ', clean_name).strip().upper()
+            
+            # V87: Return BOTH parts
+            return clean_name, course_code
 
-        async def run_extraction(event=None):
+        # --- V40: STATEFUL PARSER for the "NEW" PDF format ---
+        def extract_new_format_header(page_text):
+            """Extracts header from Page 1 of the new format."""
+            date_val, time_val, course_name = "Unknown", "Unknown", "Unknown"
+            try:
+                # V45: Make regexes handle newlines
+                dt_match = re.search(r'Exam Date:\s*(\d{2}-\d{2}-\d{4})\s*(\d{2}:\d{2}\s*[AP]M)', page_text, re.DOTALL)
+                if dt_match:
+                    date_val = dt_match.group(1).replace('-', '.')
+                    time_val = dt_match.group(2)
+                
+                course_match = re.search(r'Paper Details:\s*(.*?)/', page_text, re.DOTALL)
+                if course_match:
+                    course_name = course_match.group(1).strip().replace('\n', ' ')
+            except Exception:
+                pass # Errors will be logged by the caller if fields are "Unknown"
+            return date_val, time_val, course_name
+
+        def extract_new_format_students(page_text, file_name, page_num):
+            """Extracts only students from any page of the new format."""
+            page_rows = []
+            # V57: FIX - This regex is more robust. It only looks for the first 3 fields
+            # and doesn't care about the trailing commas, which are missing on page 2+.
+            student_regex = re.compile(
+                r'"\d+\s*","([A-Z0-9]+)\s*","(.*?)\s*","', # Match Sl.No, Reg.No, and Name
+                re.DOTALL
+            )
+            for match in student_regex.finditer(page_text):
+                try:
+                    reg_no = match.group(1).strip()
+                    name = match.group(2).strip().replace('\n', ' ')
+                    page_rows.append({'Register Number': reg_no, 'Name': name})
+                except Exception as e:
+                    log_status(f"Skipping row. Details: {e}", is_error=True, file_name=file_name, page=page_num)
+            return page_rows
+
+        # --- V40: STATEFUL PARSER for the "OLD" PDF format (V44: ROBUST) ---
+        def extract_old_format_header(page_text):
+            """Extracts header from Page 1 of the old format."""
+            date_val, time_val, course_name = "Unknown", "Unknown", "Unknown"
+            try:
+                # --- Course Regex ---
+                # 1. Try (CORE) or [syllabus]
+                course_match = re.search(r'([A-Z0-9]{3,}\d{3,}.*?(\[.*?syllabus\]|\(CORE\)))', page_text, re.DOTALL | re.IGNORECASE)
+                if not course_match:
+                    # 2. Try B.A. ... (CORE)
+                    course_match = re.search(r'^(B\.?[A-Z]{1,3}\.?\s*.*?\(CORE\))', page_text, re.MULTILINE | re.IGNORECASE)
+                if not course_match:
+                    # 3. Try line with (CCSS)
+                    course_match = re.search(r'^(.*?\(CCSS.*?\))$', page_text, re.MULTILINE | re.IGNORECASE)
+                if not course_match:
+                    # 4. Try all-caps line with a course code
+                    course_match = re.search(r'^([A-Z\s\d\(\)\[\]]{10,}\s[A-Z]{3}\d[A-Z]\d{2,})$', page_text, re.MULTILINE)
+                
+                if course_match:
+                    course_name = course_match.group(1).strip().replace('\n', ' ')
+                    course_name = course_name.replace(' Course [', ' [')
+                
+                # --- Date/Time Regex ---
+                datetime_match = None
+                
+                # 1. Try simple DD.MM.YYYY HH:MM AM/PM
+                try:
+                    datetime_match = re.search(
+                        r'(\d{2}\.\d{2}\.\d{4})\s+(\d{1,2}:\d{2}\s*[AP]M)', 
+                        page_text, 
+                        re.DOTALL | re.IGNORECASE
+                    )
+                except Exception: pass
+                
+                if not datetime_match:
+                    # 2. Try 'Date of Examination'
+                    try:
+                        datetime_match = re.search(
+                            r'Date of Examination.*?:?\s*(\d{2}\.\d{2}\.\d{4})\s*(\d{1,2}:\d{2}\s*[AP]M|002:0 0PM)', 
+                            page_text, 
+                            re.DOTALL | re.IGNORECASE # Make : optional
+                        )
+                    except Exception: pass 
+                
+                if not datetime_match:
+                    # 3. Try generic 'Date'
+                    try:
+                        datetime_match = re.search(
+                            r'Date.*?(\d{2}\.\d{2}\.\d{4})[\s\S]{0,100}?(\d{1,2}:\d{2}\s*[AP]M|002:0 0PM)', 
+                            page_text, 
+                            re.DOTALL | re.IGNORECASE
+                        )
+                    except Exception: pass 
+                                        
+                if datetime_match:
+                    date_val = datetime_match.group(1).strip()
+                    time_val = datetime_match.group(2).strip()
+                    if "002:0 0PM" in time_val: time_val = "02:00 PM"
+                    if " " not in time_val: # Fix for "09:30AM"
+                        time_val = time_val.replace("AM", " AM").replace("PM", " PM")
+                    
+                    # V44: Standardize time format (e.g., 9:30 AM -> 09:30 AM)
+                    time_parts = time_val.split(':')
+                    if len(time_parts) > 0 and len(time_parts[0]) == 1:
+                        time_val = "0" + time_val
+
+            except Exception:
+                pass # Errors will be logged by the caller if fields are "Unknown"
+            return date_val, time_val, course_name
+
+        def extract_old_format_students(page, file_name, page_num):
+            """Extracts only students from any page of the old format."""
+            page_rows = []
+            reg_num_regex = re.compile(r'([A-Z0-9]{5,}\d{3})')
+            tables = page.extract_tables()
+            
+            for table in tables:
+                for row in table:
+                    try:
+                        if not row or not row[0]: continue
+                        if not row[0].strip().isdigit(): continue
+                        reg_num, name = "Unknown", "Unknown"
+                        for idx, cell in enumerate(row):
+                            if not cell: continue
+                            cell_text = cell.strip().replace('\n', ' ')
+                            reg_match = reg_num_regex.search(cell_text)
+                            if reg_match:
+                                reg_num = reg_match.group(1)
+                                name_fragment = cell_text.replace(reg_num, '').strip()
+                                if name_fragment and not reg_num_regex.search(name_fragment) and not name_fragment.isdigit():
+                                    name = name_fragment
+                                    break
+                                try:
+                                    next_cell = row[idx+1]
+                                    if next_cell and next_cell.strip():
+                                        name = next_cell.strip().replace('\n', ' ')
+                                        break
+                                    next_next_cell = row[idx+2]
+                                    if next_next_cell and next_next_cell.strip():
+                                        name = next_next_cell.strip().replace('\n', ' ')
+                                        break
+                                except IndexError: pass
+                        if reg_num != "Unknown":
+                            page_rows.append({'Register Number': reg_num.strip(), 'Name': name.strip()})
+                    except Exception as e:
+                        error_msg = f"Skipping row. Details: {e}"
+                        log_message(f"Warning: {e}")
+                        log_status(error_msg, is_error=True, file_name=file_name, page=page_num)
+            return page_rows
+        
+        async def start_extraction(event=None):
             """
-            This function is called when the "Run Extraction" button is clicked.
+            This function is the entry point from the "Run" button.
+            It calls the main extraction function.
             """
+            # V55: No need to import js, it's global
             try:
                 show_loader(True)
-                await asyncio.sleep(0)                                
+                await asyncio.sleep(0) # Let loader show
                 
+                # V33: Clear the CSV upload status
+                js.clear_csv_upload_status() # This needs the global 'js'
+                    
+                # Call the main logic function
+                await run_extraction_py()
+                
+            except Exception as e:
+                log_message(f"Critical bridge error: {e}")
+            finally:
+                show_loader(False)
+
+        async def run_extraction_py(event=None):
+            """
+            This is the main extraction logic.
+            V40: Re-written to be STATEFUL and FILE-BASED.
+            """
+            errors_list = []
+            try:
+                # --- 1. Reset all UI elements ---
                 csv_download_container.innerHTML = ""
-                generate_report_button.classList.add("hidden")
+                generate_report_button.disabled = True
+                generate_qpaper_report_button.disabled = True
+                generate_daywise_report_button.disabled = True
+                js.disable_absentee_tab(True) # V56: Disable absentee tab
+                js.disable_qpcode_tab(True) # V58: Disable QP Code tab
                 json_data_store.innerHTML = ""
+                q_paper_data_store.innerHTML = ""
                 status_div.innerHTML = ""
+                status_log_div.innerHTML = "Waiting for extraction to complete..."
                 report_controls.classList.add("hidden")
                 report_output_area.innerHTML = ""
                 report_output_area.style.display = 'none'
@@ -373,18 +1166,15 @@
                                 
                 if file_list.length == 0:
                     log_message("Error: Please select one or more PDF files first.")
-                    show_loader(False)
+                    log_status("Error: Please select one or more PDF files first.", is_error=True)
+                    errors_list.append("No files selected")
                     return
                 
-                # --- This is now the master list for ALL files ---
+                # --- 2. PDF Processing Loop (V40 STATEFUL) ---
                 all_exam_rows = []
                 total_files = file_list.length
                 log_message(f"Found {total_files} file(s) to process.")
-                
-                # --- Regex for Register Number (defined once) ---
-                reg_num_regex = re.compile(r'([A-Z0-9]{5,}\d{3})')
-                
-                # --- *** BATCH PROCESSING LOOP *** ---
+                                
                 for file_index in range(total_files):
                     file = file_list.item(file_index)
                     file_name = file.name
@@ -393,171 +1183,130 @@
                     try:
                         file_bytes = await file.arrayBuffer()
                         pdf_file_obj = io.BytesIO(file_bytes.to_py())
-                        
-                        # --- Persistent Header Info (resets for each file, but carries over pages) ---
-                        course_name = "Unknown"
-                        date_val = "Unknown"
-                        time_val = "Unknown"
-                        
-                        with pdfplumber.open(pdf_file_obj) as pdf:
-                            total_pages = len(pdf.pages)
-                            log_message(f"File has {total_pages} pages.")
-                            
-                            for i, page in enumerate(pdf.pages):
-                                # Log progress periodically
-                                if (i + 1) % 10 == 0 or (i + 1) == total_pages:
-                                    log_message(f"Processing page {i + 1}/{total_pages}...")
-                                    await asyncio.sleep(0) # Yield to browser
-                                
-                                page_text = page.extract_text(y_tolerance=3, x_tolerance=3)
-                                                        
-                                course_match = re.search(r'([A-Z0-9]{3,}\d{3,}.*?\[.*?syllabus\])', page_text, re.DOTALL)
-                                if course_match:
-                                    new_course_name = course_match.group(1).strip().replace('\n', ' ')
-                                    new_course_name = new_course_name.replace(' Course [', ' [')
-                                    if new_course_name != course_name:
-                                        course_name = new_course_name
-                                        # log_message(f"Found new Course: {course_name}") # Too noisy for batch
-
-                                # --- *** NEW ROBUST DATE/TIME LOGIC *** ---
-                                datetime_match = None
-                                # 1. Try to find the specific, known-good string first
-                                try:
-                                    datetime_match = re.search(
-                                        r'Date of Examination.*?(\d{2}\.\d{2}\.\d{4})\s*(\d{1,2}:\d{2}\s*PM|002:0 0PM)', 
-                                        page_text, 
-                                        re.DOTALL
-                                    )
-                                except Exception:
-                                    pass # Regex might fail on weird text
-                                
-                                # 2. If it fails, try a more generic (but constrained) fallback
-                                if not datetime_match:
-                                    try:
-                                        # Looks for "Date" ... (0-100 chars) ... "DD.MM.YYYY" ... "HH:MM PM"
-                                        datetime_match = re.search(
-                                            r'Date[\s\S]{0,100}?(\d{2}\.\d{2}\.\d{4})[\s\S]{0,100}?(\d{1,2}:\d{2}\s*PM|002:0 0PM)', 
-                                            page_text, 
-                                            re.DOTALL | re.IGNORECASE
-                                        )
-                                    except Exception:
-                                        pass # Fallback also failed
-                                # --- *** END ROBUST LOGIC *** ---
-                                                        
-                                if datetime_match:
-                                    new_date_val = datetime_match.group(1).strip()
-                                    if new_date_val != date_val:
-                                        date_val = new_date_val
-                                    
-                                    new_time_val = datetime_match.group(2).strip()
-                                    if "002:0 0PM" in new_time_val: new_time_val = "02:00 PM"
-                                    if " " not in new_time_val:
-                                        new_time_val = new_time_val.replace(" ", "")
-                                        if len(new_time_val) == 7: new_time_val = "0" + new_time_val[:4] + " " + new_time_val[4:]
-                                        elif len(new_time_val) == 8: new_time_val = new_time_val[:5] + " " + new_time_val[5:]
-                                    if new_time_val != time_val:
-                                        time_val = new_time_val
-                                
-                                # --- Extract Table Data ---
-                                tables = page.extract_tables()
-                                processed_rows_on_page = 0
-                                                        
-                                for table in tables:
-                                    for row in table:
-                                        try:
-                                            if not row or not row[0]: continue
-                                            if not row[0].strip().isdigit(): continue
-                                            
-                                            reg_num = "Unknown"
-                                            name = "Unknown"
-                                            
-                                            for idx, cell in enumerate(row):
-                                                if not cell: continue
-                                                cell_text = cell.strip().replace('\n', ' ')
-                                                reg_match = reg_num_regex.search(cell_text)
                                                 
-                                                if reg_match:
-                                                    reg_num = reg_match.group(1)
-                                                    name_fragment = cell_text.replace(reg_num, '').strip()
-                                                    
-                                                    if name_fragment and not reg_num_regex.search(name_fragment) and not name_fragment.isdigit():
-                                                        name = name_fragment
-                                                        break
-                                                    try:
-                                                        next_cell = row[idx+1]
-                                                        if next_cell and next_cell.strip():
-                                                            name = next_cell.strip().replace('\n', ' ')
-                                                            break
-                                                        next_next_cell = row[idx+2]
-                                                        if next_next_cell and next_next_cell.strip():
-                                                            name = next_next_cell.strip().replace('\n', ' ')
-                                                            break
-                                                    except IndexError:
-                                                        pass
-                                                    
-                                            if reg_num != "Unknown":
-                                                formatted_row = {
-                                                    'Date': date_val.strip(),
-                                                    'Time': time_val.strip(),
-                                                    'Course': course_name.strip(),
-                                                    'Register Number': reg_num.strip(),
-                                                    'Name': name.strip()
-                                                }
-                                                all_exam_rows.append(formatted_row)
-                                                processed_rows_on_page += 1
-                                        except Exception as e:
-                                            log_message(f"Warning: Skipping row. Details: {e}")
+                        with pdfplumber.open(pdf_file_obj) as pdf:
+                            if not pdf.pages:
+                                log_status("File has no pages.", is_error=True, file_name=file_name, page="N/A")
+                                errors_list.append("File has no pages")
+                                continue
+
+                            # --- V40: STATEFUL LOGIC ---
+                            # 1. Read Page 1 to get header and determine format
+                            page1_text = pdf.pages[0].extract_text(y_tolerance=3, x_tolerance=3)
+                            
+                            file_date = "Unknown"
+                            file_time = "Unknown"
+                            file_course = "Unknown"
+                            is_new_format = False
+
+                            # V57: FIX - Robust check for "New Format"
+                            # Check for the unique, quoted, CSV-style header.
+                            page1_text_flat = page1_text.replace("\n", "")
+                            # V57: Now using Reg.No, Name, D.O.B check
+                            if '"SI.No","Reg.No","Name","D.O.B"' in page1_text_flat or '"SI.No" ,"Reg.No" ,"Name" ,"D.O.B"' in page1_text_flat:
+                                # This is DEFINITELY the NEW format
+                                is_new_format = True
+                                file_date, file_time, file_course = extract_new_format_header(page1_text)
+                                log_message("Detected 'New' PDF format.")
+                            else:
+                                # Assume OLD format
+                                is_new_format = False
+                                file_date, file_time, file_course = extract_old_format_header(page1_text)
+                                log_message("Detected 'Old' PDF format.")
+
+
+                            # Log warnings if header info is still unknown
+                            if file_date == "Unknown":
+                                log_status("Could not determine Exam Date.", is_error=True, file_name=file_name, page=1)
+                                errors_list.append("Unknown Date")
+                            if file_time == "Unknown":
+                                log_status("Could not determine Exam Time.", is_error=True, file_name=file_name, page=1)
+                                errors_list.append("Unknown Time")
+                            if file_course == "Unknown":
+                                log_status("Could not determine Course.", is_error=True, file_name=file_name, page=1)
+                                errors_list.append("Unknown Course")
+
+                            # 2. Loop through ALL pages (including page 1) to extract students
+                            total_students_in_file = 0
+                            for i, page in enumerate(pdf.pages):
+                                page_num = i + 1
                                 
-                                # Noisy log, removed for batch
-                                # if processed_rows_on_page > 0:
-                                #    log_message(f"Found {processed_rows_on_page} candidates on page {i + 1}.")
+                                page_students = []
+                                if is_new_format:
+                                    page_text = page.extract_text(y_tolerance=3, x_tolerance=3)
+                                    page_students = extract_new_format_students(page_text, file_name, page_num)
+                                else:
+                                    page_students = extract_old_format_students(page, file_name, page_num)
+                                
+                                if page_students:
+                                    total_students_in_file += len(page_students)
+                                    # 3. Apply the STORED header info to all students found
+                                    for student in page_students:
+                                        all_exam_rows.append({
+                                            'Date': file_date,
+                                            'Time': file_time,
+                                            'Course': file_course, # This is the "dirty" name
+                                            'Register Number': student['Register Number'],
+                                            'Name': student['Name']
+                                        })
+                                else:
+                                    log_status(f"No students found on page.", is_error=False, file_name=file_name, page=page_num)
+                            
+                            log_message(f"Found {total_students_in_file} students in this file.")
+                            # --- END V40 STATEFUL LOGIC ---
 
                     except Exception as e:
-                        log_message(f"CRITICAL ERROR processing file {file_name}: {e}. Skipping this file.")
-                
-                # --- *** END OF BATCH LOOP *** ---
+                        error_msg = f"CRITICAL ERROR processing file. Skipping this file. Details: {e}"
+                        log_message(error_msg)
+                        log_status(error_msg, is_error=True, file_name=file_name, page="N/A")
+                        errors_list.append(error_msg) 
                 
                 log_message("--- Batch processing complete. ---")
 
                 if not all_exam_rows:
                     log_message("Error: No data was extracted from any file.")
-                    show_loader(False)
                     return
                 
+                # --- 3. Sorting ---
                 log_message(f"Found {len(all_exam_rows)} total candidates from {total_files} file(s).")
                 await asyncio.sleep(0)
+                
+                # --- 4. V87: NORMALIZE COURSE NAMES & EXTRACT CODES ---
+                log_message("Normalizing course names and extracting codes...")
+                normalized_rows = []
+                for row in all_exam_rows:
+                    normalized_name, course_code = normalize_course_name(row['Course'])
+                    row['Course'] = normalized_name
+                    row['Course Code'] = course_code # V87: Add the new key
+                    normalized_rows.append(row)
+                all_exam_rows = normalized_rows
+                log_message("Course names normalized.")
                 
                 log_message("Sorting all entries by Date and Time...")
                 all_exam_rows_sorted = sorted(all_exam_rows, key=get_sort_key)
                 await asyncio.sleep(0)
                                 
-                log_message("Allocating room numbers...")
-                                
-                processed_rows_with_rooms = []
-                current_session_key = None
-                session_student_count = 0
-                students_per_room = 30
+                log_message("Data sorting complete.")
                 
-                for row in all_exam_rows_sorted:
-                    session_key = (row['Date'], row['Time'])
-                    if session_key != current_session_key:
-                        current_session_key = session_key
-                        session_student_count = 0
-                    session_student_count += 1
-                    room_number = math.ceil(session_student_count / students_per_room)
-                    row['Room No'] = f"Room {room_number}"
-                    processed_rows_with_rooms.append(row)
+                # --- 5. Data Export & UI Update ---
+                log_message("Converting to DataFrame...")
+                df = pd.DataFrame(all_exam_rows_sorted)
                 
-                log_message("Converting to DataFrame and creating CSV...")
-                
-                df = pd.DataFrame(processed_rows_with_rooms)
-                df = df[['Date', 'Time', 'Course', 'Register Number', 'Name', 'Room No']]
-                csv_data = df.to_csv(index=False, encoding='utf-8')
+                # --- 6. Q-PAPER REPORT SUMMARY ---
+                log_message("Generating question paper summary...")
+                # V87: Group by the new Course Code as well
+                q_paper_df = df.groupby(['Date', 'Time', 'Course', 'Course Code']).size().reset_index(name='Student Count')
+                q_paper_summary_json = q_paper_df.to_json(orient='records')
+                q_paper_data_store.innerHTML = q_paper_summary_json
+                log_message("Question paper summary generated.")
+
+                # --- 7. Create CSV and enable buttons ---
+                # V87: Add Course Code to the CSV
+                df_csv = df[['Date', 'Time', 'Course', 'Course Code', 'Register Number', 'Name']]
+                csv_data = df_csv.to_csv(index=False, encoding='utf-8')
                 
                 blob = Blob.new([csv_data], {type: "text/csv;charset=utf-8"})
                 url = URL.createObjectURL(blob)
-                                
-                # --- Give a combined filename ---
                 csv_filename = 'Combined_Nominal_Roll.csv'
                 
                 csv_download_container.innerHTML = f"""
@@ -567,22 +1316,66 @@
                     </a>
                 """
                 
-                json_data = json.dumps(processed_rows_with_rooms)
+                json_data = json.dumps(all_exam_rows_sorted)
                 json_data_store.innerHTML = json_data
-                generate_report_button.classList.remove("hidden")
+                
+                # V65: Save the base data to localStorage
+                localStorage.setItem(BASE_DATA_KEY, json_data)
+                
+                generate_report_button.disabled = False
+                generate_qpaper_report_button.disabled = False
+                generate_daywise_report_button.disabled = False
+                js.disable_absentee_tab(False) # V56: Enable absentee tab
+                js.disable_qpcode_tab(False) # V58: Enable QP Code tab
+                js.populate_session_dropdown() # V56: Populate dropdown
+                js.populate_qp_code_session_dropdown() # V61: Populate QP Code dropdown
                                 
                 log_message("Success! Your combined files are ready.")
             
             except Exception as e:
-                log_message(f"An error occurred: {e}")
-            
+                error_msg = f"An error occurred: {e}"
+                log_message(error_msg)
+                log_status(error_msg, is_error=True, file_name="Application", page="N/A")
+                errors_list.append(error_msg)
             finally:
-                show_loader(False)
+                # (V18): Log final status message
+                if not errors_list:
+                    if file_list.length > 0: # Only show success if files were processed
+                        log_status("Success: All files processed with no errors.", is_error=False)
+                else:
+                    log_status(f"Completed with {len(errors_list)} errors/warnings. See details above.", is_error=True)
+            
     </py-script>
 
-    <!-- *** JAVASCRIPT FOR REPORT VIEWER (WITH ALL FIXES) *** -->
+    <!-- *** JAVASCRIPT FOR ALL UI (V87) *** -->
     <script>
-        // --- Get references to all new modal elements ---
+        // --- Global localStorage Key ---
+        const ROOM_CONFIG_KEY = 'examRoomConfig';
+        const COLLEGE_NAME_KEY = 'examCollegeName'; // V48: New key
+        const ABSENTEE_LIST_KEY = 'examAbsenteeList'; // V56: New key
+        const QP_CODE_LIST_KEY = 'examQPCodes'; // V58: New key
+        const BASE_DATA_KEY = 'examBaseData'; // V65: New key for persistent base data
+
+        // --- Global var to hold data from the last *report run* ---
+        let lastGeneratedRoomData = [];
+        
+        // --- (V28) Global var to hold room config map for report generation ---
+        let currentRoomConfig = {};
+        
+        // --- (V48) Global var for college name ---
+        let currentCollegeName = "University of Calicut"; // Default
+        
+        // --- (V56) Global var for absentee data ---
+        let allStudentData = []; // Holds all students from PDF/CSV
+        let allStudentSessions = []; // Holds unique sessions
+        let currentAbsenteeList = []; // Holds absentees for the selected session
+        let selectedStudent = null; // Holds student from autocomplete
+        
+        // --- (V58) Global var for QP Code data ---
+        let allUniqueCourses = [];
+        let qpCodeMap = {}; // Holds { "Course Code": "QPCode" } V87: Key is now Course Code
+
+        // --- Get references to all Report elements ---
         const generateReportButton = document.getElementById('generate-report-button');
         const jsonDataStore = document.getElementById('json-data-store');
         const reportControls = document.getElementById('report-controls');
@@ -590,6 +1383,81 @@
         const reportStatus = document.getElementById('report-status');
         const finalPrintButton = document.getElementById('final-print-button');
         const clearReportButton = document.getElementById('clear-report-button');
+        const roomCsvDownloadContainer = document.getElementById('room-csv-download-container');
+        
+        // --- Get references to all Navigation elements ---
+        const viewExtractor = document.getElementById('view-extractor');
+        const viewSettings = document.getElementById('view-settings');
+        const viewQPCodes = document.getElementById('view-qpcodes'); // V58
+        const viewReports = document.getElementById('view-reports');
+        const viewAbsentees = document.getElementById('view-absentees'); // V56
+        const viewRoomSettings = document.getElementById('view-room-settings'); // V83
+        const navExtractor = document.getElementById('nav-extractor');
+        const navSettings = document.getElementById('nav-settings');
+        const navQPCodes = document.getElementById('nav-qpcodes'); // V58
+        const navReports = document.getElementById('nav-reports');
+        const navAbsentees = document.getElementById('nav-absentees'); // V56
+        const navRoomSettings = document.getElementById('nav-room-settings'); // V83
+        const allNavButtons = [navExtractor, navSettings, navRoomSettings, navQPCodes, navReports, navAbsentees]; // V83
+        const allViews = [viewExtractor, viewSettings, viewRoomSettings, viewQPCodes, viewReports, viewAbsentees]; // V83
+        
+        // --- (V26) Get references to NEW Room Settings elements ---
+        const collegeNameInput = document.getElementById('college-name-input'); // V48
+        const saveCollegeNameButton = document.getElementById('save-college-name-button'); // V87
+        const collegeNameStatus = document.getElementById('college-name-status'); // V87
+        const roomConfigContainer = document.getElementById('room-config-container');
+        const addRoomButton = document.getElementById('add-room-button');
+        const saveRoomConfigButton = document.getElementById('save-room-config-button');
+        const roomConfigStatus = document.getElementById('room-config-status');
+        
+        // --- Get references to Q-Paper Report elements ---
+        const qPaperDataStore = document.getElementById('q-paper-data-store');
+        const generateQPaperReportButton = document.getElementById('generate-qpaper-report-button');
+        
+        // --- Get references to Day-wise Report elements ---
+        const generateDaywiseReportButton = document.getElementById('generate-daywise-report-button');
+        
+        // --- Get references to CSV Upload elements ---
+        const correctedCsvUpload = document.getElementById('corrected-csv-upload'); // V67 Shifted
+        const loadCsvButton = document.getElementById('load-csv-button'); // V67 Shifted
+        const csvLoadStatus = document.getElementById('csv-load-status'); // V67 Shifted
+        
+        // --- (V56) Get references to Absentee elements ---
+        const absenteeLoader = document.getElementById('absentee-loader');
+        const absenteeContentWrapper = document.getElementById('absentee-content-wrapper');
+        const sessionSelect = document.getElementById('session-select');
+        const absenteeSearchSection = document.getElementById('absentee-search-section');
+        const absenteeSearchInput = document.getElementById('absentee-search');
+        const autocompleteResults = document.getElementById('autocomplete-results');
+        const selectedStudentDetails = document.getElementById('selected-student-details');
+        const selectedStudentName = document.getElementById('selected-student-name');
+        const selectedStudentCourse = document.getElementById('selected-student-course');
+        const selectedStudentRoom = document.getElementById('selected-student-room');
+        const addAbsenteeButton = document.getElementById('add-absentee-button');
+        const absenteeListSection = document.getElementById('absentee-list-section');
+        const currentAbsenteeListDiv = document.getElementById('current-absentee-list');
+        const generateAbsenteeReportButton = document.getElementById('generate-absentee-report-button');
+        
+        // --- (V58) Get references to QP Code elements ---
+        const qpcodeLoader = document.getElementById('qpcode-loader');
+        const qpcodeContentWrapper = document.getElementById('qpcode-content-wrapper');
+        const sessionSelectQP = document.getElementById('session-select-qp'); // V61
+        const qpEntrySection = document.getElementById('qp-entry-section'); // V61
+        const qpCodeContainer = document.getElementById('qp-code-container');
+        const qpCodeStatus = document.getElementById('qp-code-status');
+        const saveQpCodesButton = document.getElementById('save-qp-codes-button'); // V62
+
+        // --- V68 Report Filter Elements ---
+        const reportFilterSection = document.getElementById('report-filter-section');
+        const filterAllRadio = document.getElementById('filter-all');
+        const filterSessionRadio = document.getElementById('filter-session');
+        const reportsSessionDropdownContainer = document.getElementById('reports-session-dropdown-container');
+        const reportsSessionSelect = document.getElementById('reports-session-select');
+
+        
+        // --- V87: Using Course Code as key, this is no longer needed ---
+        // function cleanCourseKey(courseName) { ... }
+        
         
         // --- Helper function to numerically sort room keys ---
         function getNumericSortKey(key) {
@@ -598,25 +1466,177 @@
             const roomNumber = parseInt(roomPart.replace('Room ', ''), 10);
             return `${parts[0]}_${parts[1]}_${String(roomNumber).padStart(4, '0')}`;
         }
+        
+        // --- (V28) Helper function to create a new room row HTML (with location) ---
+        function createRoomRowHtml(roomName, capacity, location, isLast = false) {
+            // V79: Only show remove button if it's the last row
+            const removeButtonHtml = isLast ? 
+                `<button class="remove-room-button ml-auto text-sm text-red-600 hover:text-red-800 font-medium">&times; Remove</button>` : 
+                `<div class="w-20"></div>`; // Placeholder to keep alignment
+            
+            return `
+                <div class="room-row flex items-center gap-3 p-2 border-b border-gray-200" data-room-name="${roomName}">
+                    <label class="room-name-label font-medium text-gray-700 w-24 shrink-0">${roomName}:</label>
+                    <input type="number" class="room-capacity-input block w-20 p-2 border border-gray-300 rounded-md shadow-sm text-sm" value="${capacity}" min="1" placeholder="30">
+                    <input type="text" class="room-location-input block flex-grow p-2 border border-gray-300 rounded-md shadow-sm text-sm" value="${location}" placeholder="e.g., Commerce Block">
+                    ${removeButtonHtml}
+                </div>
+            `;
+        }
+        
+        // --- (V69) FIX: Robust Room Config Loading (handles NULL) ---
+        function getRoomCapacitiesFromStorage() {
+            // V48: Load College Name
+            currentCollegeName = localStorage.getItem(COLLEGE_NAME_KEY) || "University of Calicut";
+            if (collegeNameInput) collegeNameInput.value = currentCollegeName; // Update UI (check for null since it might not be visible)
+            
+            // Load Room Config
+            let savedConfigJson = localStorage.getItem(ROOM_CONFIG_KEY);
+            let roomConfig = {}; // V69: Initialize to empty object to prevent crash
+            
+            if (savedConfigJson) {
+                try {
+                    roomConfig = JSON.parse(savedConfigJson);
+                } catch (e) {
+                    console.error("Error parsing room config from localStorage:", e);
+                    // roomConfig already {}
+                }
+            }
+            
+            // (V28) Store this in the global var for report generation
+            currentRoomConfig = roomConfig; 
+            
+            let roomNames = [];
+            let roomCapacities = [];
+            
+            if (Object.keys(roomConfig).length === 0) {
+                // *** (V27): Default to 30 rooms ***
+                console.log("Using default room config (30 rooms of 30)");
+                let config = {}; // V79: Use local var for default creation
+                for (let i = 1; i <= 30; i++) {
+                    config[`Room ${i}`] = { capacity: 30, location: "" };
+                }
+                localStorage.setItem(ROOM_CONFIG_KEY, JSON.stringify(config));
+                currentRoomConfig = config; // Update global var
+            }
+            
+            // This part is now just for the allocation function, not for rendering
+            const sortedRoomKeys = Object.keys(currentRoomConfig).sort((a, b) => {
+                const numA = parseInt(a.replace(/\D/g, ''), 10) || 0;
+                const numB = parseInt(b.replace(/\D/g, ''), 10) || 0;
+                return numA - numB;
+            });
+            roomNames = sortedRoomKeys;
+            roomCapacities = sortedRoomKeys.map(key => currentRoomConfig[key].capacity);
+            
+            return { roomNames, roomCapacities };
+        }
+        
+        // --- (V29) Central Allocation Function (to be used by multiple reports) ---
+        function performRoomAllocation(data) {
+            // 1. Get CURRENT room capacities
+            // This function also populates 'currentRoomConfig' global var
+            const { roomNames: masterRoomNames, roomCapacities: masterRoomCaps } = getRoomCapacitiesFromStorage();
+            
+            // 2. Perform Room Allocation
+            const processed_rows_with_rooms = [];
+            const sessionRoomFills = {};
+            const DEFAULT_OVERFLOW_CAPACITY = 30;
+            
+            for (const row of data) {
+                const sessionKey = `${row.Date}_${row.Time}`;
+                
+                if (!sessionRoomFills[sessionKey]) {
+                    sessionRoomFills[sessionKey] = new Array(masterRoomCaps.length).fill(0);
+                }
+                
+                const currentFills = sessionRoomFills[sessionKey];
+                let assignedRoomName = "";
+                
+                // 2a. Try to fill configured rooms
+                for (let i = 0; i < masterRoomCaps.length; i++) {
+                    if (currentFills[i] < masterRoomCaps[i]) {
+                        currentFills[i]++;
+                        assignedRoomName = masterRoomNames[i];
+                        break;
+                    }
+                }
+                
+                // 2b. If all configured rooms are full, create overflow
+                if (assignedRoomName === "") {
+                    let foundOverflowSpot = false;
+                    for (let i = masterRoomCaps.length; i < currentFills.length; i++) {
+                        if (currentFills[i] < DEFAULT_OVERFLOW_CAPACITY) {
+                            currentFills[i]++;
+                            assignedRoomName = `Room ${i + 1}`;
+                            foundOverflowSpot = true;
+                            break;
+                        }
+                    }
+                    
+                    // 2c. If no existing overflow has space, create a *new* overflow
+                    if (!foundOverflowSpot) {
+                        currentFills.push(1); 
+                        assignedRoomName = `Room ${currentFills.length}`;
+                    }
+                }
+                
+                processed_rows_with_rooms.push({ ...row, 'Room No': assignedRoomName });
+            }
+            return processed_rows_with_rooms;
+        }
 
-        // --- 1. Event listener for the "Generate Report" button ---
+        // V68: Helper function to filter data based on selected report filter
+        function getFilteredReportData(reportType) {
+            const data = JSON.parse(jsonDataStore.innerHTML || '[]');
+            if (data.length === 0) return [];
+            
+            if (filterAllRadio.checked) {
+                // Return all data
+                return data;
+            } else if (filterSessionRadio.checked) {
+                const sessionKey = reportsSessionSelect.value;
+                if (!sessionKey || sessionKey === 'all') { // Fallback if somehow 'all' is selected here
+                    return data; 
+                }
+                const [date, time] = sessionKey.split(' | ');
+                
+                // Filter by selected session
+                return data.filter(s => s.Date === date && s.Time === time);
+            }
+            return [];
+        }
+
+
+        // --- 1. Event listener for the "Generate Room-wise Report" button ---
         generateReportButton.addEventListener('click', async () => {
             
             generateReportButton.disabled = true;
-            generateReportButton.textContent = "Generating Report...";
+            generateReportButton.textContent = "Allocating Rooms & Generating Report...";
             reportOutputArea.innerHTML = "";
             reportControls.classList.add('hidden');
+            roomCsvDownloadContainer.innerHTML = "";
+            lastGeneratedRoomData = [];
             await new Promise(resolve => setTimeout(resolve, 50));
 
             try {
-                const data = JSON.parse(jsonDataStore.innerHTML);
-                if (!data || data.length === 0) {
-                    alert("No data to generate. Please run extraction first.");
+                // 1. Get FILTERED RAW student data
+                const data = getFilteredReportData('room-wise');
+
+                if (data.length === 0) {
+                    alert("No data found for the selected filter/session.");
                     return;
                 }
+                
+                // 2. Perform Room Allocation (V29 - uses central function)
+                const processed_rows_with_rooms = performRoomAllocation(data);
+                
+                // 3. Store data for CSV
+                lastGeneratedRoomData = processed_rows_with_rooms;
 
+                // 4. Group data for Report Generation
                 const sessions = {};
-                data.forEach(student => {
+                processed_rows_with_rooms.forEach(student => {
                     const key = `${student.Date}_${student.Time}_${student['Room No']}`;
                     if (!sessions[key]) {
                         sessions[key] = {
@@ -638,33 +1658,41 @@
 
                 let allPagesHtml = '';
                 let totalPagesGenerated = 0;
-                // --- USE NUMERIC SORT KEY ---
+                
                 const sortedSessionKeys = Object.keys(sessions).sort((a, b) => {
                     return getNumericSortKey(a).localeCompare(getNumericSortKey(b));
                 });
 
-                // --- *** REVISED PAGE BREAK LOGIC (V7) *** ---
+                // 5. Build the HTML report pages
                 sortedSessionKeys.forEach(key => {
                     const session = sessions[key];
                     const studentsPerPage = 20;
+                    
+                    // (V28) Get location for this room
+                    const roomInfo = currentRoomConfig[session.Room];
+                    const location = (roomInfo && roomInfo.location) ? roomInfo.location : "";
+                    const locationHtml = location ? `<div class="report-location-header">Location: ${location}</div>` : "";
 
-                    // --- 1. Define Common Page Elements ---
                     let courseSummaryHtml = '';
                     for (const [courseName, count] of Object.entries(session.courseCounts)) {
                         const shortCourseName = courseName.split(' ').slice(0, 4).join(' ') + (courseName.split(' ').length > 4 ? '...' : '');
-                        courseSummaryHtml += `<div style="font-weight: bold;">${shortCourseName}: ${count} Student(s)</div>`;
+                        courseSummaryHtml += `<div style="font-weight: bold;">${courseName}: ${count} Student(s)</div>`; // V38: Show full course name
                     }
                     
                     const pageHeaderHtml = `
-                        <h1>University of Calicut</h1>
-                        <h2>${session.Date} &nbsp;|&nbsp; ${session.Time} &nbsp;|&nbsp; ${session.Room}</h2>
-                        <div class="course-summary">
-                            ${courseSummaryHtml}
+                        <!-- V89: Wrap headers in group to prevent page break -->
+                        <div class="print-header-group">
+                            <h1>${currentCollegeName}</h1> <!-- V48: Use college name -->
+                            <h2>${session.Date} &nbsp;|&nbsp; ${session.Time} &nbsp;|&nbsp; ${session.Room}</h2>
+                            ${locationHtml} <!-- (V28) Added location here -->
+                            <div class="course-summary">
+                                ${courseSummaryHtml}
+                            </div>
                         </div>
                     `;
                     
                     const tableHeaderHtml = `
-                        <table>
+                        <table class="print-table">
                             <thead>
                                 <tr>
                                     <th class="sl-col">Sl No</th>
@@ -675,37 +1703,31 @@
                                 </tr>
                             </thead>
                             <tbody>
-                    `; // Note: tbody is opened
-                    
+                    `; 
                     const tableCloseHtml = `</tbody></table>`;
-                    
                     const invigilatorFooterHtml = `
                         <div class="invigilator-footer">
                             <div><strong>Answer Booklets Received:</strong> _________________</div>
                             <div><strong>Answer Booklets Used:</strong> _________________</div>
                             <div><strong>Answer Booklets Returned (Balance):</strong> _________________</div>
                             <div class="signature">
-                                Invigilator Signature
+                                Chief Superintendent
                             </div>
                         </div>
                     `;
 
-                    // --- 2. Helper function to generate table rows for a student list ---
-                    let previousCourseName = ""; // Use a shared var, reset when needed
-                    
+                    let previousCourseName = ""; 
                     function generateTableRows(studentList) {
                         let rowsHtml = '';
-                        studentList.forEach((student) => { // 'index' is not needed here
-                            const studentNumber = student.originalIndex + 1; // Get the original Sl.No.
-                            const tableCourseName = student.Course.split(' ').slice(0, 4).join(' ') + (student.Course.split(' ').length > 4 ? '...' : '');
+                        studentList.forEach((student) => { 
+                            const studentNumber = student.originalIndex + 1; 
+                            const tableCourseName = student.Course; // V38: Show full course name
+                            // V70: Truncate Course Name to 4 words for column 1
+                            const words = tableCourseName.split(/\s+/);
+                            const truncatedCourseName = words.slice(0, 4).join(' ') + (words.length > 4 ? '...' : '');
                             
-                            let displayCourseName;
-                            if (tableCourseName === previousCourseName) {
-                                displayCourseName = '"';
-                            } else {
-                                displayCourseName = tableCourseName;
-                                previousCourseName = tableCourseName;
-                            }
+                            let displayCourseName = (truncatedCourseName === previousCourseName) ? '"' : truncatedCourseName;
+                            if (truncatedCourseName !== previousCourseName) previousCourseName = truncatedCourseName;
 
                             rowsHtml += `
                                 <tr>
@@ -720,77 +1742,1329 @@
                         return rowsHtml;
                     }
                     
-                    // --- 3. Slice students and add original index ---
                     const studentsWithIndex = session.students.map((student, index) => ({
                         ...student,
-                        originalIndex: index // We need this to keep the Sl.No. correct
+                        originalIndex: index 
                     }));
                     
                     const studentsPage1 = studentsWithIndex.slice(0, studentsPerPage);
                     const studentsPage2 = studentsWithIndex.slice(studentsPerPage);
 
-                    // --- 4. Build Page 1 ---
-                    previousCourseName = ""; // Reset for page 1
+                    previousCourseName = ""; 
                     const tableRowsPage1 = generateTableRows(studentsPage1);
-                    
-                    allPagesHtml += `<div class="print-page">`;
-                    allPagesHtml += pageHeaderHtml;
-                    allPagesHtml += tableHeaderHtml;
-                    allPagesHtml += tableRowsPage1;
-                    allPagesHtml += tableCloseHtml;
-                    
-                    if (studentsPage2.length === 0) {
-                        // This is the only page, so add footer
-                        allPagesHtml += invigilatorFooterHtml;
-                    }
-                    
-                    allPagesHtml += `</div>`; // Close page 1
+                    allPagesHtml += `<div class="print-page">${pageHeaderHtml}${tableHeaderHtml}${tableRowsPage1}${tableCloseHtml}`;
+                    if (studentsPage2.length === 0) allPagesHtml += invigilatorFooterHtml;
+                    allPagesHtml += `</div>`; 
                     totalPagesGenerated++;
                     
-                    // --- 5. Build Page 2 (if necessary) ---
                     if (studentsPage2.length > 0) {
-                        previousCourseName = ""; // Reset for page 2
+                        previousCourseName = ""; 
                         const tableRowsPage2 = generateTableRows(studentsPage2);
-                        
-                        allPagesHtml += `<div class="print-page">`;
-                        allPagesHtml += tableHeaderHtml; // NO page header
-                        allPagesHtml += tableRowsPage2;
-                        allPagesHtml += tableCloseHtml;
-                        allPagesHtml += invigilatorFooterHtml; // Footer ALWAYS on last page
-                        allPagesHtml += `</div>`; // Close page 2
+                        allPagesHtml += `<div class="print-page">${tableHeaderHtml}${tableRowsPage2}${tableCloseHtml}${invigilatorFooterHtml}</div>`; 
                         totalPagesGenerated++;
                     }
                 });
-                // --- *** END REVISED LOGIC (V7) *** ---
 
+                // 6. Show report and controls
                 reportOutputArea.innerHTML = allPagesHtml;
                 reportOutputArea.style.display = 'block'; 
                 reportStatus.textContent = `Generated ${totalPagesGenerated} total pages for ${sortedSessionKeys.length} room sessions.`;
                 reportControls.classList.remove('hidden');
+                
+                // 7. Add download button
+                roomCsvDownloadContainer.innerHTML = `
+                    <button id="download-room-csv-button" class="w-full inline-flex justify-center items-center rounded-md border border-gray-300 bg-white py-3 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">
+                        Download Room Allocation Report (.csv)
+                    </button>
+                `;
+                document.getElementById('download-room-csv-button').addEventListener('click', downloadRoomCsv);
 
             } catch (e) {
-                console.error("Error generating print report:", e);
+                console.error("Error generating room-wise report:", e);
                 reportStatus.textContent = "An error occurred while generating the report.";
                 reportControls.classList.remove('hidden');
-                
             } finally {
                 generateReportButton.disabled = false;
-                generateReportButton.textContent = "Generate Room-wise Report";
+                generateReportButton.textContent = "Generate Room-wise Seating Report";
             }
         });
 
-        // --- 2. Event listener for the "Print" button ---
+        // --- (V29) Event listener for the "Day-wise Student List" button ---
+        generateDaywiseReportButton.addEventListener('click', async () => {
+            generateDaywiseReportButton.disabled = true;
+            // V49: Button text updated
+            generateDaywiseReportButton.textContent = "Generating...";
+            reportOutputArea.innerHTML = "";
+            reportControls.classList.add('hidden');
+            roomCsvDownloadContainer.innerHTML = "";
+            lastGeneratedRoomData = []; // This report doesn't use the room CSV
+            await new Promise(resolve => setTimeout(resolve, 50));
+
+            try {
+                // 1. Get FILTERED RAW student data
+                const data = getFilteredReportData('day-wise');
+
+                if (data.length === 0) {
+                    alert("No data found for the selected filter/session.");
+                    return;
+                }
+                
+                // 2. Perform Room Allocation (V29 - uses central function)
+                const processed_rows_with_rooms = performRoomAllocation(data);
+
+                // 3. Group by Room to get SL No.
+                const roomSessions = {};
+                processed_rows_with_rooms.forEach(student => {
+                    const key = `${student.Date}_${student.Time}_${student['Room No']}`;
+                    if (!roomSessions[key]) {
+                        roomSessions[key] = {
+                            Date: student.Date,
+                            Time: student.Time,
+                            Room: student['Room No'],
+                            students: []
+                        };
+                    }
+                    roomSessions[key].students.push(student);
+                });
+                
+                const daySessions = {}; // V72 FIX: Added definition here
+
+                // 4. Create new flat list with SlNoInRoom
+                let flatStudentList = [];
+                Object.values(roomSessions).forEach(roomSession => {
+                    roomSession.students.forEach((student, index) => {
+                        flatStudentList.push({ 
+                            ...student, 
+                            slNoInRoom: index + 1,
+                            roomName: roomSession.Room 
+                        });
+                    });
+                });
+                
+                // 5. Sort this new list by Date, Time, Course, then Register Number
+                flatStudentList.sort((a, b) => {
+                    if (a.Date !== b.Date) return a.Date.localeCompare(b.Date);
+                    if (a.Time !== b.Time) return a.Time.localeCompare(b.Time, 'en', { numeric: true }); // Handle 10:00 AM vs 2:00 PM
+                    if (a.Course !== b.Course) return a.Course.localeCompare(b.Course);
+                    return a['Register Number'].localeCompare(b['Register Number']);
+                });
+
+                // 6. Group this sorted list by Day/Session
+                flatStudentList.forEach(student => {
+                    const key = `${student.Date}_${student.Time}`;
+                    if (!daySessions[key]) {
+                        daySessions[key] = {
+                            Date: student.Date,
+                            Time: student.Time,
+                            students: []
+                        };
+                    }
+                    daySessions[key].students.push(student);
+                });
+                
+                // 7. Build the HTML
+                let allPagesHtml = '';
+                let totalPagesGenerated = 0;
+                // V77: Updated for better fit (35 per column)
+                const STUDENTS_PER_COLUMN = 35; 
+                const COLUMNS_PER_PAGE = 2; 
+                const STUDENTS_PER_PAGE = STUDENTS_PER_COLUMN * COLUMNS_PER_PAGE; 
+
+                // (V30) Helper to build a table for a column, NOW WITH COURSE GROUPING
+                function buildColumnTable(studentChunk) {
+                    let rowsHtml = '';
+                    let currentCourse = ""; // Track the current course
+                    let previousRoomDisplay = ""; // V48: Track previous room
+
+                    studentChunk.forEach(student => {
+                        // Check if the course has changed
+                        if (student.Course !== currentCourse) {
+                            currentCourse = student.Course;
+                            previousRoomDisplay = ""; // V48: Reset for new course
+                            // Add a course heading row
+                            rowsHtml += `
+                                <tr>
+                                    <td colspan="4" style="background-color: #ddd; font-weight: bold; padding: 4px 2px; border: 1px solid #999;">
+                                        ${student.Course}
+                                    </td>
+                                </tr>
+                            `;
+                        }
+
+                        // Add the student row
+                        const roomInfo = currentRoomConfig[student.roomName];
+                        const location = (roomInfo && roomInfo.location) ? roomInfo.location : "";
+                        const roomDisplay = location ? `${student.roomName} (${location})` : student.roomName;
+
+                        // V48: Check if same as above
+                        const displayRoom = (roomDisplay === previousRoomDisplay) ? '"' : roomDisplay;
+                        previousRoomDisplay = roomDisplay; // Update for next iteration
+
+                        rowsHtml += `
+                            <tr>
+                                <td>${student['Register Number']}</td>
+                                <td>${student.Name}</td>
+                                <td>${displayRoom}</td>
+                                <td style="text-align: center;">${student.slNoInRoom}</td>
+                            </tr>
+                        `;
+                    });
+
+                    // (V30) Updated table header to remove Course
+                    // (V32) Updated widths
+                    return `
+                        <table class="daywise-report-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 25%;">Register No</th>
+                                    <th style="width: 35%;">Name</th>
+                                    <th style="width: 30%;">Room (Location)</th>
+                                    <th style="width: 10%;">Sl</th>
+                                </tr>
+                            </thead>
+                            <tbody>${rowsHtml}</tbody>
+                        </table>
+                    `;
+                }
+
+                const sortedSessionKeys = Object.keys(daySessions).sort();
+
+                sortedSessionKeys.forEach(key => {
+                    const session = daySessions[key];
+                    
+                    for (let i = 0; i < session.students.length; i += STUDENTS_PER_PAGE) {
+                        const pageStudents = session.students.slice(i, i + STUDENTS_PER_PAGE);
+                        totalPagesGenerated++;
+                        
+                        const col1Students = pageStudents.slice(0, STUDENTS_PER_COLUMN);
+                        const col2Students = pageStudents.slice(STUDENTS_PER_COLUMN); // (V31) Changed to get rest of students
+
+                        allPagesHtml += `
+                            <div class="print-page print-page-daywise">
+                                <!-- V89: Wrap headers in group to prevent page break -->
+                                <div class="print-header-group">
+                                    <!-- V49: Title Updated -->
+                                    <h1>Seating Details for Candidates</h1>
+                                    <!-- V48: Use college name -->
+                                    <h2>${currentCollegeName} &nbsp;|&nbsp; ${session.Date} &nbsp;|&nbsp; ${session.Time}</h2>
+                                </div>
+                                <div class="column-container">
+                                    <div class="column">
+                                        ${buildColumnTable(col1Students)}
+                                    </div>
+                                    <div class="column">
+                                        ${col2Students.length > 0 ? buildColumnTable(col2Students) : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+
+                // 8. Show report and controls
+                reportOutputArea.innerHTML = allPagesHtml;
+                reportOutputArea.style.display = 'block'; 
+                reportStatus.textContent = `Generated ${totalPagesGenerated} compact pages for ${sortedSessionKeys.length} sessions.`;
+                reportControls.classList.remove('hidden');
+                roomCsvDownloadContainer.innerHTML = ""; // This report has no CSV
+
+            } catch (e) {
+                console.error("Error generating day-wise report:", e);
+                reportStatus.textContent = "An error occurred while generating the report.";
+                reportControls.classList.remove('hidden');
+            } finally {
+                generateDaywiseReportButton.disabled = false;
+                // V49: Button text updated
+                generateDaywiseReportButton.textContent = "Generate Seating Details for Candidates (Compact)";
+            }
+        });
+        
+        // --- (V56) Event listener for "Generate Absentee Statement" ---
+        generateAbsenteeReportButton.addEventListener('click', async () => {
+            const sessionKey = sessionSelect.value;
+            if (!sessionKey) {
+                alert("Please select a session first.");
+                return;
+            }
+
+            generateAbsenteeReportButton.disabled = true;
+            generateAbsenteeReportButton.textContent = "Generating...";
+            await new Promise(resolve => setTimeout(resolve, 50));
+            
+            try {
+                // 1. Get all students for this session
+                const [date, time] = sessionKey.split(' | ');
+                const sessionStudents = allStudentData.filter(s => s.Date === date && s.Time === time);
+                
+                // 2. Get absentee register numbers for this session
+                const allAbsentees = JSON.parse(localStorage.getItem(ABSENTEE_LIST_KEY) || '{}');
+                const absenteeRegNos = new Set(allAbsentees[sessionKey] || []);
+                
+                // 3. Group students by Course
+                const courses = {};
+                for (const student of sessionStudents) {
+                    const courseDisplay = student.Course;
+                    const courseKey = student['Course Code']; // V87: Use the reliable Course Code
+                    
+                    if (!courses[courseKey]) {
+                        courses[courseKey] = {
+                            name: courseDisplay, // Store the display name
+                            present: [],
+                            absent: []
+                        };
+                    }
+                    
+                    if (absenteeRegNos.has(student['Register Number'])) {
+                        courses[courseKey].absent.push(student['Register Number']);
+                    } else {
+                        courses[courseKey].present.push(student['Register Number']);
+                    }
+                }
+                
+                // 4. Build Report Pages
+                let allPagesHtml = '';
+                let totalPages = 0;
+                const sortedCourseKeys = Object.keys(courses).sort();
+                
+                // V58: Load QP codes
+                loadQPCodes(); // Ensure qpCodeMap is up-to-date
+                
+                for (const courseKey of sortedCourseKeys) {
+                    totalPages++;
+                    const courseData = courses[courseKey];
+                    // V87: Use the Course Code (key) for lookup
+                    const qpCode = qpCodeMap[courseKey] || "____"; 
+                    
+                    // V57: Add page break logic. Each course is a new page.
+                    allPagesHtml += `
+                        <div class="print-page">
+                            <!-- V57: Header repeated on each page -->
+                            <!-- V89: Wrap headers in group to prevent page break -->
+                            <div class="print-header-group">
+                                <h1>${currentCollegeName}</h1>
+                                <h2>Absentee Statement</h2>
+                                <h3>${date} &nbsp;|&nbsp; ${time}</h3>
+                            </div>
+                        
+                            <table class="absentee-report-table print-table">
+                                <thead>
+                                    <tr>
+                                        <!-- V58: Added QP Code -->
+                                        <th colspan="2">Course: ${courseData.name} &nbsp;&nbsp; [ QP Code: ${qpCode} ]</th>
+                                    </tr>
+                                    <tr>
+                                        <th>Status</th>
+                                        <th>Register Numbers</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Present (${courseData.present.length})</strong></td>
+                                        <td class="regno-list">
+                                            ${courseData.present.length > 0 ? courseData.present.map(regNo => `<span>${regNo}</span>`).join('') : '<em>None</em>'}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Absent (${courseData.absent.length})</strong></td>
+                                        <td class="regno-list">
+                                            ${courseData.absent.length > 0 ? courseData.absent.map(regNo => `<span>${regNo}</span>`).join('') : '<em>None</em>'}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                            <div class="absentee-footer">
+                                <div class="signature">
+                                    Chief Superintendent
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // 5. Show report and controls
+                reportOutputArea.innerHTML = allPagesHtml;
+                reportOutputArea.style.display = 'block'; 
+                reportStatus.textContent = `Generated ${totalPages} page(s) for ${sortedCourseKeys.length} courses.`;
+                reportControls.classList.remove('hidden');
+                roomCsvDownloadContainer.innerHTML = ""; // This report has no CSV
+
+            } catch (e) {
+                console.error("Error generating absentee report:", e);
+                reportStatus.textContent = "An error occurred while generating the report.";
+                reportControls.classList.remove('hidden');
+            } finally {
+                generateAbsenteeReportButton.disabled = false;
+                generateAbsenteeReportButton.textContent = "Generate Absentee Statement";
+            }
+        });
+
+        // --- Event listener for the "Print" button ---
         finalPrintButton.addEventListener('click', () => {
             window.print();
         });
 
-        // --- 3. Event listener for the "Clear" button ---
-        clearReportButton.addEventListener('click', () => {
+        // --- Event listener for the "Clear" button ---
+        clearReportButton.addEventListener('click', clearReport);
+        
+        // --- Centralized logic for clearing reports ---
+        function clearReport() {
             reportOutputArea.innerHTML = "";
             reportOutputArea.style.display = 'none'; 
             reportControls.classList.add('hidden');
+            roomCsvDownloadContainer.innerHTML = ""; // Clear CSV button
+            lastGeneratedRoomData = []; // Clear data
+        }
+        
+        // --- Function to download the room-allocated CSV ---
+        function downloadRoomCsv() {
+            if (!lastGeneratedRoomData || lastGeneratedRoomData.length === 0) {
+                alert("No room data to download.");
+                return;
+            }
+            
+            // (V28) Add Location to CSV
+            const headers = ['Date', 'Time', 'Course', 'Course Code', 'Register Number', 'Name', 'Room No', 'Location'];
+            let csvContent = headers.join(",") + "\n";
+            
+            lastGeneratedRoomData.forEach(row => {
+                // (V28) Get location for this row
+                const roomInfo = currentRoomConfig[row['Room No']];
+                const location = (roomInfo && roomInfo.location) ? roomInfo.location.toString() : "";
+                row['Location'] = location; // Add it to the row object for mapping
+                
+                const values = headers.map(header => {
+                    let val = row[header] ? row[header].toString() : "";
+                    val = val.replace(/"/g, '""');
+                    if (val.includes(',')) {
+                        val = `"${val}"`;
+                    }
+                    return val;
+                });
+                csvContent += values.join(",") + "\n";
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", "Room_Allocation_Report.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        
+        // --- NAVIGATION VIEW-SWITCHING LOGIC ---
+        navExtractor.addEventListener('click', () => showView(viewExtractor, navExtractor));
+        navSettings.addEventListener('click', () => showView(viewSettings, navSettings));
+        navRoomSettings.addEventListener('click', () => showView(viewRoomSettings, navRoomSettings)); // V83
+        navQPCodes.addEventListener('click', () => showView(viewQPCodes, navQPCodes)); // V58
+        navReports.addEventListener('click', () => showView(viewReports, navReports));
+        navAbsentees.addEventListener('click', () => showView(viewAbsentees, navAbsentees)); // V56
+        
+        function showView(viewToShow, buttonToActivate) {
+            allViews.forEach(view => view.classList.add('hidden'));
+            allNavButtons.forEach(btn => {
+                btn.classList.add('nav-button-inactive');
+                btn.classList.remove('nav-button-active');
+            });
+            viewToShow.classList.remove('hidden');
+            buttonToActivate.classList.remove('nav-button-inactive');
+            buttonToActivate.classList.add('nav-button-active');
+            
+            clearReport(); // Always clear reports when switching views
+        }
+
+        // --- (V87) NEW SETTINGS & ROOMS LOGIC (Split Tabs) ---
+        
+        // --- Save College Name Button ---
+        saveCollegeNameButton.addEventListener('click', () => {
+            const collegeName = collegeNameInput.value.trim() || "University of Calicut";
+            localStorage.setItem(COLLEGE_NAME_KEY, collegeName);
+            currentCollegeName = collegeName; // Update global var
+            
+            collegeNameStatus.textContent = "College Name Saved!";
+            setTimeout(() => { collegeNameStatus.textContent = ""; }, 2000);
         });
+
+        // --- Save Room Config Button ---
+        saveRoomConfigButton.addEventListener('click', () => {
+            try {
+                const newConfig = {};
+                const roomRows = roomConfigContainer.querySelectorAll('.room-row');
+                
+                roomRows.forEach(row => {
+                    const roomName = row.querySelector('.room-name-label').textContent.replace(':', '').trim();
+                    let capacity = parseInt(row.querySelector('.room-capacity-input').value, 10);
+                    let location = row.querySelector('.room-location-input').value.trim();
+                    
+                    if (isNaN(capacity) || capacity <= 0) capacity = 30;
+                    
+                    if (roomName) {
+                        newConfig[roomName] = { capacity: capacity, location: location };
+                    }
+                });
+                
+                localStorage.setItem(ROOM_CONFIG_KEY, JSON.stringify(newConfig));
+                
+                roomConfigStatus.textContent = "Settings saved successfully!";
+                setTimeout(() => { roomConfigStatus.textContent = ""; }, 2000);
+                
+                loadRoomConfig(); // Re-render the list
+                
+            } catch (e) {
+                roomConfigStatus.textContent = "Error saving settings.";
+                console.error("Error saving room config:", e);
+            }
+        });
+
+        // --- (V87) Load data into dynamic form (no college name) ---
+        function loadRoomConfig() {
+            // Load College Name (into its own input)
+            currentCollegeName = localStorage.getItem(COLLEGE_NAME_KEY) || "University of Calicut";
+            collegeNameInput.value = currentCollegeName;
+            
+            // Load Room Config
+            let savedConfigJson = localStorage.getItem(ROOM_CONFIG_KEY);
+            let config;
+            
+            if (savedConfigJson) {
+                try {
+                    config = JSON.parse(savedConfigJson);
+                } catch (e) {
+                    console.error("Error parsing saved config, resetting.", e);
+                    config = {};
+                }
+            } else {
+                config = {};
+            }
+            
+            currentRoomConfig = config;
+            
+            if (Object.keys(config).length === 0) {
+                // Default to 30 rooms
+                config = {};
+                for (let i = 1; i <= 30; i++) {
+                    config[`Room ${i}`] = { capacity: 30, location: "" };
+                }
+                localStorage.setItem(ROOM_CONFIG_KEY, JSON.stringify(config));
+                currentRoomConfig = config; // Update global var
+            }
+            
+            // Populate the dynamic form
+            roomConfigContainer.innerHTML = ''; // Clear existing rows
+            const sortedKeys = Object.keys(config).sort((a, b) => {
+                const numA = parseInt(a.replace(/\D/g, ''), 10) || 0;
+                const numB = parseInt(b.replace(/\D/g, ''), 10) || 0;
+                return numA - numB;
+            });
+            
+            // V79: Add rows, determining if 'isLast' is true
+            sortedKeys.forEach((roomName, index) => {
+                const roomData = config[roomName];
+                const isLast = (index === sortedKeys.length - 1);
+                const rowHtml = createRoomRowHtml(roomName, roomData.capacity, roomData.location, isLast);
+                roomConfigContainer.insertAdjacentHTML('beforeend', rowHtml);
+            });
+        }
+        
+        // --- (V28) Add New Room Button (with location) ---
+        addRoomButton.addEventListener('click', () => {
+            const allRows = roomConfigContainer.querySelectorAll('.room-row');
+            let newName = "Room 1";
+            
+            if (allRows.length > 0) {
+                const lastRow = allRows[allRows.length - 1];
+                const lastName = lastRow.querySelector('.room-name-label').textContent.replace(':', '').trim();
+                let lastNum = 0;
+                try {
+                    lastNum = parseInt(lastName.match(/(\d+)/)[0], 10);
+                } catch(e) {
+                    lastNum = allRows.length; // Fallback
+                }
+                newName = `Room ${lastNum + 1}`;
+            }
+            
+            // V79: Before adding new row, remove remove button from the current last row
+            const currentLastRow = roomConfigContainer.lastElementChild;
+            if (currentLastRow) {
+                const removeButton = currentLastRow.querySelector('.remove-room-button');
+                if (removeButton) {
+                    const placeholder = document.createElement('div');
+                    placeholder.className = 'w-20'; // Match the button width for alignment
+                    removeButton.parentNode.replaceChild(placeholder, removeButton);
+                }
+            }
+
+            const newRowHtml = createRoomRowHtml(newName, 30, "", true); // Add new row as the last row
+            roomConfigContainer.insertAdjacentHTML('beforeend', newRowHtml);
+        });
+        
+        // --- (V79) Remove Room Button (Event Delegation for all rows) ---
+        roomConfigContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('remove-room-button')) {
+                e.target.closest('.room-row').remove();
+                
+                // Re-save configuration to update the room names and persist the deletion
+                saveRoomConfigButton.click(); // Triggers re-saving and re-rendering to fix numbering and buttons
+            }
+        });
+        
+        
+        // --- Q-PAPER REPORT LOGIC ---
+        generateQPaperReportButton.addEventListener('click', async () => {
+            generateQPaperReportButton.disabled = true;
+            generateQPaperReportButton.textContent = "Generating...";
+            reportOutputArea.innerHTML = "";
+            reportControls.classList.add('hidden');
+            roomCsvDownloadContainer.innerHTML = "";
+            await new Promise(resolve => setTimeout(resolve, 50));
+            
+            try {
+                // V68: Get Filtered data
+                const filteredData = getFilteredReportData('q-paper');
+                
+                // Group the filtered data to generate the Q-Paper summary dynamically
+                const qPaperSummary = {};
+                filteredData.forEach(item => {
+                    const key = `${item.Date}_${item.Time}`;
+                    if (!qPaperSummary[key]) {
+                        qPaperSummary[key] = { Date: item.Date, Time: item.Time, courses: {} };
+                    }
+                    const courseKey = item.Course;
+                    if (!qPaperSummary[key].courses[courseKey]) {
+                        qPaperSummary[key].courses[courseKey] = 0;
+                    }
+                    qPaperSummary[key].courses[courseKey]++;
+                });
+
+                const sessions = qPaperSummary;
+                
+                if (Object.keys(sessions).length === 0) {
+                    alert("No question paper data found for the selected filter/session.");
+                    return;
+                }
+                
+                let allPagesHtml = '';
+                let totalPages = 0;
+                const sortedSessionKeys = Object.keys(sessions).sort((a, b) => a.localeCompare(b));
+                
+                sortedSessionKeys.forEach(key => {
+                    const session = sessions[key];
+                    totalPages++;
+                    let totalStudentsInSession = 0;
+                    
+                    let tableRowsHtml = '';
+                    const sortedCourses = Object.keys(session.courses).sort();
+
+                    sortedCourses.forEach((courseName, index) => {
+                        const count = session.courses[courseName];
+                        totalStudentsInSession += count;
+                        tableRowsHtml += `
+                            <tr>
+                                <td class="sl-col">${index + 1}</td>
+                                <td class="course-col">${courseName}</td>
+                                <td class="count-col">${count}</td>
+                            </tr>
+                        `;
+                    });
+                    
+                    const pageHtml = `
+                        <div class="print-page">
+                            <!-- V89: Wrap headers in group to prevent page break -->
+                            <div class="print-header-group">
+                                <h1>${currentCollegeName}</h1> <!-- V48: Use college name -->
+                                <h2>Question Paper Summary</h2>
+                                <h3>${session.Date} &nbsp;|&nbsp; ${session.Time}</h3>
+                            </div>
+                            
+                            <table class="q-paper-table print-table">
+                                <thead>
+                                    <tr>
+                                        <th class="sl-col">Sl No</th>
+                                        <th class="course-col">Course Name</th>
+                                        <th class="count-col">Student Count</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${tableRowsHtml}
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="2" style="text-align: right;"><strong>Total Students</strong></td>
+                                        <td class="count-col"><strong>${totalStudentsInSession}</strong></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    `;
+                    allPagesHtml += pageHtml;
+                });
+                
+                reportOutputArea.innerHTML = allPagesHtml;
+                reportOutputArea.style.display = 'block'; 
+                reportStatus.textContent = `Generated ${totalPages} summary pages for ${sortedSessionKeys.length} sessions.`;
+                reportControls.classList.remove('hidden');
+
+            } catch(e) {
+                console.error("Error generating Q-Paper report:", e);
+                reportStatus.textContent = "An error occurred generating the report.";
+                reportControls.classList.remove('hidden');
+            } finally {
+                generateQPaperReportButton.disabled = false;
+                generateQPaperReportButton.textContent = "Generate Question Paper Report";
+            }
+        });
+        
+        // --- (V33) NEW CSV UPLOAD LOGIC ---
+        
+        // V33: Function called by Python to clear the CSV upload status
+        function clear_csv_upload_status() {
+            csvLoadStatus.textContent = "";
+            if (correctedCsvUpload) {
+                correctedCsvUpload.value = ""; // Clear the file input
+            }
+        }
+
+        // V33: Add event listener for the new "Load CSV" button
+        loadCsvButton.addEventListener('click', () => {
+            const file = correctedCsvUpload.files[0];
+            if (!file) {
+                csvLoadStatus.textContent = "Please select a CSV file first.";
+                return;
+            }
+            
+            // V67: Disable PDF input while CSV is being processed/loaded
+            document.getElementById('pdf-file').disabled = true;
+            document.getElementById('run-button').disabled = true;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const csvText = event.target.result;
+                parseCsvAndLoadData(csvText);
+            };
+            reader.onerror = () => {
+                csvLoadStatus.textContent = "Error reading file.";
+                document.getElementById('pdf-file').disabled = false;
+                document.getElementById('run-button').disabled = false;
+            };
+            reader.readAsText(file);
+        });
+
+        // V33: This function parses the CSV and overwrites the data stores
+        function parseCsvAndLoadData(csvText) {
+            try {
+                const lines = csvText.trim().split('\n');
+                const headersLine = lines.shift().trim();
+                const headers = headersLine.split(',');
+
+                // Find indices, this is more robust
+                const dateIndex = headers.indexOf('Date');
+                const timeIndex = headers.indexOf('Time');
+                const courseIndex = headers.indexOf('Course');
+                const courseCodeIndex = headers.indexOf('Course Code'); // V87
+                const regNumIndex = headers.indexOf('Register Number');
+                const nameIndex = headers.indexOf('Name');
+
+                if (regNumIndex === -1 || nameIndex === -1 || courseIndex === -1 || courseCodeIndex === -1) {
+                    csvLoadStatus.textContent = "Error: CSV must contain 'Date', 'Time', 'Course', 'Course Code', 'Register Number', and 'Name' headers.";
+                    csvLoadStatus.classList.add('text-red-600');
+                    csvLoadStatus.classList.remove('text-green-600');
+                    // V67: Re-enable PDF inputs
+                    document.getElementById('pdf-file').disabled = false;
+                    document.getElementById('run-button').disabled = false;
+                    return;
+                }
+
+                const jsonData = [];
+                const qPaperSummary = {}; // Use an object for quick lookup
+
+                for (const line of lines) {
+                    if (!line.trim()) continue;
+                    
+                    // Regex parser that handles quoted fields (commas inside courses)
+                    const regex = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
+                    const values = line.split(regex).map(val => val.trim().replace(/^"|"$/g, '')); // Trim and remove surrounding quotes
+
+                    if (values.length !== headers.length) {
+                        console.warn("Skipping malformed CSV line:", line);
+                        continue;
+                    }
+
+                    const student = {
+                        'Date': values[dateIndex],
+                        'Time': values[timeIndex],
+                        'Course': values[courseIndex], // V87: Clean Display Name
+                        'Course Code': values[courseCodeIndex], // V87: Clean Key
+                        'Register Number': values[regNumIndex],
+                        'Name': values[nameIndex]
+                    };
+                    
+                    jsonData.push(student);
+                    
+                    // --- Regenerate Q-Paper Summary ---
+                    const key = `${student.Date}_${student.Time}_${student.Course}`;
+                    if (!qPaperSummary[key]) {
+                        qPaperSummary[key] = { 
+                            Date: student.Date, 
+                            Time: student.Time, 
+                            Course: student.Course, 
+                            'Student Count': 0 
+                        };
+                    }
+                    qPaperSummary[key]['Student Count']++;
+                }
+                
+                const qPaperArray = Object.values(qPaperSummary);
+
+                // --- Update Data Stores ---
+                jsonDataStore.innerHTML = JSON.stringify(jsonData);
+                qPaperDataStore.innerHTML = JSON.stringify(qPaperArray);
+                
+                // V65: Save the base data to localStorage
+                localStorage.setItem(BASE_DATA_KEY, JSON.stringify(jsonData))
+
+                // --- Update UI ---
+                csvLoadStatus.textContent = `Successfully loaded and parsed ${jsonData.length} student records.`;
+                csvLoadStatus.classList.remove('text-red-600');
+                csvLoadStatus.classList.add('text-green-600');
+                
+                // Enable report buttons
+                generateReportButton.disabled = false;
+                generateQPaperReportButton.disabled = false;
+                generateDaywiseReportButton.disabled = false;
+                
+                // V56: Enable and populate absentee tab
+                disable_absentee_tab(false);
+                populate_session_dropdown();
+                
+                // V61: Enable and populate QP Code tab
+                disable_qpcode_tab(false);
+                populate_qp_code_session_dropdown();
+                
+                // V67: Disable CSV input while PDF input is enabled (since CSV is the new source)
+                document.getElementById('pdf-file').disabled = false;
+                document.getElementById('run-button').disabled = false;
+
+
+            } catch (e) {
+                console.error("Error parsing CSV:", e);
+                csvLoadStatus.textContent = "Error parsing CSV file. See console for details.";
+                csvLoadStatus.classList.add('text-red-600');
+                csvLoadStatus.classList.remove('text-green-600');
+                // V67: Re-enable PDF inputs
+                document.getElementById('pdf-file').disabled = false;
+                document.getElementById('run-button').disabled = false;
+            }
+        }
+        
+        
+        // --- (V56) NEW ABSENTEE LOGIC ---
+        
+        function disable_absentee_tab(disabled) {
+            navAbsentees.disabled = disabled;
+            if (disabled) {
+                absenteeLoader.classList.remove('hidden');
+                absenteeContentWrapper.classList.add('hidden');
+                navAbsentees.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                absenteeLoader.classList.add('hidden');
+                absenteeContentWrapper.classList.remove('hidden');
+                navAbsentees.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+        
+        function populate_session_dropdown() {
+            try {
+                allStudentData = JSON.parse(jsonDataStore.innerHTML || '[]');
+                if (allStudentData.length === 0) {
+                    disable_absentee_tab(true);
+                    return;
+                }
+                
+                // Get unique sessions
+                const sessions = new Set(allStudentData.map(s => `${s.Date} | ${s.Time}`));
+                allStudentSessions = Array.from(sessions).sort();
+                
+                sessionSelect.innerHTML = '<option value="">-- Select a Session --</option>'; // Clear
+                reportsSessionSelect.innerHTML = '<option value="all">All Sessions</option>'; // V68: Clear and set default for reports
+                
+                // Find today's session
+                const today = new Date();
+                const todayStr = today.toLocaleDateString('en-GB').replace(/\//g, '.'); // DD.MM.YYYY
+                let defaultSession = "";
+                
+                allStudentSessions.forEach(session => {
+                    sessionSelect.innerHTML += `<option value="${session}">${session}</option>`;
+                    reportsSessionSelect.innerHTML += `<option value="${session}">${session}</option>`; // V68
+                    if (session.startsWith(todayStr)) {
+                        defaultSession = session;
+                    }
+                });
+                
+                if (defaultSession) {
+                    sessionSelect.value = defaultSession;
+                    sessionSelect.dispatchEvent(new Event('change')); // Trigger change to load list
+                }
+                
+                // V68: Ensure report filters are visible and default set
+                reportFilterSection.classList.remove('hidden');
+                // V81: Set Specific Session as default
+                filterSessionRadio.checked = true;
+                reportsSessionDropdownContainer.classList.remove('hidden');
+                // Ensure the report select box defaults to today's session if found
+                reportsSessionSelect.value = defaultSession || reportsSessionSelect.options[1]?.value || "all";
+
+            } catch (e) {
+                console.error("Failed to populate sessions:", e);
+                disable_absentee_tab(true);
+            }
+        }
+        
+        sessionSelect.addEventListener('change', () => {
+            const sessionKey = sessionSelect.value;
+            if (sessionKey) {
+                absenteeSearchSection.classList.remove('hidden');
+                absenteeListSection.classList.remove('hidden');
+                generateAbsenteeReportButton.disabled = false;
+                loadAbsenteeList(sessionKey);
+            } else {
+                absenteeSearchSection.classList.add('hidden');
+                absenteeListSection.classList.add('hidden');
+                generateAbsenteeReportButton.disabled = true;
+                currentAbsenteeListDiv.innerHTML = "";
+            }
+            clearSearch();
+        });
+        
+        absenteeSearchInput.addEventListener('input', () => {
+            const query = absenteeSearchInput.value.trim().toUpperCase();
+            if (query.length < 3) {
+                autocompleteResults.classList.add('hidden');
+                return;
+            }
+            
+            const sessionKey = sessionSelect.value;
+            if (!sessionKey) return;
+            const [date, time] = sessionKey.split(' | ');
+            
+            // Filter students for this session
+            const sessionStudents = allStudentData.filter(s => s.Date === date && s.Time === time);
+            
+            // Filter by search query
+            const matches = sessionStudents.filter(s => s['Register Number'].toUpperCase().includes(query)).slice(0, 10);
+            
+            if (matches.length > 0) {
+                autocompleteResults.innerHTML = '';
+                matches.forEach(student => {
+                    const item = document.createElement('div');
+                    item.className = 'autocomplete-item';
+                    item.innerHTML = student['Register Number'].replace(new RegExp(query, 'gi'), '<strong>$&</strong>') + ` (${student.Name})`;
+                    item.onclick = () => selectStudent(student);
+                    autocompleteResults.appendChild(item);
+                });
+                autocompleteResults.classList.remove('hidden');
+            } else {
+                autocompleteResults.classList.add('hidden');
+            }
+        });
+        
+        function selectStudent(student) {
+            selectedStudent = student;
+            absenteeSearchInput.value = student['Register Number'];
+            autocompleteResults.classList.add('hidden');
+            
+            // V87 FIX: Allocate rooms for the *entire* session to find the correct room
+            const sessionKey = sessionSelect.value;
+            const [date, time] = sessionKey.split(' | ');
+            const sessionStudents = allStudentData.filter(s => s.Date === date && s.Time === time);
+            
+            // Perform allocation on the *entire* session
+            const allocatedSessionData = performRoomAllocation(sessionStudents);
+            
+            // Find our selected student in the allocated list
+            const allocatedStudent = allocatedSessionData.find(s => s['Register Number'] === student['Register Number']);
+            
+            const roomNo = allocatedStudent ? allocatedStudent['Room No'] : 'N/A';
+            const roomInfo = currentRoomConfig[roomNo];
+            const location = (roomInfo && roomInfo.location) ? `(${roomInfo.location})` : "";
+            
+            selectedStudentName.textContent = student.Name;
+            selectedStudentCourse.textContent = student.Course;
+            selectedStudentRoom.textContent = `Room: ${roomNo} ${location}`; // Use the correctly allocated room
+            selectedStudentDetails.classList.remove('hidden');
+        }
+        
+        function clearSearch() {
+            selectedStudent = null;
+            absenteeSearchInput.value = "";
+            autocompleteResults.classList.add('hidden');
+            selectedStudentDetails.classList.add('hidden');
+        }
+        
+        addAbsenteeButton.addEventListener('click', () => {
+            if (!selectedStudent) return;
+            
+            const sessionKey = sessionSelect.value;
+            const regNo = selectedStudent['Register Number'];
+            
+            if (currentAbsenteeList.includes(regNo)) {
+                alert(`${regNo} is already on the absentee list.`);
+                clearSearch();
+                return;
+            }
+            
+            // Add to list and save
+            currentAbsenteeList.push(regNo);
+            saveAbsenteeList(sessionKey);
+            renderAbsenteeList();
+            clearSearch();
+        });
+        
+        function loadAbsenteeList(sessionKey) {
+            const allAbsentees = JSON.parse(localStorage.getItem(ABSENTEE_LIST_KEY) || '{}');
+            currentAbsenteeList = allAbsentees[sessionKey] || [];
+            renderAbsenteeList();
+        }
+        
+        function saveAbsenteeList(sessionKey) {
+            const allAbsentees = JSON.parse(localStorage.getItem(ABSENTEE_LIST_KEY) || '{}');
+            allAbsentees[sessionKey] = currentAbsenteeList;
+            localStorage.setItem(ABSENTEE_LIST_KEY, JSON.stringify(allAbsentees));
+        }
+        
+        function renderAbsenteeList() {
+            const sessionKey = sessionSelect.value;
+            currentAbsenteeListDiv.innerHTML = "";
+            
+            if (currentAbsenteeList.length === 0) {
+                currentAbsenteeListDiv.innerHTML = `<em class="text-gray-500">No absentees marked for this session.</em>`;
+                return;
+            }
+
+            // V81 FIX: Allocate rooms for the entire session first to get correct room numbers
+            const [date, time] = sessionKey.split(' | ');
+            const sessionStudents = allStudentData.filter(s => s.Date === date && s.Time === time);
+            const allocatedSessionData = performRoomAllocation(sessionStudents);
+            const allocatedMap = allocatedSessionData.reduce((map, s) => {
+                map[s['Register Number']] = s['Room No'];
+                return map;
+            }, {});
+
+            currentAbsenteeList.forEach(regNo => {
+                const room = allocatedMap[regNo] || 'N/A'; // Get the correct room from the map
+                const roomInfo = currentRoomConfig[room];
+                const location = (roomInfo && roomInfo.location) ? `(${roomInfo.location})` : "";
+                const roomDisplay = `${room} ${location}`;
+                
+                const item = document.createElement('div');
+                item.className = 'flex justify-between items-center p-2 bg-white border border-gray-200 rounded';
+                item.innerHTML = `
+                    <span class="font-medium">${regNo}</span>
+                    <span class="text-sm text-gray-500">${roomDisplay}</span>
+                    <button class="text-xs text-red-600 hover:text-red-800 font-medium">&times; Remove</button>
+                `;
+                item.querySelector('button').onclick = () => removeAbsentee(regNo);
+                currentAbsenteeListDiv.appendChild(item);
+            });
+        }
+        
+        function removeAbsentee(regNo) {
+            currentAbsenteeList = currentAbsenteeList.filter(r => r !== regNo);
+            saveAbsenteeList(sessionSelect.value);
+            renderAbsenteeList();
+        }
+        
+        // --- (V87) NEW QP CODE LOGIC (Using Course Code as Key) ---
+        
+        function disable_qpcode_tab(disabled) {
+            navQPCodes.disabled = disabled;
+            if (disabled) {
+                qpcodeLoader.classList.remove('hidden');
+                qpcodeContentWrapper.classList.add('hidden');
+                navQPCodes.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                qpcodeLoader.classList.add('hidden');
+                qpcodeContentWrapper.classList.remove('hidden');
+                navQPCodes.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+        
+        function loadQPCodes() {
+            // V87: This map uses Course Code as the key
+            qpCodeMap = JSON.parse(localStorage.getItem(QP_CODE_LIST_KEY) || '{}');
+        }
+        
+        // V61: Populates the QP Code session dropdown
+        function populate_qp_code_session_dropdown() {
+            try {
+                if (allStudentData.length === 0) {
+                     allStudentData = JSON.parse(jsonDataStore.innerHTML || '[]');
+                }
+                if (allStudentData.length === 0) {
+                    disable_qpcode_tab(true);
+                    return;
+                }
+                
+                // Get unique sessions (same as absentee tab)
+                const sessions = new Set(allStudentData.map(s => `${s.Date} | ${s.Time}`));
+                allStudentSessions = Array.from(sessions).sort();
+                
+                sessionSelectQP.innerHTML = '<option value="">-- Select a Session --</option>'; // Clear
+                
+                // Find today's session
+                const today = new Date();
+                const todayStr = today.toLocaleDateString('en-GB').replace(/\//g, '.'); // DD.MM.YYYY
+                let defaultSession = "";
+                
+                allStudentSessions.forEach(session => {
+                    sessionSelectQP.innerHTML += `<option value="${session}">${session}</option>`;
+                    if (session.startsWith(todayStr)) {
+                        defaultSession = session;
+                    }
+                });
+                
+                if (defaultSession) {
+                    sessionSelectQP.value = defaultSession;
+                    sessionSelectQP.dispatchEvent(new Event('change')); // Trigger change to load course list
+                }
+
+            } catch (e) {
+                console.error("Failed to populate QP sessions:", e);
+                disable_qpcode_tab(true);
+            }
+        }
+
+        // V61: Event listener for the QP Code session dropdown
+        sessionSelectQP.addEventListener('change', () => {
+            const sessionKey = sessionSelectQP.value;
+            if (sessionKey) {
+                qpEntrySection.classList.remove('hidden');
+                render_qp_code_list(sessionKey);
+            } else {
+                qpEntrySection.classList.add('hidden');
+                qpCodeContainer.innerHTML = '';
+                qpCodeStatus.textContent = '';
+                saveQpCodesButton.disabled = true; // V62: Disable save button
+            }
+        });
+        
+        // V87: Renders the course list for the selected session
+        function render_qp_code_list(sessionKey) {
+            
+            // 1. Filter students for this specific session
+            const [date, time] = sessionKey.split(' | ');
+            const sessionStudents = allStudentData.filter(s => s.Date === date && s.Time === time);
+            
+            // 2. Get unique courses for this session
+            // V87: Use a Map to get unique codes->names
+            const sessionCourses = new Map(sessionStudents.map(s => [s['Course Code'], s.Course]));
+            
+            // 3. Load saved codes
+            loadQPCodes();
+            
+            // 4. Populate the UI
+            qpCodeContainer.innerHTML = ''; // Clear old
+            
+            if (sessionCourses.size === 0) {
+                qpCodeContainer.innerHTML = '<p class="text-center text-gray-500">No courses found for this session.</p>';
+                saveQpCodesButton.disabled = true; 
+                return;
+            }
+
+            // Sort by Course Code
+            const sortedCourses = [...sessionCourses.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+
+            sortedCourses.forEach(([courseCode, courseName]) => {
+                const savedCode = qpCodeMap[courseCode] || "";
+                
+                qpCodeContainer.innerHTML += `
+                    <div class="flex items-center gap-3 p-2 border-b border-gray-200">
+                        <label class="font-medium text-gray-700 w-2/3 text-sm">${courseName}</label>
+                        <input type="text" 
+                               class="qp-code-input block w-1/3 p-2 border border-gray-300 rounded-md shadow-sm text-sm" 
+                               value="${savedCode}" 
+                               data-course-code="${courseCode}" 
+                               placeholder="Enter QP Code">
+                    </div>
+                `;
+            });
+            saveQpCodesButton.disabled = false; // Enable save button
+            qpCodeStatus.textContent = ''; // Clear status on new load
+        }
+        
+        // V87: Manual Save Button Handler (uses Course Code)
+        saveQpCodesButton.addEventListener('click', () => {
+            // 1. Iterate over all visible inputs and update the global map
+            const qpInputs = qpCodeContainer.querySelectorAll('.qp-code-input');
+            
+            let saveCount = 0;
+            
+            qpInputs.forEach(input => {
+                const courseCode = input.dataset.courseCode; // V87: Use the reliable code
+                const qpCode = input.value.trim();
+
+                if (courseCode) {
+                    qpCodeMap[courseCode] = qpCode; // Save to global map
+                    saveCount++;
+                }
+            });
+
+            // 2. Commit the global map (which was just updated) to localStorage
+            localStorage.setItem(QP_CODE_LIST_KEY, JSON.stringify(qpCodeMap));
+
+            // 3. Show success message
+            qpCodeStatus.classList.remove('text-red-600');
+            qpCodeStatus.classList.add('text-green-600');
+            qpCodeStatus.textContent = `QP Codes saved successfully!`;
+            setTimeout(() => { qpCodeStatus.textContent = ""; }, 2000);
+        });
+
+        // V87: Input listener now just shows pending status
+        qpCodeContainer.addEventListener('input', (e) => {
+            if (e.target.classList.contains('qp-code-input')) {
+                // Show pending status
+                qpCodeStatus.classList.remove('text-green-600');
+                qpCodeStatus.classList.add('text-red-600');
+                qpCodeStatus.textContent = 'Unsaved changes... Click SAVE QP CODES to commit.';
+            }
+        });
+
+        
+        // --- V68: Report Filter Logic ---
+        filterSessionRadio.addEventListener('change', () => {
+            if (filterSessionRadio.checked) {
+                reportsSessionDropdownContainer.classList.remove('hidden');
+                reportsSessionSelect.value = reportsSessionSelect.options[1]?.value || ""; // Default to first session
+            }
+        });
+
+        filterAllRadio.addEventListener('change', () => {
+            if (filterAllRadio.checked) {
+                reportsSessionDropdownContainer.classList.add('hidden');
+                reportsSessionSelect.value = reportsSessionSelect.options[0]?.value || "all"; // Reset to All
+            }
+        });
+
+        // --- V68: Master Reset Button Logic ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const masterResetButton = document.getElementById('master-reset-button');
+            
+            if (masterResetButton) {
+                masterResetButton.addEventListener('click', () => {
+                    // V70 FIX: Use alert/confirm instead of modal due to iframe constraints
+                    const step1 = confirm('WARNING: This will clear ALL saved data (Rooms, College Name, Absentees, QP Codes, and Base Data) from your browser. Continue?');
+                    if (!step1) return;
+                    
+                    const step2 = confirm('ARE YOU ABSOLUTELY SURE? This action cannot be undone.');
+                    if (step2) {
+                        localStorage.clear();
+                        alert('All local data cleared. The application will now reload.');
+                        window.location.reload();
+                    }
+                });
+            }
+        });
+
+
+        // --- V65: Initial Data Load on Startup ---
+        function loadInitialData() {
+            // 1. Load configuration and UI elements (Room settings, college name)
+            loadRoomConfig();
+            
+            // 2. Check for base student data persistence
+            const savedDataJson = localStorage.getItem(BASE_DATA_KEY);
+            if (savedDataJson) {
+                try {
+                    const savedData = JSON.parse(savedDataJson);
+                    if (savedData && savedData.length > 0) {
+                        
+                        // We create dummy data stores to allow reports to run
+                        const qPaperSummary = {};
+                        
+                        savedData.forEach(student => {
+                            const key = `${student.Date}_${student.Time}_${student.Course}`;
+                            if (!qPaperSummary[key]) {
+                                qPaperSummary[key] = { 
+                                    Date: student.Date, 
+                                    Time: student.Time, 
+                                    Course: student.Course, 
+                                    'Student Count': 0 
+                                };
+                            }
+                            qPaperSummary[key]['Student Count']++;
+                        });
+                        
+                        // Update JSON Data Stores
+                        jsonDataStore.innerHTML = JSON.stringify(savedData);
+                        qPaperDataStore.innerHTML = JSON.stringify(Object.values(qPaperSummary));
+                        
+                        // Enable UI tabs
+                        generateReportButton.disabled = false;
+                        generateQPaperReportButton.disabled = false;
+                        generateDaywiseReportButton.disabled = false;
+                        disable_absentee_tab(false);
+                        disable_qpcode_tab(false);
+                        populate_session_dropdown();
+                        populate_qp_code_session_dropdown();
+                        
+                        console.log(`Successfully loaded ${savedData.length} records from local storage.`);
+                        
+                        // Update log status (Optional, good for user feedback)
+                        document.getElementById("status-log").innerHTML = `<p class="mb-1 text-green-700">&gt; [${new Date().toLocaleTimeString()}] Successfully loaded data from previous session.</p>`;
+                        document.getElementById("status-log").scrollTop = document.getElementById("status-log").scrollHeight;
+
+
+                    }
+                } catch(e) {
+                    console.error("Failed to load BASE_DATA_KEY from localStorage. Clearing key.", e);
+                    localStorage.removeItem(BASE_DATA_KEY);
+                }
+            }
+        }
+        
+        // V67: Disable CSV input on load if data is loaded, and enable PDF button
+        if (jsonDataStore.innerHTML && JSON.parse(jsonDataStore.innerHTML || '[]').length > 0) {
+            correctedCsvUpload.disabled = false;
+            loadCsvButton.disabled = false;
+            document.getElementById('pdf-file').disabled = false;
+            document.getElementById('run-button').disabled = false;
+        } else {
+             // If no data is loaded, keep reports disabled, but enable PDF/CSV inputs
+            document.getElementById('pdf-file').disabled = false;
+            document.getElementById('run-button').disabled = false;
+            correctedCsvUpload.disabled = false;
+            loadCsvButton.disabled = false;
+        }
+        
+        // V67: Prevent user from trying to run extraction if CSV load is active
+        document.getElementById('pdf-file').addEventListener('change', () => {
+            if (document.getElementById('pdf-file').files.length > 0) {
+                correctedCsvUpload.disabled = true;
+                loadCsvButton.disabled = true;
+            } else {
+                correctedCsvUpload.disabled = false;
+                loadCsvButton.disabled = false;
+            }
+        });
+        
+        // V67: Prevent user from trying to load CSV if PDF is selected
+        correctedCsvUpload.addEventListener('change', () => {
+            if (correctedCsvUpload.files.length > 0) {
+                document.getElementById('pdf-file').disabled = true;
+                document.getElementById('run-button').disabled = true;
+            } else {
+                document.getElementById('pdf-file').disabled = false;
+                document.getElementById('run-button').disabled = false;
+            }
+        });
+
+        // --- Run on initial page load ---
+        loadInitialData(); // V65: Run this first!
+
     </script>
 
 </body>
 </html>
+

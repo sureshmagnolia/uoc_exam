@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Updated Title -->
-    <title>UOC Exam Management V67</title>
+    <title>UOC Exam Management V68</title>
     
     <!-- Load Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -617,7 +617,7 @@
         </div>
     </div>
     
-    <!-- *** "Reports" View (V33 Update: Removed CSV Upload) *** -->
+    <!-- *** "Reports" View (V68: Filter Added) *** -->
     <div id="view-reports" class="container max-w-2xl mx-auto p-4 min-h-screen hidden">
         <div class="bg-white p-8 rounded-lg shadow-xl w-full">
             <h1 class="text-3xl font-bold text-gray-800 mb-6">Reports</h1>
@@ -625,6 +625,32 @@
             <p class="text-gray-600 mb-4">
                 Generate reports based on the last loaded data. (Buttons are enabled after extraction or CSV load.)
             </p>
+
+            <!-- V68: Report Filtering Options -->
+            <div id="report-filter-section" class="bg-gray-100 p-4 rounded-lg mb-6 hidden">
+                <h4 class="font-semibold text-gray-700 mb-2">Filter Reports By:</h4>
+                <div class="flex flex-col sm:flex-row gap-4 mb-3">
+                    <!-- Radio Button Toggle -->
+                    <div class="flex items-center">
+                        <input type="radio" id="filter-all" name="report-filter" value="all" checked class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
+                        <label for="filter-all" class="ml-2 text-sm text-gray-700 font-medium">All Sessions (Bulk Print)</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="radio" id="filter-session" name="report-filter" value="session" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
+                        <label for="filter-session" class="ml-2 text-sm text-gray-700 font-medium">Specific Session</label>
+                    </div>
+                </div>
+                
+                <!-- Session Dropdown (Initially Hidden) -->
+                <div id="reports-session-dropdown-container" class="hidden">
+                    <select id="reports-session-select" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm">
+                        <option value="">-- Select a Session --</option>
+                    </select>
+                </div>
+            </div>
+            <!-- END V68 Filter Section -->
+
+
             <div class="space-y-4">
                 <button id="generate-report-button" class="w-full inline-flex justify-center items-center rounded-md border border-transparent bg-blue-600 py-3 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50" disabled>
                     Generate Room-wise Seating Report
@@ -1225,7 +1251,7 @@
             
     </py-script>
 
-    <!-- *** JAVASCRIPT FOR ALL UI (V63) *** -->
+    <!-- *** JAVASCRIPT FOR ALL UI (V67) *** -->
     <script>
         // --- Global localStorage Key ---
         const ROOM_CONFIG_KEY = 'examRoomConfig';
@@ -1288,13 +1314,13 @@
         const qPaperDataStore = document.getElementById('q-paper-data-store');
         const generateQPaperReportButton = document.getElementById('generate-qpaper-report-button');
         
-        // --- (V29) Get references to Day-wise Report elements ---
+        // --- Get references to Day-wise Report elements ---
         const generateDaywiseReportButton = document.getElementById('generate-daywise-report-button');
         
-        // --- (V33) Get references to CSV Upload elements ---
-        const correctedCsvUpload = document.getElementById('corrected-csv-upload');
-        const loadCsvButton = document.getElementById('load-csv-button');
-        const csvLoadStatus = document.getElementById('csv-load-status');
+        // --- Get references to CSV Upload elements ---
+        const correctedCsvUpload = document.getElementById('corrected-csv-upload'); // V67 Shifted
+        const loadCsvButton = document.getElementById('load-csv-button'); // V67 Shifted
+        const csvLoadStatus = document.getElementById('csv-load-status'); // V67 Shifted
         
         // --- (V56) Get references to Absentee elements ---
         const absenteeLoader = document.getElementById('absentee-loader');
@@ -1321,6 +1347,22 @@
         const qpCodeStatus = document.getElementById('qp-code-status');
         const saveQpCodesButton = document.getElementById('save-qp-codes-button'); // V62
 
+        // --- V68 Report Filter Elements ---
+        const reportFilterSection = document.getElementById('report-filter-section');
+        const filterAllRadio = document.getElementById('filter-all');
+        const filterSessionRadio = document.getElementById('filter-session');
+        const reportsSessionDropdownContainer = document.getElementById('reports-session-dropdown-container');
+        const reportsSessionSelect = document.getElementById('reports-session-select');
+
+
+        // --- V64 FIX: Aggressive Key Cleaning Function ---
+        function cleanCourseKey(courseName) {
+            if (typeof courseName !== 'string') return '';
+            // 1. Replace all whitespace (including \n, \t, \u00a0) with a single space
+            // 2. Trim leading/trailing spaces
+            return courseName.replace(/\s+/g, ' ').trim();
+        }
+        
         
         // --- Helper function to numerically sort room keys ---
         function getNumericSortKey(key) {
@@ -1352,7 +1394,7 @@
             let savedConfigJson = localStorage.getItem(ROOM_CONFIG_KEY) || "{}"; 
             let roomConfig;
             try {
-                roomConfig = JSON.parse(savedConfigJson);
+                config = JSON.parse(savedConfigJson);
             } catch (e) {
                 console.error("Error parsing room config from localStorage:", e);
                 roomConfig = {};
@@ -1443,6 +1485,28 @@
             return processed_rows_with_rooms;
         }
 
+        // V68: Helper function to filter data based on selected report filter
+        function getFilteredReportData(reportType) {
+            const data = JSON.parse(jsonDataStore.innerHTML || '[]');
+            if (data.length === 0) return [];
+            
+            if (filterAllRadio.checked) {
+                // Return all data
+                return data;
+            } else if (filterSessionRadio.checked) {
+                const sessionKey = reportsSessionSelect.value;
+                if (!sessionKey) {
+                    alert("Please select a session to generate the report.");
+                    return [];
+                }
+                const [date, time] = sessionKey.split(' | ');
+                
+                // Filter by selected session
+                return data.filter(s => s.Date === date && s.Time === time);
+            }
+            return [];
+        }
+
 
         // --- 1. Event listener for the "Generate Room-wise Report" button ---
         generateReportButton.addEventListener('click', async () => {
@@ -1456,10 +1520,11 @@
             await new Promise(resolve => setTimeout(resolve, 50));
 
             try {
-                // 1. Get RAW student data
-                const data = JSON.parse(jsonDataStore.innerHTML);
-                if (!data || data.length === 0) {
-                    alert("No data to generate. Please run extraction first.");
+                // 1. Get FILTERED RAW student data
+                const data = getFilteredReportData('room-wise');
+
+                if (data.length === 0) {
+                    alert("No data found for the selected filter/session.");
                     return;
                 }
                 
@@ -1629,10 +1694,11 @@
             await new Promise(resolve => setTimeout(resolve, 50));
 
             try {
-                // 1. Get RAW student data
-                const data = JSON.parse(jsonDataStore.innerHTML);
-                if (!data || data.length === 0) {
-                    alert("No data to generate. Please run extraction first.");
+                // 1. Get FILTERED RAW student data
+                const data = getFilteredReportData('day-wise');
+
+                if (data.length === 0) {
+                    alert("No data found for the selected filter/session.");
                     return;
                 }
                 
@@ -1825,7 +1891,7 @@
                 // 3. Group students by Course
                 const courses = {};
                 for (const student of sessionStudents) {
-                    const course = student.Course.trim(); // V63: Ensure course key is trimmed
+                    const course = cleanCourseKey(student.Course); // V64 FIX: Ensure course key is aggressively cleaned
                     if (!courses[course]) {
                         courses[course] = {
                             present: [],
@@ -1851,8 +1917,8 @@
                 for (const courseName of sortedCourses) {
                     totalPages++;
                     const courseData = courses[courseName];
-                    // V64 FIX: Ensure lookup key is also trimmed
-                    const qpCode = qpCodeMap[courseName.trim()] || "____"; 
+                    // V64 FIX: Ensure lookup key is also aggressively cleaned
+                    const qpCode = qpCodeMap[cleanCourseKey(courseName)] || "____"; 
                     
                     // V57: Add page break logic. Each course is a new page.
                     allPagesHtml += `
@@ -2128,27 +2194,29 @@
             await new Promise(resolve => setTimeout(resolve, 50));
             
             try {
-                const data = JSON.parse(qPaperDataStore.innerHTML);
-                if (!data || data.length === 0) {
-                    alert("No question paper data found. Please run an extraction first.");
+                // V68: Get Filtered data
+                const filteredData = getFilteredReportData('q-paper');
+                
+                // Group the filtered data to generate the Q-Paper summary dynamically
+                const qPaperSummary = {};
+                filteredData.forEach(item => {
+                    const key = `${item.Date}_${item.Time}`;
+                    if (!qPaperSummary[key]) {
+                        qPaperSummary[key] = { Date: item.Date, Time: item.Time, courses: {} };
+                    }
+                    const courseKey = item.Course;
+                    if (!qPaperSummary[key].courses[courseKey]) {
+                        qPaperSummary[key].courses[courseKey] = 0;
+                    }
+                    qPaperSummary[key].courses[courseKey]++;
+                });
+
+                const sessions = qPaperSummary;
+                
+                if (Object.keys(sessions).length === 0) {
+                    alert("No question paper data found for the selected filter/session.");
                     return;
                 }
-                
-                const sessions = {};
-                data.forEach(item => {
-                    const key = `${item.Date}_${item.Time}`;
-                    if (!sessions[key]) {
-                        sessions[key] = {
-                            Date: item.Date,
-                            Time: item.Time,
-                            courses: []
-                        };
-                    }
-                    sessions[key].courses.push({
-                        Course: item.Course,
-                        Count: item['Student Count']
-                    });
-                });
                 
                 let allPagesHtml = '';
                 let totalPages = 0;
@@ -2160,13 +2228,16 @@
                     let totalStudentsInSession = 0;
                     
                     let tableRowsHtml = '';
-                    session.courses.forEach((course, index) => {
-                        totalStudentsInSession += course.Count;
+                    const sortedCourses = Object.keys(session.courses).sort();
+
+                    sortedCourses.forEach((courseName, index) => {
+                        const count = session.courses[courseName];
+                        totalStudentsInSession += count;
                         tableRowsHtml += `
                             <tr>
                                 <td class="sl-col">${index + 1}</td>
-                                <td class="course-col">${course.Course}</td>
-                                <td class="count-col">${course.Count}</td>
+                                <td class="course-col">${courseName}</td>
+                                <td class="count-col">${count}</td>
                             </tr>
                         `;
                     });
@@ -2384,6 +2455,7 @@
                 allStudentSessions = Array.from(sessions).sort();
                 
                 sessionSelect.innerHTML = '<option value="">-- Select a Session --</option>'; // Clear
+                reportsSessionSelect.innerHTML = '<option value="all">All Sessions</option>'; // V68: Clear and set default for reports
                 
                 // Find today's session
                 const today = new Date();
@@ -2392,6 +2464,7 @@
                 
                 allStudentSessions.forEach(session => {
                     sessionSelect.innerHTML += `<option value="${session}">${session}</option>`;
+                    reportsSessionSelect.innerHTML += `<option value="${session}">${session}</option>`; // V68
                     if (session.startsWith(todayStr)) {
                         defaultSession = session;
                     }
@@ -2401,6 +2474,11 @@
                     sessionSelect.value = defaultSession;
                     sessionSelect.dispatchEvent(new Event('change')); // Trigger change to load list
                 }
+                
+                // V68: Ensure report filters are visible and default set
+                reportFilterSection.classList.remove('hidden');
+                filterAllRadio.checked = true;
+                reportsSessionDropdownContainer.classList.add('hidden');
 
             } catch (e) {
                 console.error("Failed to populate sessions:", e);
@@ -2632,7 +2710,7 @@
 
             uniqueCoursesArray.forEach(courseName => {
                 // V64 FIX: Ensure the lookup key is always trimmed
-                const trimmedCourseName = courseName.trim();
+                const trimmedCourseName = cleanCourseKey(courseName); // V68: Use aggressive cleaner
                 const savedCode = qpCodeMap[trimmedCourseName] || "";
                 
                 qpCodeContainer.innerHTML += `
@@ -2660,7 +2738,8 @@
             
             qpInputs.forEach(input => {
                 // V64 FIX: Ensure the key (from data-course) is consistently trimmed
-                const courseName = input.dataset.course.trim(); 
+                // data-course is already clean from render_qp_code_list
+                const courseName = input.dataset.course; 
                 const qpCode = input.value.trim();
 
                 if (courseName) {
@@ -2683,7 +2762,7 @@
         qpCodeContainer.addEventListener('input', (e) => {
             if (e.target.classList.contains('qp-code-input')) {
                 // V64 FIX: Ensure the key (from data-course) is consistently trimmed
-                const courseName = e.target.dataset.course.trim(); 
+                const courseName = e.target.dataset.course; 
                 const qpCode = e.target.value.trim();
                 
                 if (courseName) {
@@ -2787,6 +2866,21 @@
             } else {
                 document.getElementById('pdf-file').disabled = false;
                 document.getElementById('run-button').disabled = false;
+            }
+        });
+
+        // --- V68: Report Filter Logic ---
+        filterSessionRadio.addEventListener('change', () => {
+            if (filterSessionRadio.checked) {
+                reportsSessionDropdownContainer.classList.remove('hidden');
+                reportsSessionSelect.value = reportsSessionSelect.options[1]?.value || ""; // Default to first session
+            }
+        });
+
+        filterAllRadio.addEventListener('change', () => {
+            if (filterAllRadio.checked) {
+                reportsSessionDropdownContainer.classList.add('hidden');
+                reportsSessionSelect.value = reportsSessionSelect.options[0]?.value || "all"; // Reset to All
             }
         });
 

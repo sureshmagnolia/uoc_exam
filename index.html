@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Updated Title -->
-    <title>UOC Exam Management V9.6</title>
+    <title>UOC Exam Management V9.1</title>
     
     <!-- Load Tailwind CSS for styling -->
     <script src="https://cdn-tailwindcss.vercel.app/"></script>
@@ -13,8 +13,7 @@
     <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
     <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
     
-    <!-- V91: Load HTML2PDF.JS for PDF Download Functionality -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- V96: REMOVED HTML2PDF.JS (Relying on browser native print for reliable PDF output) -->
 
     <!-- Custom Styles for Printing, Spinner, and Navigation -->
     <style>
@@ -697,7 +696,7 @@
             <h1 class="text-3xl font-bold text-gray-800 mb-6">QP Code Settings</h1>
             
             <div id="qpcode-content-wrapper" class="hidden">
-                <!-- V61: Session Selector for QP Codes -->
+                <!-- Session Selector for QP Codes -->
                 <div class="mb-4">
                     <label for="session-select-qp" class="block text-sm font-medium text-gray-700 mb-1">Select Exam Session:</label>
                     <select id="session-select-qp" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm">
@@ -854,9 +853,7 @@
         <span id="report-status" class="text-sm font-medium text-gray-700"></span>
         <!-- V91: Updated control buttons -->
         <div class="flex flex-wrap gap-2 mt-2">
-            <button id="download-pdf-button" class="flex-1 inline-flex justify-center items-center rounded-md border border-transparent bg-red-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-red-700">
-                Download PDF
-            </button>
+            <!-- V96: Download PDF button removed as requested -->
             <button id="final-print-button" class="flex-1 inline-flex justify-center items-center rounded-md border border-transparent bg-green-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-green-700">
                 Print Report (Browser)
             </button>
@@ -1417,7 +1414,7 @@
         const reportControls = document.getElementById('report-controls');
         const reportOutputArea = document.getElementById('report-output-area');
         const reportStatus = document.getElementById('report-status');
-        const downloadPdfButton = document.getElementById('download-pdf-button'); // V91
+        // const downloadPdfButton = document.getElementById('download-pdf-button'); // V96: Removed
         const finalPrintButton = document.getElementById('final-print-button');
         const clearReportButton = document.getElementById('clear-report-button');
         const roomCsvDownloadContainer = document.getElementById('room-csv-download-container');
@@ -2309,86 +2306,12 @@
             }
         });
         
-        // --- V91: New PDF Download Functionality ---
-        downloadPdfButton.addEventListener('click', () => {
-            const reportName = lastGeneratedReportType || "Report";
-            
-            // Check if there is a report generated
-            if (reportOutputArea.innerHTML.trim() === "") {
-                 alert("Please generate a report first before downloading.");
-                 return;
-            }
-
-            // Get all report pages
-            const pages = reportOutputArea.querySelectorAll('.print-page');
-            if (pages.length === 0) {
-                alert("No pages found to generate PDF.");
-                return;
-            }
-
-            // 1. Create a container element to hold clones of all pages
-            const container = document.createElement('div');
-            container.id = 'pdf-export-container';
-            // V93 FIX: Add CSS for display during rendering to avoid odd scaling
-            container.style.width = 'fit-content';
-            container.style.margin = '0 auto';
-            container.style.visibility = 'hidden';
-
-            // 2. Clone pages and append to container
-            pages.forEach((page, index) => {
-                // Clone the node deeply
-                const clonedPage = page.cloneNode(true);
-                // V93 FIX: Ensure the cloned element has the pagebreak-after CSS class.
-                clonedPage.classList.add('html2pdf__page-break');
-
-                // V93 FIX: Remove page-break on the very last element.
-                if (index === pages.length - 1) {
-                    clonedPage.style.pageBreakAfter = 'auto'; 
-                }
-
-                container.appendChild(clonedPage);
-            });
-            
-            // 3. Append container to the body temporarily
-            document.body.appendChild(container);
-
-            // 4. Configure and run html2pdf
-            // V94 FIX: Use 'avoid-all' mode for pagebreak for better reliability on complex tables.
-            let pdfConfig = {
-                margin: 10, // 10mm margin on all sides
-                filename: `${reportName}_${new Date().toISOString().slice(0, 10)}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                // V93 FIX: Updated html2canvas settings for better fidelity and reliability
-                html2canvas: { 
-                    scale: 3, 
-                    logging: false, 
-                    dpi: 288, 
-                    letterRendering: true,
-                    useCORS: true
-                },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                // V95 FIX: Changed back to avoid-all/css mode for better multi-page handling
-                pagebreak: { mode: 'avoid-all', before: '.print-page' } 
-            };
-
-            // V92 FIX: Use landscape for compact report as it is too wide
-            if (reportName.includes("Daywise_Seating_Details")) {
-                pdfConfig.jsPDF.orientation = 'landscape';
-            }
-
-            // Use the container to generate the PDF
-            html2pdf().from(container).set(pdfConfig).save().then(() => {
-                // 5. Clean up the temporary container
-                document.body.removeChild(container);
-            }).catch(error => {
-                console.error("PDF generation failed:", error);
-                alert("PDF generation failed. Check console for details.");
-                document.body.removeChild(container); // Ensure cleanup on error
-            });
-        });
+        // --- V96: Removed PDF Download Functionality (Replaced with native Print) ---
+        // downloadPdfButton.addEventListener('click', ... removed ...)
         
         // --- Event listener for the "Print" button ---
         finalPrintButton.addEventListener('click', () => {
+            // This button now exclusively uses the native browser print function
             window.print();
         });
 

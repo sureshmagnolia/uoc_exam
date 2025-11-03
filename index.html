@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1528,9 +1527,10 @@
         // --- (V69) FIX: Robust Room Config Loading (handles NULL) ---
         function getRoomCapacitiesFromStorage() {
             // V48: Load College Name
+            // *** FIX: Read college name here and update the global var, but do NOT update the input UI here ***
             currentCollegeName = localStorage.getItem(COLLEGE_NAME_KEY) || "University of Calicut";
-            if (collegeNameInput) collegeNameInput.value = currentCollegeName; // Update UI (check for null since it might not be visible)
-            
+            // if (collegeNameInput) collegeNameInput.value = currentCollegeName; // REMOVED: Handled in loadRoomConfig
+
             // Load Room Config
             let savedConfigJson = localStorage.getItem(ROOM_CONFIG_KEY);
             let roomConfig = {}; // V69: Initialize to empty object to prevent crash
@@ -1665,7 +1665,8 @@
                 const data = getFilteredReportData('room-wise');
 
                 if (data.length === 0) {
-                    alert("No data found for the selected filter/session.");
+                    // V70 FIX: Use alert instead of custom modal
+                    alert("No data found for the selected filter/session."); 
                     return;
                 }
                 
@@ -1720,6 +1721,7 @@
                         courseSummaryHtml += `<div style="font-weight: bold;">${courseName}: ${count} Student(s)</div>`; // V38: Show full course name
                     }
                     
+                    // *** COLLEGE NAME IS CORRECTLY LOADED IN currentCollegeName GLOBAL VAR ***
                     const pageHeaderHtml = `
                         <!-- V89: Wrap headers in group to prevent page break -->
                         <div class="print-header-group">
@@ -2173,13 +2175,14 @@
             lastGeneratedRoomData.forEach(row => {
                 // (V28) Get location for this row
                 const roomInfo = currentRoomConfig[row['Room No']];
-                const location = (roomInfo && roomInfo.location) ? roomInfo.location.toString() : "";
-                row['Location'] = location; // Add it to the row object for mapping
+                const location = (roomInfo && roomInfo.location) ? row['Location'] || roomInfo.location.toString() : ""; // V91 FIX: Use row location if present
                 
                 const values = headers.map(header => {
                     let val = row[header] ? row[header].toString() : "";
+                    if (header === 'Location') { val = location; } // V91 FIX: Explicitly set location
+                    
                     val = val.replace(/"/g, '""');
-                    if (val.includes(',')) {
+                    if (val.includes(',') || val.includes('\n')) {
                         val = `"${val}"`;
                     }
                     return val;
@@ -2274,7 +2277,8 @@
         function loadRoomConfig() {
             // V48: Load College Name
             currentCollegeName = localStorage.getItem(COLLEGE_NAME_KEY) || "University of Calicut";
-            if (collegeNameInput) collegeNameInput.value = currentCollegeName; // V82: Check for existence since it moved
+            // *** V91 FIX: Populate the input field with the saved value ***
+            if (collegeNameInput) collegeNameInput.value = currentCollegeName; 
             
             // Load Room Config
             let savedConfigJson = localStorage.getItem(ROOM_CONFIG_KEY);
@@ -3054,7 +3058,8 @@
         // --- V65: Initial Data Load on Startup ---
         function loadInitialData() {
             // 1. Load configuration and UI elements (Room settings, college name)
-            loadRoomConfig();
+            // *** V91 FIX: Call loadRoomConfig to ensure collegeNameInput is populated ***
+            loadRoomConfig(); 
             
             // 2. Check for base student data persistence
             const savedDataJson = localStorage.getItem(BASE_DATA_KEY);
@@ -3150,4 +3155,3 @@
 
 </body>
 </html>
-

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Updated Title -->
-    <title>UOC Exam Management V9.4</title>
+    <title>UOC Exam Management V9.1</title>
     
     <!-- Load Tailwind CSS for styling -->
     <script src="https://cdn-tailwindcss.vercel.app/"></script>
@@ -1684,7 +1684,7 @@
             await new Promise(resolve => setTimeout(resolve, 50));
 
             try {
-                // *** V94 FIX: Refresh college name from local storage BEFORE generation ***
+                // *** V95 FIX: Refresh college name from local storage BEFORE generation ***
                 currentCollegeName = localStorage.getItem(COLLEGE_NAME_KEY) || "University of Calicut";
                 
                 // 1. Get FILTERED RAW student data
@@ -1873,7 +1873,7 @@
             await new Promise(resolve => setTimeout(resolve, 50));
 
             try {
-                // *** V94 FIX: Refresh college name from local storage BEFORE generation ***
+                // *** V95 FIX: Refresh college name from local storage BEFORE generation ***
                 currentCollegeName = localStorage.getItem(COLLEGE_NAME_KEY) || "University of Calicut";
                 
                 // 1. Get FILTERED RAW student data
@@ -2084,7 +2084,7 @@
             await new Promise(resolve => setTimeout(resolve, 50));
             
             try {
-                // *** V94 FIX: Refresh college name from local storage BEFORE generation ***
+                // *** V95 FIX: Refresh college name from local storage BEFORE generation ***
                 currentCollegeName = localStorage.getItem(COLLEGE_NAME_KEY) || "University of Calicut";
                 
                 // V68: Get Filtered data
@@ -2196,7 +2196,7 @@
             await new Promise(resolve => setTimeout(resolve, 50));
             
             try {
-                // *** V94 FIX: Refresh college name from local storage BEFORE generation ***
+                // *** V95 FIX: Refresh college name from local storage BEFORE generation ***
                 currentCollegeName = localStorage.getItem(COLLEGE_NAME_KEY) || "University of Calicut";
                 
                 // 1. Get all students for this session
@@ -2367,7 +2367,7 @@
                     useCORS: true
                 },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                // V94 FIX: Use 'avoid-all' to tell it to respect the whole 'print-page' block
+                // V95 FIX: Changed back to avoid-all/css mode for better multi-page handling
                 pagebreak: { mode: 'avoid-all', before: '.print-page' } 
             };
 
@@ -3004,7 +3004,7 @@
                     return;
                 }
                 
-                // Get unique sessions (same as absentee tab)
+                // Get unique sessions
                 const sessions = new Set(allStudentData.map(s => `${s.Date} | ${s.Time}`));
                 allStudentSessions = Array.from(sessions).sort();
                 

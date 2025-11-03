@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Updated Title -->
-    <title>UOC Exam Management V9.7</title>
+    <title>UOC Exam Management V9.9</title>
     
     <!-- Load Tailwind CSS for styling -->
     <script src="https://cdn-tailwindcss.vercel.app/"></script>
@@ -169,6 +169,7 @@
                 font-size: 10pt;
                 margin-bottom: 1rem;
                 padding: 0.5rem;
+                /* V99 FIX: Add border for the box */
                 border: 1px solid #ccc;
                 text-align: left;
             }
@@ -360,11 +361,23 @@
             text-align: center;
             margin-bottom: 1rem;
         }
+        /* V98: On-screen view of summary box in the body */
         .print-page .course-summary {
             font-size: 11pt;
             margin-bottom: 1rem;
             padding: 0.5rem;
             border: 1px solid #ccc;
+        }
+
+        /* V98: On-screen view of summary box in the footer */
+        .invigilator-footer .course-summary-footer {
+            display: block;
+            font-size: 10pt;
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            /* V99 FIX: Add border for the box */
+            border: 1px solid #ccc;
+            text-align: left;
         }
         
         /* (V28) Style for new location header */
@@ -1776,10 +1789,7 @@
                             <h1>${currentCollegeName}</h1> <!-- V48: Use college name -->
                             <h2>${session.Date} &nbsp;|&nbsp; ${session.Time} &nbsp;|&nbsp; ${session.Room}</h2>
                             ${locationHtml} <!-- (V28) Added location here -->
-                            <div class="course-summary">
-                                <!-- V98: THIS IS NOW HIDDEN BY CSS. Summary remains but is only printed in the footer -->
-                                ${courseSummaryHtml} 
-                            </div>
+                            <!-- V99 FIX: Removed course-summary div from header -->
                         </div>
                     `;
                     

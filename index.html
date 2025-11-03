@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Updated Title -->
-    <title>UOC Exam Management V9.2</title>
+    <title>UOC Exam Management V9.1</title>
     
     <!-- Load Tailwind CSS for styling -->
     <script src="https://cdn-tailwindcss.vercel.app/"></script>
@@ -12,6 +12,9 @@
     <!-- Load PyScript -->
     <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
     <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+    
+    <!-- V91: Load HTML2PDF.JS for PDF Download Functionality -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <!-- Custom Styles for Printing, Spinner, and Navigation -->
     <style>
@@ -836,9 +839,13 @@
     <!-- *** Report Controls *** -->
     <div id="report-controls" class="container max-w-2xl mx-auto p-4 bg-gray-100 rounded-lg hidden">
         <span id="report-status" class="text-sm font-medium text-gray-700"></span>
+        <!-- V91: Updated control buttons -->
         <div class="flex flex-wrap gap-2 mt-2">
+            <button id="download-pdf-button" class="flex-1 inline-flex justify-center items-center rounded-md border border-transparent bg-red-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-red-700">
+                Download PDF
+            </button>
             <button id="final-print-button" class="flex-1 inline-flex justify-center items-center rounded-md border border-transparent bg-green-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-green-700">
-                Print Report
+                Print Report (Browser)
             </button>
             <button id="clear-report-button" class="flex-1 inline-flex justify-center items-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">
                 Clear Report
@@ -1159,7 +1166,7 @@
             V40: Re-written to be STATEFUL and FILE-BASED.
             """
             errors_list = []
-            try:
+            try: # <-- CORRECTED SYNTAX
                 # --- 1. Reset all UI elements ---
                 csv_download_container.innerHTML = ""
                 generate_report_button.disabled = True
@@ -1372,6 +1379,7 @@
 
         // --- Global var to hold data from the last *report run* ---
         let lastGeneratedRoomData = [];
+        let lastGeneratedReportType = ""; // V91: To track the type for PDF filename
         
         // --- (V28) Global var to hold room config map for report generation ---
         let currentRoomConfig = {};
@@ -1396,6 +1404,7 @@
         const reportControls = document.getElementById('report-controls');
         const reportOutputArea = document.getElementById('report-output-area');
         const reportStatus = document.getElementById('report-status');
+        const downloadPdfButton = document.getElementById('download-pdf-button'); // V91
         const finalPrintButton = document.getElementById('final-print-button');
         const clearReportButton = document.getElementById('clear-report-button');
         const roomCsvDownloadContainer = document.getElementById('room-csv-download-container');
@@ -1658,6 +1667,7 @@
             reportControls.classList.add('hidden');
             roomCsvDownloadContainer.innerHTML = "";
             lastGeneratedRoomData = [];
+            lastGeneratedReportType = ""; // V91: Reset report type
             await new Promise(resolve => setTimeout(resolve, 50));
 
             try {
@@ -1675,6 +1685,7 @@
                 
                 // 3. Store data for CSV
                 lastGeneratedRoomData = processed_rows_with_rooms;
+                lastGeneratedReportType = "Roomwise_Seating_Report"; // V91: Set report type
 
                 // 4. Group data for Report Generation
                 const sessions = {};
@@ -1841,6 +1852,7 @@
             reportControls.classList.add('hidden');
             roomCsvDownloadContainer.innerHTML = "";
             lastGeneratedRoomData = []; // This report doesn't use the room CSV
+            lastGeneratedReportType = ""; // V91: Reset report type
             await new Promise(resolve => setTimeout(resolve, 50));
 
             try {
@@ -2010,6 +2022,7 @@
                 reportStatus.textContent = `Generated ${totalPagesGenerated} compact pages for ${sortedSessionKeys.length} sessions.`;
                 reportControls.classList.remove('hidden');
                 roomCsvDownloadContainer.innerHTML = ""; // This report has no CSV
+                lastGeneratedReportType = "Daywise_Seating_Details"; // V91: Set report type
 
             } catch (e) {
                 console.error("Error generating day-wise report:", e);
@@ -2019,6 +2032,113 @@
                 generateDaywiseReportButton.disabled = false;
                 // V49: Button text updated
                 generateDaywiseReportButton.textContent = "Generate Seating Details for Candidates (Compact)";
+            }
+        });
+        
+        // --- V91: Event listener for "Generate Question Paper Report" (Added report type set) ---
+        generateQPaperReportButton.addEventListener('click', async () => {
+            generateQPaperReportButton.disabled = true;
+            generateQPaperReportButton.textContent = "Generating...";
+            reportOutputArea.innerHTML = "";
+            reportControls.classList.add('hidden');
+            roomCsvDownloadContainer.innerHTML = "";
+            lastGeneratedReportType = ""; // V91: Reset report type
+            await new Promise(resolve => setTimeout(resolve, 50));
+            
+            try {
+                // V68: Get Filtered data
+                const filteredData = getFilteredReportData('q-paper');
+                
+                // Group the filtered data to generate the Q-Paper summary dynamically
+                const qPaperSummary = {};
+                filteredData.forEach(item => {
+                    const key = `${item.Date}_${item.Time}`;
+                    if (!qPaperSummary[key]) {
+                        qPaperSummary[key] = { Date: item.Date, Time: item.Time, courses: {} };
+                    }
+                    const courseKey = item.Course;
+                    if (!qPaperSummary[key].courses[courseKey]) {
+                        qPaperSummary[key].courses[courseKey] = 0;
+                    }
+                    qPaperSummary[key].courses[courseKey]++;
+                });
+
+                const sessions = qPaperSummary;
+                
+                if (Object.keys(sessions).length === 0) {
+                    alert("No question paper data found for the selected filter/session.");
+                    return;
+                }
+                
+                let allPagesHtml = '';
+                let totalPages = 0;
+                const sortedSessionKeys = Object.keys(sessions).sort((a, b) => a.localeCompare(b));
+                
+                sortedSessionKeys.forEach(key => {
+                    const session = sessions[key];
+                    totalPages++;
+                    let totalStudentsInSession = 0;
+                    
+                    let tableRowsHtml = '';
+                    const sortedCourses = Object.keys(session.courses).sort();
+
+                    sortedCourses.forEach((courseName, index) => {
+                        const count = session.courses[courseName];
+                        totalStudentsInSession += count;
+                        tableRowsHtml += `
+                            <tr>
+                                <td class="sl-col">${index + 1}</td>
+                                <td class="course-col">${courseName}</td>
+                                <td class="count-col">${count}</td>
+                            </tr>
+                        `;
+                    });
+                    
+                    const pageHtml = `
+                        <div class="print-page">
+                            <!-- V89: Wrap headers in group to prevent page break -->
+                            <div class="print-header-group">
+                                <h1>${currentCollegeName}</h1> <!-- V48: Use college name -->
+                                <h2>Question Paper Summary</h2>
+                                <h3>${session.Date} &nbsp;|&nbsp; ${session.Time}</h3>
+                            </div>
+                            
+                            <table class="q-paper-table print-table">
+                                <thead>
+                                    <tr>
+                                        <th class="sl-col">Sl No</th>
+                                        <th class="course-col">Course Name</th>
+                                        <th class="count-col">Student Count</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${tableRowsHtml}
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="2" style="text-align: right;"><strong>Total Students</strong></td>
+                                        <td class="count-col"><strong>${totalStudentsInSession}</strong></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    `;
+                    allPagesHtml += pageHtml;
+                });
+                
+                reportOutputArea.innerHTML = allPagesHtml;
+                reportOutputArea.style.display = 'block'; 
+                reportStatus.textContent = `Generated ${totalPages} summary pages for ${sortedSessionKeys.length} sessions.`;
+                reportControls.classList.remove('hidden');
+                lastGeneratedReportType = "Question_Paper_Summary"; // V91: Set report type
+
+            } catch(e) {
+                console.error("Error generating Q-Paper report:", e);
+                reportStatus.textContent = "An error occurred generating the report.";
+                reportControls.classList.remove('hidden');
+            } finally {
+                generateQPaperReportButton.disabled = false;
+                generateQPaperReportButton.textContent = "Generate Question Paper Report";
             }
         });
         
@@ -2133,6 +2253,7 @@
                 reportStatus.textContent = `Generated ${totalPages} page(s) for ${sortedCourseKeys.length} courses.`;
                 reportControls.classList.remove('hidden');
                 roomCsvDownloadContainer.innerHTML = ""; // This report has no CSV
+                lastGeneratedReportType = `Absentee_Statement_${date.replace(/\./g, '_')}_${time.replace(/\s/g, '')}`; // V91: Set report type
 
             } catch (e) {
                 console.error("Error generating absentee report:", e);
@@ -2143,7 +2264,60 @@
                 generateAbsenteeReportButton.textContent = "Generate Absentee Statement";
             }
         });
+        
+        // --- V91: New PDF Download Functionality ---
+        downloadPdfButton.addEventListener('click', () => {
+            const reportName = lastGeneratedReportType || "Report";
+            
+            // Check if there is a report generated
+            if (reportOutputArea.innerHTML.trim() === "") {
+                 alert("Please generate a report first before downloading.");
+                 return;
+            }
 
+            // Get all report pages
+            const pages = reportOutputArea.querySelectorAll('.print-page');
+            if (pages.length === 0) {
+                alert("No pages found to generate PDF.");
+                return;
+            }
+
+            // 1. Create a container element to hold clones of all pages
+            const container = document.createElement('div');
+            container.id = 'pdf-export-container';
+            // The pages inside are already styled with print media queries.
+
+            // 2. Clone pages and append to container
+            pages.forEach((page) => {
+                // Clone the node deeply
+                const clonedPage = page.cloneNode(true);
+                // Temporarily ensure cloned page uses print styles for jsPDF
+                clonedPage.style.width = '210mm';
+                clonedPage.style.minHeight = '297mm';
+                clonedPage.style.margin = '0';
+                clonedPage.style.boxShadow = 'none';
+                container.appendChild(clonedPage);
+            });
+            
+            // 3. Append container to the body temporarily
+            document.body.appendChild(container);
+
+            // 4. Configure and run html2pdf
+            const pdfConfig = {
+                margin: 10, // 10mm margin on all sides
+                filename: `${reportName}_${new Date().toISOString().slice(0, 10)}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, logging: false, dpi: 192, letterRendering: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // Use the container to generate the PDF
+            html2pdf().from(container).set(pdfConfig).save().then(() => {
+                // 5. Clean up the temporary container
+                document.body.removeChild(container);
+            });
+        });
+        
         // --- Event listener for the "Print" button ---
         finalPrintButton.addEventListener('click', () => {
             window.print();
@@ -2159,6 +2333,7 @@
             reportControls.classList.add('hidden');
             roomCsvDownloadContainer.innerHTML = ""; // Clear CSV button
             lastGeneratedRoomData = []; // Clear data
+            lastGeneratedReportType = ""; // V91: Clear report type
         }
         
         // --- Function to download the room-allocated CSV ---
@@ -2370,109 +2545,7 @@
         
         
         // --- Q-PAPER REPORT LOGIC ---
-        generateQPaperReportButton.addEventListener('click', async () => {
-            generateQPaperReportButton.disabled = true;
-            generateQPaperReportButton.textContent = "Generating...";
-            reportOutputArea.innerHTML = "";
-            reportControls.classList.add('hidden');
-            roomCsvDownloadContainer.innerHTML = "";
-            await new Promise(resolve => setTimeout(resolve, 50));
-            
-            try {
-                // V68: Get Filtered data
-                const filteredData = getFilteredReportData('q-paper');
-                
-                // Group the filtered data to generate the Q-Paper summary dynamically
-                const qPaperSummary = {};
-                filteredData.forEach(item => {
-                    const key = `${item.Date}_${item.Time}`;
-                    if (!qPaperSummary[key]) {
-                        qPaperSummary[key] = { Date: item.Date, Time: item.Time, courses: {} };
-                    }
-                    const courseKey = item.Course;
-                    if (!qPaperSummary[key].courses[courseKey]) {
-                        qPaperSummary[key].courses[courseKey] = 0;
-                    }
-                    qPaperSummary[key].courses[courseKey]++;
-                });
-
-                const sessions = qPaperSummary;
-                
-                if (Object.keys(sessions).length === 0) {
-                    alert("No question paper data found for the selected filter/session.");
-                    return;
-                }
-                
-                let allPagesHtml = '';
-                let totalPages = 0;
-                const sortedSessionKeys = Object.keys(sessions).sort((a, b) => a.localeCompare(b));
-                
-                sortedSessionKeys.forEach(key => {
-                    const session = sessions[key];
-                    totalPages++;
-                    let totalStudentsInSession = 0;
-                    
-                    let tableRowsHtml = '';
-                    const sortedCourses = Object.keys(session.courses).sort();
-
-                    sortedCourses.forEach((courseName, index) => {
-                        const count = session.courses[courseName];
-                        totalStudentsInSession += count;
-                        tableRowsHtml += `
-                            <tr>
-                                <td class="sl-col">${index + 1}</td>
-                                <td class="course-col">${courseName}</td>
-                                <td class="count-col">${count}</td>
-                            </tr>
-                        `;
-                    });
-                    
-                    const pageHtml = `
-                        <div class="print-page">
-                            <!-- V89: Wrap headers in group to prevent page break -->
-                            <div class="print-header-group">
-                                <h1>${currentCollegeName}</h1> <!-- V48: Use college name -->
-                                <h2>Question Paper Summary</h2>
-                                <h3>${session.Date} &nbsp;|&nbsp; ${session.Time}</h3>
-                            </div>
-                            
-                            <table class="q-paper-table print-table">
-                                <thead>
-                                    <tr>
-                                        <th class="sl-col">Sl No</th>
-                                        <th class="course-col">Course Name</th>
-                                        <th class="count-col">Student Count</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${tableRowsHtml}
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <td colspan="2" style="text-align: right;"><strong>Total Students</strong></td>
-                                        <td class="count-col"><strong>${totalStudentsInSession}</strong></td>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
-                    `;
-                    allPagesHtml += pageHtml;
-                });
-                
-                reportOutputArea.innerHTML = allPagesHtml;
-                reportOutputArea.style.display = 'block'; 
-                reportStatus.textContent = `Generated ${totalPages} summary pages for ${sortedSessionKeys.length} sessions.`;
-                reportControls.classList.remove('hidden');
-
-            } catch(e) {
-                console.error("Error generating Q-Paper report:", e);
-                reportStatus.textContent = "An error occurred generating the report.";
-                reportControls.classList.remove('hidden');
-            } finally {
-                generateQPaperReportButton.disabled = false;
-                generateQPaperReportButton.textContent = "Generate Question Paper Report";
-            }
-        });
+        // Listener moved above
         
         // --- (V33) NEW CSV UPLOAD LOGIC ---
         

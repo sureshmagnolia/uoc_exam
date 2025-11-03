@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Updated Title -->
-    <title>UOC Exam Management V9.9</title>
+    <title>UOC Exam Management V9.7</title>
     
     <!-- Load Tailwind CSS for styling -->
     <script src="https://cdn-tailwindcss.vercel.app/"></script>
@@ -109,6 +109,11 @@
 
         /* --- PRINT STYLES --- */
         @media print {
+            /* V98 FIX: Adjust page padding to maximize content area and minimize blank margins */
+            @page {
+                margin: 0.5cm; /* Minimal margin */
+            }
+            
             /* Hide the main app container and all other non-report elements */
             #main-nav, #view-extractor, #view-settings, #view-reports, #view-absentees, #view-qpcodes, #view-room-settings, body > py-config, body > py-script, #report-controls {
                 display: none !important; /* Be forceful */
@@ -131,7 +136,8 @@
                 page-break-after: always;
                 page-break-inside: avoid;
                 width: 100%;
-                padding: 1cm;
+                /* V98 FIX: Use padding=margin to match @page setting */
+                padding: 0.5cm; 
                 box-sizing: border-box;
                 box-shadow: none;
                 border: none;
@@ -152,11 +158,19 @@
             h2 { font-size: 14pt; font-weight: bold; margin-bottom: 1rem; }
             h3 { font-size: 12pt; font-weight: bold; margin-bottom: 1rem; }
 
+            /* V98: Hide course summary from the body content as it is moved to footer */
             .course-summary {
-                font-size: 11pt;
+                display: none;
+            }
+
+            /* V98: New style for summary inside the footer */
+            .invigilator-footer .course-summary-footer {
+                display: block;
+                font-size: 10pt;
                 margin-bottom: 1rem;
                 padding: 0.5rem;
                 border: 1px solid #ccc;
+                text-align: left;
             }
             
             /* (V28) Style for new location header */
@@ -1749,9 +1763,9 @@
                     const location = (roomInfo && roomInfo.location) ? roomInfo.location : "";
                     const locationHtml = location ? `<div class="report-location-header">Location: ${location}</div>` : "";
 
+                    // V98: Prepare Course Summary for the FOOTER
                     let courseSummaryHtml = '';
                     for (const [courseName, count] of Object.entries(session.courseCounts)) {
-                        const shortCourseName = courseName.split(' ').slice(0, 4).join(' ') + (courseName.split(' ').length > 4 ? '...' : '');
                         courseSummaryHtml += `<div style="font-weight: bold;">${courseName}: ${count} Student(s)</div>`; // V38: Show full course name
                     }
                     
@@ -1763,7 +1777,8 @@
                             <h2>${session.Date} &nbsp;|&nbsp; ${session.Time} &nbsp;|&nbsp; ${session.Room}</h2>
                             ${locationHtml} <!-- (V28) Added location here -->
                             <div class="course-summary">
-                                ${courseSummaryHtml}
+                                <!-- V98: THIS IS NOW HIDDEN BY CSS. Summary remains but is only printed in the footer -->
+                                ${courseSummaryHtml} 
                             </div>
                         </div>
                     `;
@@ -1783,6 +1798,11 @@
                     `; 
                     const invigilatorFooterHtml = `
                         <div class="invigilator-footer">
+                            <!-- V98: ADDED COURSE SUMMARY HERE (Moved from top) -->
+                            <div class="course-summary-footer">
+                                <strong>Course Summary:</strong>
+                                ${courseSummaryHtml}
+                            </div>
                             <div><strong>Answer Booklets Received:</strong> _________________</div>
                             <div><strong>Answer Booklets Used:</strong> _________________</div>
                             <div><strong>Answer Booklets Returned (Balance):</strong> _________________</div>

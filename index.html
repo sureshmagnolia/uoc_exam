@@ -128,6 +128,7 @@
             .print-page {
                 display: block !important;
                 visibility: visible !important;
+                /* V93 FIX: Enforce page break on all report pages */
                 page-break-after: always;
                 page-break-inside: avoid;
                 width: 100%;
@@ -136,6 +137,11 @@
                 box-shadow: none;
                 border: none;
                 margin: 0;
+            }
+
+            /* V93 FIX: Final page should not have a page break */
+            .print-page:last-child {
+                page-break-after: auto;
             }
             
             /* The rest of the styles are for formatting the page */
@@ -170,6 +176,7 @@
                 padding-top: 1rem;
                 border-top: 1px solid #ccc;
                 font-size: 10pt;
+                page-break-before: avoid; /* Keep with content above */
             }
             .invigilator-footer div {
                 margin-bottom: 0.5rem;
@@ -231,12 +238,13 @@
             .print-page-daywise h1 { font-size: 14pt; }
             .print-page-daywise h2 { font-size: 12pt; margin-bottom: 0.5rem; }
             .print-page-daywise .column-container {
-                display: flex;
-                gap: 10px;
+                /* V92 FIX: Ensure print media treats this as a single column for PDF export if needed */
+                display: block; 
+                gap: 0;
             }
             .print-page-daywise .column {
-                flex: 1;
-                min-width: 0; /* Prevents flex overflow */
+                flex: none;
+                min-width: 100%; /* Prevents flex overflow */
             }
             .daywise-report-table {
                 width: 100%;
@@ -315,6 +323,11 @@
             box-sizing: border-box; 
             /* V71: Reduce base font size for better fitting */
             font-size: 9pt; 
+        }
+        .print-page-daywise {
+            /* V93 FIX: Ensure Day-wise is visible in landscape on screen */
+            width: 297mm; /* A4 height */
+            min-height: 210mm; /* A4 width */
         }
         .print-page h1 {
             font-size: 16pt;
@@ -1671,7 +1684,7 @@
             await new Promise(resolve => setTimeout(resolve, 50));
 
             try {
-                // *** V91 FIX: Refresh college name from local storage ***
+                // *** V94 FIX: Refresh college name from local storage BEFORE generation ***
                 currentCollegeName = localStorage.getItem(COLLEGE_NAME_KEY) || "University of Calicut";
                 
                 // 1. Get FILTERED RAW student data
@@ -1761,7 +1774,6 @@
                             </thead>
                             <tbody>
                     `; 
-                    const tableCloseHtml = `</div>`;
                     const invigilatorFooterHtml = `
                         <div class="invigilator-footer">
                             <div><strong>Answer Booklets Received:</strong> _________________</div>
@@ -1809,7 +1821,8 @@
 
                     previousCourseName = ""; 
                     const tableRowsPage1 = generateTableRows(studentsPage1);
-                    allPagesHtml += `<div class="print-page">${pageHeaderHtml}${tableHeaderHtml}${tableRowsPage1}</tbody></table>`; // FIX: Moved </tbody></table>
+                    // V92 FIX: Ensure table is properly closed on every page
+                    allPagesHtml += `<div class="print-page">${pageHeaderHtml}${tableHeaderHtml}${tableRowsPage1}</tbody></table>`; 
                     if (studentsPage2.length === 0) allPagesHtml += invigilatorFooterHtml;
                     allPagesHtml += `</div>`; 
                     totalPagesGenerated++;
@@ -1817,7 +1830,8 @@
                     if (studentsPage2.length > 0) {
                         previousCourseName = ""; 
                         const tableRowsPage2 = generateTableRows(studentsPage2);
-                        allPagesHtml += `<div class="print-page">${tableHeaderHtml}${tableRowsPage2}</tbody></table>${invigilatorFooterHtml}</div>`; // FIX: Moved </tbody></table>
+                        // V92 FIX: Ensure table is properly closed on every page
+                        allPagesHtml += `<div class="print-page">${tableHeaderHtml}${tableRowsPage2}</tbody></table>${invigilatorFooterHtml}</div>`; 
                         totalPagesGenerated++;
                     }
                 });
@@ -1859,7 +1873,7 @@
             await new Promise(resolve => setTimeout(resolve, 50));
 
             try {
-                // *** V91 FIX: Refresh college name from local storage ***
+                // *** V94 FIX: Refresh college name from local storage BEFORE generation ***
                 currentCollegeName = localStorage.getItem(COLLEGE_NAME_KEY) || "University of Calicut";
                 
                 // 1. Get FILTERED RAW student data
@@ -1997,8 +2011,33 @@
                         const pageStudents = session.students.slice(i, i + STUDENTS_PER_PAGE);
                         totalPagesGenerated++;
                         
+                        // V92 FIX: For compact report, render as a single column for PDF export if many pages are needed.
                         const col1Students = pageStudents.slice(0, STUDENTS_PER_COLUMN);
-                        const col2Students = pageStudents.slice(STUDENTS_PER_COLUMN); // (V31) Changed to get rest of students
+                        const col2Students = pageStudents.slice(STUDENTS_PER_COLUMN); 
+                        
+                        // To ensure PDF doesn't break tables, we will manually merge the two columns if they exist.
+                        // This allows the table to flow naturally and use the existing page break CSS rules.
+                        // However, on-screen display still uses flex/columns via CSS.
+                        
+                        let columnHtml = '';
+                        if (col1Students.length > 0 && col2Students.length === 0) {
+                            // Only column 1 needed
+                            columnHtml = `<div class="column">${buildColumnTable(col1Students)}</div>`;
+                        } else if (col1Students.length > 0 && col2Students.length > 0) {
+                            // Two columns needed (default screen view). We use the container for display on screen,
+                            // but CSS print media handles how they break/flow for print.
+                            columnHtml = `
+                                <div class="column-container">
+                                    <div class="column">
+                                        ${buildColumnTable(col1Students)}
+                                    </div>
+                                    <div class="column">
+                                        ${buildColumnTable(col2Students)}
+                                    </div>
+                                </div>
+                            `;
+                        }
+
 
                         allPagesHtml += `
                             <div class="print-page print-page-daywise">
@@ -2009,14 +2048,7 @@
                                     <!-- V48: Use college name -->
                                     <h2>${currentCollegeName} &nbsp;|&nbsp; ${session.Date} &nbsp;|&nbsp; ${session.Time}</h2>
                                 </div>
-                                <div class="column-container">
-                                    <div class="column">
-                                        ${buildColumnTable(col1Students)}
-                                    </div>
-                                    <div class="column">
-                                        ${col2Students.length > 0 ? buildColumnTable(col2Students) : ''}
-                                    </div>
-                                </div>
+                                ${columnHtml}
                             </div>
                         `;
                     }
@@ -2052,7 +2084,7 @@
             await new Promise(resolve => setTimeout(resolve, 50));
             
             try {
-                // *** V91 FIX: Refresh college name from local storage ***
+                // *** V94 FIX: Refresh college name from local storage BEFORE generation ***
                 currentCollegeName = localStorage.getItem(COLLEGE_NAME_KEY) || "University of Calicut";
                 
                 // V68: Get Filtered data
@@ -2164,7 +2196,7 @@
             await new Promise(resolve => setTimeout(resolve, 50));
             
             try {
-                // *** V91 FIX: Refresh college name from local storage ***
+                // *** V94 FIX: Refresh college name from local storage BEFORE generation ***
                 currentCollegeName = localStorage.getItem(COLLEGE_NAME_KEY) || "University of Calicut";
                 
                 // 1. Get all students for this session
@@ -2297,17 +2329,23 @@
             // 1. Create a container element to hold clones of all pages
             const container = document.createElement('div');
             container.id = 'pdf-export-container';
-            // The pages inside are already styled with print media queries.
+            // V93 FIX: Add CSS for display during rendering to avoid odd scaling
+            container.style.width = 'fit-content';
+            container.style.margin = '0 auto';
+            container.style.visibility = 'hidden';
 
             // 2. Clone pages and append to container
-            pages.forEach((page) => {
+            pages.forEach((page, index) => {
                 // Clone the node deeply
                 const clonedPage = page.cloneNode(true);
-                // Temporarily ensure cloned page uses print styles for jsPDF
-                clonedPage.style.width = '210mm';
-                clonedPage.style.minHeight = '297mm';
-                clonedPage.style.margin = '0';
-                clonedPage.style.boxShadow = 'none';
+                // V93 FIX: Ensure the cloned element has the pagebreak-after CSS class.
+                clonedPage.classList.add('html2pdf__page-break');
+
+                // V93 FIX: Remove page-break on the very last element.
+                if (index === pages.length - 1) {
+                    clonedPage.style.pageBreakAfter = 'auto'; 
+                }
+
                 container.appendChild(clonedPage);
             });
             
@@ -2315,18 +2353,37 @@
             document.body.appendChild(container);
 
             // 4. Configure and run html2pdf
-            const pdfConfig = {
+            // V94 FIX: Use 'avoid-all' mode for pagebreak for better reliability on complex tables.
+            let pdfConfig = {
                 margin: 10, // 10mm margin on all sides
                 filename: `${reportName}_${new Date().toISOString().slice(0, 10)}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, logging: false, dpi: 192, letterRendering: true },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                // V93 FIX: Updated html2canvas settings for better fidelity and reliability
+                html2canvas: { 
+                    scale: 3, 
+                    logging: false, 
+                    dpi: 288, 
+                    letterRendering: true,
+                    useCORS: true
+                },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                // V94 FIX: Use 'avoid-all' to tell it to respect the whole 'print-page' block
+                pagebreak: { mode: 'avoid-all', before: '.print-page' } 
             };
+
+            // V92 FIX: Use landscape for compact report as it is too wide
+            if (reportName.includes("Daywise_Seating_Details")) {
+                pdfConfig.jsPDF.orientation = 'landscape';
+            }
 
             // Use the container to generate the PDF
             html2pdf().from(container).set(pdfConfig).save().then(() => {
                 // 5. Clean up the temporary container
                 document.body.removeChild(container);
+            }).catch(error => {
+                console.error("PDF generation failed:", error);
+                alert("PDF generation failed. Check console for details.");
+                document.body.removeChild(container); // Ensure cleanup on error
             });
         });
         

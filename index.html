@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Updated Title -->
-    <title>UOC Exam Management V61</title>
+    <title>UOC Exam Management V65</title>
     
     <!-- Load Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -560,7 +560,7 @@
                 <div id="qp-entry-section" class="hidden">
                     <p class="text-gray-600 mb-4">
                         Assign a Question Paper (QP) Code to each course. This code will be used in the Absentee Statement.
-                        Settings are saved automatically as you type.
+                        **Click 'Save QP Codes' below to commit changes to local memory.**
                     </p>
                 
                     <!-- Dynamic Form Container -->
@@ -576,7 +576,13 @@
                             <!-- Rows will be added by JavaScript -->
                         </div>
                     </div>
+                    <!-- V62: Status message for unsaved changes -->
                     <div id="qp-code-status" class="text-sm text-green-600 font-medium text-center h-5 mt-4"></div>
+                    
+                    <!-- V62: NEW SAVE BUTTON -->
+                    <button id="save-qp-codes-button" class="w-full inline-flex justify-center items-center rounded-md border border-transparent bg-indigo-600 py-3 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 mt-4">
+                        Save QP Codes
+                    </button>
                 </div>
 
             </div>
@@ -721,7 +727,7 @@
         packages = ["pandas", "pdfplumber==0.9.0"]
     </py-config>
     
-    <!-- *** Python Script (V60 - COURSE NORMALIZER) *** -->
+    <!-- *** Python Script (V64 - COURSE NORMALIZER) *** -->
     <py-script>
         import pandas as pd
         import pdfplumber
@@ -762,6 +768,7 @@
         
         ROOM_CONFIG_KEY = 'examRoomConfig'
         COLLEGE_NAME_KEY = 'examCollegeName' # V48: New key
+        BASE_DATA_KEY = 'examBaseData'; # V65: New key for persistent base data
 
         def log_message(message):
             """Helper function to print messages to the HTML (Processing) log."""
@@ -1189,6 +1196,9 @@
                 json_data = json.dumps(all_exam_rows_sorted)
                 json_data_store.innerHTML = json_data
                 
+                # V65: Save the base data to localStorage
+                localStorage.setItem(BASE_DATA_KEY, json_data)
+                
                 generate_report_button.disabled = False
                 generate_qpaper_report_button.disabled = False
                 generate_daywise_report_button.disabled = False
@@ -1214,13 +1224,14 @@
             
     </py-script>
 
-    <!-- *** JAVASCRIPT FOR ALL UI (V61) *** -->
+    <!-- *** JAVASCRIPT FOR ALL UI (V63) *** -->
     <script>
         // --- Global localStorage Key ---
         const ROOM_CONFIG_KEY = 'examRoomConfig';
         const COLLEGE_NAME_KEY = 'examCollegeName'; // V48: New key
         const ABSENTEE_LIST_KEY = 'examAbsenteeList'; // V56: New key
         const QP_CODE_LIST_KEY = 'examQPCodes'; // V58: New key
+        const BASE_DATA_KEY = 'examBaseData'; // V65: New key for persistent base data
 
         // --- Global var to hold data from the last *report run* ---
         let lastGeneratedRoomData = [];
@@ -1307,6 +1318,7 @@
         const qpEntrySection = document.getElementById('qp-entry-section'); // V61
         const qpCodeContainer = document.getElementById('qp-code-container');
         const qpCodeStatus = document.getElementById('qp-code-status');
+        const saveQpCodesButton = document.getElementById('save-qp-codes-button'); // V62
 
         
         // --- Helper function to numerically sort room keys ---
@@ -1631,7 +1643,7 @@
                 processed_rows_with_rooms.forEach(student => {
                     const key = `${student.Date}_${student.Time}_${student['Room No']}`;
                     if (!roomSessions[key]) {
-                        roomSessions[key] = {
+                        sessions[key] = {
                             Date: student.Date,
                             Time: student.Time,
                             Room: student['Room No'],
@@ -1812,7 +1824,7 @@
                 // 3. Group students by Course
                 const courses = {};
                 for (const student of sessionStudents) {
-                    const course = student.Course;
+                    const course = student.Course.trim(); // V63: Ensure course key is trimmed
                     if (!courses[course]) {
                         courses[course] = {
                             present: [],
@@ -1838,7 +1850,8 @@
                 for (const courseName of sortedCourses) {
                     totalPages++;
                     const courseData = courses[courseName];
-                    const qpCode = qpCodeMap[courseName] || "____"; // V58: Get QP code
+                    // V63 FIX: Ensure lookup key is also trimmed
+                    const qpCode = qpCodeMap[courseName.trim()] || "____"; 
                     
                     // V57: Add page break logic. Each course is a new page.
                     allPagesHtml += `
@@ -1932,7 +1945,7 @@
             lastGeneratedRoomData.forEach(row => {
                 // (V28) Get location for this row
                 const roomInfo = currentRoomConfig[row['Room No']];
-                const location = (roomInfo && roomInfo.location) ? roomInfo.location : "";
+                const location = (roomInfo && roomInfo.location) ? row[header].toString() : "";
                 row['Location'] = location; // Add it to the row object for mapping
                 
                 const values = headers.map(header => {
@@ -2295,6 +2308,9 @@
                 jsonDataStore.innerHTML = JSON.stringify(jsonData);
                 qPaperDataStore.innerHTML = JSON.stringify(qPaperArray);
                 
+                // V65: Save the base data to localStorage
+                localStorage.setItem(BASE_DATA_KEY, JSON.stringify(jsonData))
+
                 // --- Update UI ---
                 csvLoadStatus.textContent = `Successfully loaded and parsed ${jsonData.length} student records.`;
                 csvLoadStatus.classList.remove('text-red-600');
@@ -2569,6 +2585,7 @@
                 qpEntrySection.classList.add('hidden');
                 qpCodeContainer.innerHTML = '';
                 qpCodeStatus.textContent = '';
+                saveQpCodesButton.disabled = true; // V62: Disable save button
             }
         });
         
@@ -2591,46 +2608,140 @@
             
             if (uniqueCoursesArray.length === 0) {
                 qpCodeContainer.innerHTML = '<p class="text-center text-gray-500">No courses found for this session.</p>';
+                saveQpCodesButton.disabled = true; // V62: Disable save button
                 return;
             }
 
             uniqueCoursesArray.forEach(courseName => {
-                const savedCode = qpCodeMap[courseName] || "";
+                // V64 FIX: Ensure the lookup key is always trimmed
+                const trimmedCourseName = courseName.trim();
+                const savedCode = qpCodeMap[trimmedCourseName] || "";
+                
                 qpCodeContainer.innerHTML += `
                     <div class="flex items-center gap-3 p-2 border-b border-gray-200">
                         <label class="font-medium text-gray-700 w-2/3 text-sm">${courseName}</label>
                         <input type="text" 
                                class="qp-code-input block w-1/3 p-2 border border-gray-300 rounded-md shadow-sm text-sm" 
                                value="${savedCode}" 
-                               data-course="${courseName}" 
+                               data-course="${trimmedCourseName}" 
                                placeholder="Enter QP Code">
                     </div>
                 `;
             });
+            saveQpCodesButton.disabled = false; // V62: Enable save button once list is rendered
+            qpCodeStatus.textContent = ''; // V62: Clear status on new load
         }
         
-        // Event delegation for saving QP codes (Remains the same, saves universally)
+        // V62: Manual Save Button Handler
+        saveQpCodesButton.addEventListener('click', () => {
+            // 1. Iterate over all visible inputs and update the global map
+            const qpInputs = qpCodeContainer.querySelectorAll('.qp-code-input');
+            
+            // V63 FIX: Iterating over all inputs and ensuring keys are clean
+            let saveCount = 0;
+            
+            qpInputs.forEach(input => {
+                // V63/V64 FIX: Ensure the key (from data-course) is consistently trimmed
+                const courseName = input.dataset.course.trim(); 
+                const qpCode = input.value.trim();
+
+                if (courseName) {
+                    qpCodeMap[courseName] = qpCode; 
+                    saveCount++;
+                }
+            });
+
+            // 2. Commit the global map (which was just updated) to localStorage
+            localStorage.setItem(QP_CODE_LIST_KEY, JSON.stringify(qpCodeMap));
+
+            // 3. Show success message
+            qpCodeStatus.classList.remove('text-red-600');
+            qpCodeStatus.classList.add('text-green-600');
+            qpCodeStatus.textContent = `QP Codes saved successfully!`;
+            setTimeout(() => { qpCodeStatus.textContent = ""; }, 2000);
+        });
+
+        // V62: Input listener now just updates map and displays pending status
         qpCodeContainer.addEventListener('input', (e) => {
             if (e.target.classList.contains('qp-code-input')) {
-                const courseName = e.target.dataset.course;
+                // V63/V64 FIX: Ensure the key (from data-course) is consistently trimmed
+                const courseName = e.target.dataset.course.trim(); 
                 const qpCode = e.target.value.trim();
                 
                 if (courseName) {
+                    // Update global map immediately (in memory)
                     qpCodeMap[courseName] = qpCode;
-                    localStorage.setItem(QP_CODE_LIST_KEY, JSON.stringify(qpCodeMap));
                     
-                    // Show saved message
-                    qpCodeStatus.textContent = `Saved code for ${courseName}`;
-                    setTimeout(() => { qpCodeStatus.textContent = ""; }, 1500);
+                    // Show pending status
+                    qpCodeStatus.classList.remove('text-green-600');
+                    qpCodeStatus.classList.add('text-red-600');
+                    qpCodeStatus.textContent = 'Unsaved changes... Click SAVE QP CODES to commit.';
                 }
             }
         });
 
+        // --- (V65) Initial Data Load on Startup ---
+        function loadInitialData() {
+            // 1. Load configuration and UI elements (Room settings, college name)
+            loadRoomConfig();
+            
+            // 2. Check for base student data persistence
+            const savedDataJson = localStorage.getItem(BASE_DATA_KEY);
+            if (savedDataJson) {
+                try {
+                    const savedData = JSON.parse(savedDataJson);
+                    if (savedData && savedData.length > 0) {
+                        // Re-process the data to calculate the Q-Paper summary just like Python does
+                        
+                        // We need the Q-Paper calculation logic from Python's run_extraction_py
+                        // Since we can't run the PyScript part until PyScript loads, we do a minimal summary re-creation here
+                        
+                        // We create dummy data stores to allow reports to run
+                        const qPaperSummary = {};
+                        
+                        savedData.forEach(student => {
+                            const key = `${student.Date}_${student.Time}_${student.Course}`;
+                            if (!qPaperSummary[key]) {
+                                qPaperSummary[key] = { 
+                                    Date: student.Date, 
+                                    Time: student.Time, 
+                                    Course: student.Course, 
+                                    'Student Count': 0 
+                                };
+                            }
+                            qPaperSummary[key]['Student Count']++;
+                        });
+                        
+                        // Update JSON Data Stores
+                        jsonDataStore.innerHTML = JSON.stringify(savedData);
+                        qPaperDataStore.innerHTML = JSON.stringify(Object.values(qPaperSummary));
+                        
+                        // Enable UI tabs
+                        generateReportButton.disabled = false;
+                        generateQPaperReportButton.disabled = false;
+                        generateDaywiseReportButton.disabled = false;
+                        disable_absentee_tab(false);
+                        disable_qpcode_tab(false);
+                        populate_session_dropdown();
+                        populate_qp_code_session_dropdown();
+                        
+                        console.log(`Successfully loaded ${savedData.length} records from local storage.`);
+                        
+                        // Update log status (Optional, good for user feedback)
+                        document.getElementById("status-log").innerHTML = `<p class="mb-1 text-green-700">&gt; [${new Date().toLocaleTimeString()}] Successfully loaded data from previous session.</p>`;
+                        document.getElementById("status-log").scrollTop = document.getElementById("status-log").scrollHeight;
+
+
+                    }
+                } catch(e) {
+                    console.error("Failed to load BASE_DATA_KEY from localStorage. Clearing key.", e);
+                    localStorage.removeItem(BASE_DATA_KEY);
+                }
+            }
+        }
         
         // --- Run on initial page load ---
-        loadRoomConfig();
-        disable_absentee_tab(true); // V56: Disable tab by default
-        disable_qpcode_tab(true); // V58: Disable tab by default
+        loadInitialData(); // V65: Run this first!
 
     </script>
 

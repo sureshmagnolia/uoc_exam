@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Updated Title -->
-    <title>UOC Exam Management V65</title>
+    <title>UOC Exam Management V66</title>
     
     <!-- Load Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -1850,7 +1850,7 @@
                 for (const courseName of sortedCourses) {
                     totalPages++;
                     const courseData = courses[courseName];
-                    // V63 FIX: Ensure lookup key is also trimmed
+                    // V64 FIX: Ensure lookup key is also trimmed
                     const qpCode = qpCodeMap[courseName.trim()] || "____"; 
                     
                     // V57: Add page break logic. Each course is a new page.
@@ -2691,10 +2691,6 @@
                 try {
                     const savedData = JSON.parse(savedDataJson);
                     if (savedData && savedData.length > 0) {
-                        // Re-process the data to calculate the Q-Paper summary just like Python does
-                        
-                        // We need the Q-Paper calculation logic from Python's run_extraction_py
-                        // Since we can't run the PyScript part until PyScript loads, we do a minimal summary re-creation here
                         
                         // We create dummy data stores to allow reports to run
                         const qPaperSummary = {};

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Updated Title -->
-    <title>UOC Exam Management V111 (Stable)</title>
+    <title>UOC Exam Management V101 (Stable)</title>
     
     <!-- Load Tailwind CSS for styling -->
     <script src="https://cdn-tailwindcss.vercel.app/"></script>
@@ -1165,7 +1165,7 @@
             # If no code found, just return the cleaned-up original
             return re.sub(r'\s+', ' ', course_name).strip().upper()
 
-        # --- V40: STATEFUL PARSER for the "OLD" PDF format (V44: ROBUST) ---
+        # --- V40: STATEFUL PARSER for the "NEW" PDF format ---
         def extract_new_format_header(page_text):
             """Extracts header from Page 1 of the new format."""
             date_val, time_val, course_name = "Unknown", "Unknown", "Unknown"
@@ -1623,7 +1623,7 @@
         }
 
 
-        // --- CORE UI HELPERS ---
+        // --- CORE UI HELPERS (Defined before complex logic/initializers) ---
         // V105 FIX: Define core enablement functions first to ensure Python can call them
         function disable_absentee_tab(disabled) {
             const ui = getUIElements();
@@ -1701,8 +1701,28 @@
             if(ui.loadCsvButton) ui.loadCsvButton.disabled = false;
         }
 
-        // --- END CORE UI HELPERS ---
+        // V114 FIX: Define showView in the global scope before DOMContentLoaded is processed.
+        function showView(viewToShow, buttonToActivate) {
+            // NOTE: We must fetch these elements dynamically inside the function as they are not global variables
+            const allViews = [document.getElementById('view-extractor'), document.getElementById('view-room-settings'), document.getElementById('view-session-assign'), document.getElementById('view-qpcodes'), document.getElementById('view-absentees'), document.getElementById('view-scribes'), document.getElementById('view-reports'), document.getElementById('view-settings')];
+            const allNavButtons = [document.getElementById('nav-extractor'), document.getElementById('nav-room-settings'), document.getElementById('nav-session-assign'), document.getElementById('nav-qpcodes'), document.getElementById('nav-absentees'), document.getElementById('nav-scribes'), document.getElementById('nav-reports'), document.getElementById('nav-settings')];
 
+            allViews.forEach(view => view.classList.add('hidden'));
+            allNavButtons.forEach(btn => {
+                btn.classList.add('nav-button-inactive');
+                btn.classList.remove('nav-button-active');
+            });
+            viewToShow.classList.remove('hidden');
+            buttonToActivate.classList.remove('nav-button-inactive');
+            buttonToActivate.classList.add('nav-button-active');
+            
+            clearReport(); // Always clear reports when switching views
+        }
+        
+        // --- END CORE UI HELPERS (Defined before complex logic/initializers) ---
+
+
+        // --- UTILITY/HELPER FUNCTIONS (Must be defined first to resolve ReferenceErrors) ---
 
         // --// V90 FIX: Aggressive Key Cleaning Function (Fixes key collision) ---
         function cleanCourseKey(courseName) {
@@ -1772,7 +1792,7 @@
             if (Object.keys(roomConfig).length === 0) {
                 console.log("Using default room config (30 rooms of 30)");
                 config = {};
-                for (let i = 1; i <= 30; i++) {
+                for (let i = 1; i <= 10; i++) {
                     config[`Room ${i}`] = { capacity: 30, location: "" };
                 }
                 currentRoomConfig = config; 
@@ -2787,9 +2807,11 @@
                             <table class="q-paper-table print-table">
                                 <thead>
                                     <tr>
-                                        <th class="sl-col">Sl No</th>
-                                        <th class="course-col">Course Name</th>
-                                        <th class="count-col">Student Count</th>
+                                        <th style="width: 5%;">Sl No</th>
+                                        <th style="width: 20%;">Register Number</th>
+                                        <th style="width: 25%;">Name</th>
+                                        <th style="width: 35%;">Course Name</th>
+                                        <th style="width: 15%;">Assigned Room</th>
                                     </tr>
                                 </thead>
                                 <tbody>

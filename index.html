@@ -4,16 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Updated Title -->
-    <title>UOC Exam Management V9.9</title>
+    <title>UOC Exam Management V111 (Stable)</title>
     
     <!-- Load Tailwind CSS for styling -->
     <script src="https://cdn-tailwindcss.vercel.app/"></script>
     
     <!-- Load PyScript -->
     <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
-    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script> 
     
-    <!-- V96: REMOVED HTML2PDF.JS (Relying on browser native print for reliable PDF output) -->
 
     <!-- Custom Styles for Printing, Spinner, and Navigation -->
     <style>
@@ -31,79 +30,63 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* --- Navigation Styles (V87: Rounder, Bigger) --- */
+        /* --- V103: Material/Rounded/Shadowed UI Principles --- */
         .nav-button {
-            /* Base styles for all nav buttons */
-            /* V87: More rounded, more padding, bolder font */
-            @apply py-2.5 px-5 rounded-t-xl text-sm font-semibold transition-all duration-200 text-white shadow; 
+            @apply py-2.5 px-5 rounded-t-lg text-sm font-semibold transition-all duration-200 text-white shadow-md; 
         }
         .nav-button-active {
-            /* Active state: Taller, lighter bg, dark text */
-            @apply shadow-lg scale-105 transform -translate-y-1; 
+            @apply shadow-xl scale-105 transform -translate-y-0.5; 
         }
         .nav-button-inactive {
-            /* Inactive state: Darker bg, white text, slight fade */
-            @apply opacity-90 hover:opacity-100 transform;
+            @apply opacity-80 hover:opacity-100 transform;
         }
-
+        
         /* V83: Main Nav Bar Adjustment */
         #top-banner {
-            background-color: #4f46e5; /* Indigo-600 */
+            background-color: #312e81; /* Indigo-800 */
         }
         #main-nav-tabs {
-            /* V86: New background and padding for spacing */
             background-color: #1f2937; /* gray-800 */
             width: 100%;
-            padding-top: 4px; /* Space for rounded tabs to lift */
+            padding-top: 4px;
         }
 
-        /* V86: Unique Button Colors */
-        #nav-extractor {
-            background-color: #2563eb; /* blue-600 */
-        }
-        #nav-extractor.nav-button-active {
-            background-color: #dbeafe; /* blue-100 */
-            color: #1d4ed8; /* blue-700 */
-        }
+        /* V86: Unique Button Colors (Slightly adjusted for material look) */
+        #nav-extractor { background-color: #2563eb; }
+        #nav-extractor.nav-button-active { background-color: #bfdbfe; color: #1d4ed8; }
 
-        #nav-settings {
-            background-color: #16a34a; /* green-600 */
-        }
-        #nav-settings.nav-button-active {
-            background-color: #dcfce7; /* green-100 */
-            color: #15803d; /* green-700 */
-        }
+        #nav-room-settings { background-color: #9333ea; }
+        #nav-room-settings.nav-button-active { background-color: #f3e8ff; color: #7e22ce; }
 
-        #nav-room-settings {
-            background-color: #9333ea; /* purple-600 */
-        }
-        #nav-room-settings.nav-button-active {
-            background-color: #f3e8ff; /* purple-100 */
-            color: #7e22ce; /* purple-700 */
-        }
+        #nav-session-assign { background-color: #ca8a04; } /* New Tab Color */
+        #nav-session-assign.nav-button-active { background-color: #fef9c3; color: #a16207; }
 
-        #nav-qpcodes {
-            background-color: #ca8a04; /* yellow-600 */
-        }
-        #nav-qpcodes.nav-button-active {
-            background-color: #fef9c3; /* yellow-100 */
-            color: #a16207; /* yellow-700 */
-        }
+        #nav-qpcodes { background-color: #16a34a; }
+        #nav-qpcodes.nav-button-active { background-color: #dcfce7; color: #15803d; }
 
-        #nav-reports {
-            background-color: #dc2626; /* red-600 */
-        }
-        #nav-reports.nav-button-active {
-            background-color: #fee2e2; /* red-100 */
-            color: #b91c1c; /* red-700 */
-        }
+        #nav-absentees { background-color: #db2777; }
+        #nav-absentees.nav-button-active { background-color: #fce7f3; color: #be185d; }
+        
+        /* V107: New Scribes Tab Color */
+        #nav-scribes { background-color: #0d9488; } /* Teal-600 */
+        #nav-scribes.nav-button-active { background-color: #ccfbf1; color: #0f766e; } /* Teal-100 */
 
-        #nav-absentees {
-            background-color: #db2777; /* pink-600 */
+        #nav-reports { background-color: #dc2626; }
+        #nav-reports.nav-button-active { background-color: #fee2e2; color: #b91c1c; }
+        
+        #nav-settings { background-color: #0f172a; } /* Dark Blue/Slate for far right settings */
+        #nav-settings.nav-button-active { background-color: #e2e8f0; color: #0f172a; }
+
+        /* General container style update */
+        .bg-white {
+            border-radius: 0.75rem; /* Rounded corners for containers */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Soft material shadow */
         }
-        #nav-absentees.nav-button-active {
-            background-color: #fce7f3; /* pink-100 */
-            color: #be185d; /* pink-700 */
+        
+        /* V107: Highlight for Scribe Students */
+        .scribe-highlight {
+            background-color: #f3f4f6 !important; /* Light gray background for screen/print */
+            font-weight: bold;
         }
 
 
@@ -122,7 +105,7 @@
             }
 
             /* Hide the main app container and all other non-report elements */
-            #main-nav, #view-extractor, #view-settings, #view-reports, #view-absentees, #view-qpcodes, #view-room-settings, body > py-config, body > py-script, #report-controls {
+            #main-nav, #view-extractor, #view-settings, #view-reports, #view-absentees, #view-qpcodes, #view-room-settings, #view-session-assign, #view-scribes, body > py-config, body > py-script, #report-controls {
                 display: none !important; /* Be forceful */
             }
             
@@ -247,6 +230,12 @@
             .reg-col { width: 20%; }
             .name-col { width: 35%; }
             .signature-col { width: 10%; } 
+            
+            /* V107: Scribe Highlight in Print */
+            .scribe-highlight {
+                background-color: #f3f4f6 !important; /* Light gray background */
+                font-weight: bold;
+            }
 
             /* --- Question Paper Report Table Styles --- */
             .q-paper-table .sl-col { width: 10%; }
@@ -419,7 +408,7 @@
         }
         .print-page th {
             padding: 8px 3px;
-            background-color: #eee;
+            background-color: #f0f0f0;
         }
         
         .print-page .sl-col { width: 5%; }
@@ -567,42 +556,42 @@
         <!-- V83: Top Banner (Spanning Width, Centered Title) -->
         <div id="top-banner" class="w-full bg-indigo-700 text-center py-2">
             <!-- V90: Updated Title -->
-            <h1 class="text-xl font-extrabold tracking-wider text-white">UOC Exam Management (V90)</h1>
+            <h1 class="text-xl font-extrabold tracking-wider text-white">UOC Exam Management (V111)</h1>
         </div>
         
         <!-- V83: Navigation Tabs (Below Banner) -->
-        <!-- V86: Added justify-center and gap-2 for spacing -->
-        <div id="main-nav-tabs" class="container max-w-2xl mx-auto flex justify-center gap-2">
+        <!-- V103: RE-ORDERED NAV TABS -->
+        <div id="main-nav-tabs" class="container max-w-5xl mx-auto flex justify-start gap-2">
             <button id="nav-extractor" class="nav-button nav-button-active">Main Extractor</button>
-            <button id="nav-settings" class="nav-button nav-button-inactive">Settings</button>
-            <button id="nav-room-settings" class="nav-button nav-button-inactive">Room Settings</button> 
+            <button id="nav-room-settings" class="nav-button nav-button-inactive">Room Setup</button>
+            <button id="nav-session-assign" class="nav-button nav-button-inactive">Room Assign</button> <!-- NEW TAB --> 
             <button id="nav-qpcodes" class="nav-button nav-button-inactive">QP Codes</button>
-            <button id="nav-reports" class="nav-button nav-button-inactive">Reports</button>
             <button id="nav-absentees" class="nav-button nav-button-inactive">Absentees</button>
+            <button id="nav-scribes" class="nav-button nav-button-inactive">Scribes</button> <!-- NEW SCRIBES TAB -->
+            <button id="nav-reports" class="nav-button nav-button-inactive">Reports</button>
+            <button id="nav-settings" class="nav-button nav-button-inactive ml-auto">General Settings</button> <!-- MOVED TO RIGHT -->
         </div>
     </nav>
 
-    <!-- *** "Extractor" View (V67: CSV Upload Shifted Here) *** -->
+    <!-- *** "Extractor" View *** -->
     <div id="view-extractor" class="container max-w-2xl mx-auto p-4 min-h-screen">
         <div class="bg-white p-8 rounded-lg shadow-xl w-full">
             
-            <!-- New Title as requested -->
             <h1 class="text-3xl font-bold text-gray-800 mb-6">Data Extractor</h1>
 
             <!-- How to Use Instructions -->
             <div class="bg-indigo-50 border border-indigo-200 p-4 rounded-md mb-6">
                 <h4 class="font-semibold text-gray-800">How to Use:</h4>
                 <ol class="list-decimal list-inside text-sm text-gray-700 mt-2 space-y-1">
-                    <li>Go to **Room Settings** and define capacities and locations. Save changes.</li>
+                    <li>Go to **Room Setup** and define capacities and locations. Save changes.</li>
                     <li>Click 'Select PDF Files' and choose 1 or 100+ PDF files.</li>
                     <li>Click 'Run Batch Extraction'. Check the **Status Log** for errors.</li>
-                    <li>Click 'Download Combined_Nominal_Roll.csv' for raw data.</li>
+                    <li>Go to **Room Assign** to assign extracted sessions to physical rooms.</li>
                     <li>(Optional) Go to **QP Codes** to assign codes to each course.</li>
                     <li>Go to **Reports** to generate seating lists, day-wise lists, and question paper counts.</li>
-                    <li>Go to **Absentees** to mark absentees and generate the final statement.</li>
+                    <li>Go to **Absentees** and **Scribes** to mark special case students and generate statements.</li>
                 </ol>
             </div>
-            <!-- END HOW TO USE SECTION -->
 
             <!-- HTML Interface -->
             <div class="space-y-4">
@@ -613,7 +602,7 @@
                 
                 <button id="run-button" 
                         py-click="start_extraction" 
-                        class="w-full inline-flex justify-center items-center rounded-md border border-transparent bg-indigo-600 py-3 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50">
+                        class="w-full inline-flex justify-center items-center rounded-lg border border-transparent bg-indigo-600 py-3 px-4 text-sm font-medium text-white shadow-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50">
                     <span id="spinner" class="loader-spin -ml-1 mr-3 h-5 w-5 text-white hidden"></span>
                     <span id="button-text">2. Run Batch Extraction</span>
                 </button>
@@ -623,15 +612,15 @@
             <!-- Output & Download Area -->
             <div class="mt-6">
                 <h3 class="text-lg font-medium text-gray-900">Processing Log:</h3>
-                <div id="status" class="w-full h-48 p-3 mt-2 bg-gray-900 text-gray-200 text-sm font-mono rounded-md overflow-y-auto">
+                <div id="status" class="w-full h-48 p-3 mt-2 bg-gray-900 text-gray-200 text-sm font-mono rounded-lg overflow-y-auto">
                     Waiting for file...
                 </div>
             </div>
 
-            <!-- (V18): Status Log -->
+            <!-- Status Log -->
             <div class="mt-6">
                 <h3 class="text-lg font-medium text-gray-900">Status Log:</h3>
-                <div id="status-log" class="w-full h-48 p-3 mt-2 bg-gray-100 border border-gray-300 text-gray-800 text-sm font-mono rounded-md overflow-y-auto">
+                <div id="status-log" class="w-full h-48 p-3 mt-2 bg-gray-100 border border-gray-300 text-gray-800 text-sm font-mono rounded-lg overflow-y-auto">
                     Waiting for extraction to complete...
                 </div>
             </div>
@@ -641,73 +630,36 @@
                 <div id="csv-download-container"></div>
             </div>
             
-            <!-- V67: CSV Upload Section (Shifted to bottom) -->
-            <div class="bg-gray-50 border border-gray-200 p-4 rounded-md mt-6">
+            <!-- CSV Upload Section -->
+            <div class="bg-gray-50 border border-gray-200 p-4 rounded-lg mt-6">
                 <h4 class="font-semibold text-gray-800">3. Load Corrected Data (Optional)</h4>
                 <p class="text-sm text-gray-600 mt-1 mb-3">
                     Upload a corrected `Combined_Nominal_Roll.csv` file to overwrite the extracted data.
-                    This is your base data source for all reports.
                 </p>
                 <div class="flex items-center gap-2">
                     <input type="file" id="corrected-csv-upload" accept=".csv" class="block w-full text-sm text-gray-500
                                   file:mr-4 file:py-2 file:px-4
-                                  file:rounded-md file:border-0
+                                  file:rounded-lg file:border-0
                                   file:text-sm file:font-semibold
                                   file:bg-green-50 file:text-green-700
                                   hover:file:bg-green-100"/>
-                    <button id="load-csv-button" class="inline-flex justify-center items-center rounded-md border border-transparent bg-gray-600 py-2 px-3 text-sm font-medium text-white shadow-sm hover:bg-gray-700">
+                    <button id="load-csv-button" class="inline-flex justify-center items-center rounded-lg border border-transparent bg-gray-600 py-2 px-3 text-sm font-medium text-white shadow-md hover:bg-gray-700">
                         Load CSV
                     </button>
                 </div>
                 <span id="csv-load-status" class="text-sm font-medium text-green-600 mt-2 block h-5"></span>
             </div>
-            <!-- END V67 Shifted Section -->
 
         </div>
     </div>
     
-    <!-- *** "Settings" View (V82: CONSOLIDATED SETTINGS) *** -->
-    <div id="view-settings" class="container max-w-2xl mx-auto p-4 min-h-screen hidden">
-        <div class="bg-white p-8 rounded-lg shadow-xl w-full">
-            <h1 class="text-3xl font-bold text-gray-800 mb-6">General Settings</h1>
-            
-            <!-- General Settings (College Name & Reset) -->
-            <div class="bg-red-50 border border-red-200 p-4 rounded-lg mb-6">
-                 <h2 class="text-xl font-bold text-gray-800 mb-4 pb-2 border-b border-gray-300">
-                    College Name
-                </h2>
-                <!-- V48: College Name Input -->
-                <div class="mb-6 flex gap-2 items-end">
-                    <div class="flex-grow">
-                        <label for="college-name-input" class="block text-sm font-medium text-gray-700 mb-1">College Name (for Reports)</label>
-                        <input type="text" id="college-name-input" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm" placeholder="e.g., University of Calicut">
-                    </div>
-                    <!-- V97: New Save Button for College Name -->
-                    <button id="save-college-name-button" class="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-500 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-600">
-                        Save
-                    </button>
-                </div>
-                <div id="college-name-status" class="text-sm font-medium text-green-600 mt-2 block h-5"></div>
-                 
-                 <h2 class="text-xl font-bold text-gray-800 mb-4 pb-2 border-b border-gray-300">
-                    Master Reset
-                </h2>
-                 <!-- V68: Master Reset Button -->
-                <button id="master-reset-button" class="w-full inline-flex justify-center items-center rounded-md border border-red-700 bg-red-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-red-700 mt-2">
-                    Master Reset: Clear ALL Local Data
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- *** "Room Settings" View (V83: SPLIT FROM SETTINGS) *** -->
+    <!-- *** "Room Settings" View (Room Setup) *** -->
     <div id="view-room-settings" class="container max-w-2xl mx-auto p-4 min-h-screen hidden">
         <div class="bg-white p-8 rounded-lg shadow-xl w-full">
-             <h1 class="text-3xl font-bold text-gray-800 mb-6">Room Capacity & Location</h1>
+             <h1 class="text-3xl font-bold text-gray-800 mb-6">Room Capacity & Location Setup</h1>
 
             <p class="text-gray-600 mb-4">
-                Define the number of students per room. This list is automatically saved to your browser.
-                If a capacity is left blank, it will default to 30 when saved.
+                Define the physical rooms, their capacities, and their location blocks. This list is saved locally.
             </p>
             
             <!-- Dynamic Form Container -->
@@ -725,22 +677,63 @@
                 </div>
                 
                 <!-- Add New Room Button -->
-                <button id="add-room-button" class="w-full inline-flex justify-center items-center rounded-md border border-dashed border-gray-400 bg-gray-50 py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-100">
+                <button id="add-room-button" class="w-full inline-flex justify-center items-center rounded-lg border border-dashed border-gray-400 bg-gray-50 py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-100">
                     + Add New Room
                 </button>
                 
                 <hr class="my-4">
                 
                 <!-- Save Button -->
-                <button id="save-room-config-button" class="w-full inline-flex justify-center items-center rounded-md border border-transparent bg-indigo-600 py-3 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700">
+                <button id="save-room-config-button" class="w-full inline-flex justify-center items-center rounded-lg border border-transparent bg-indigo-600 py-3 px-4 text-sm font-medium text-white shadow-lg hover:bg-indigo-700">
                     Save Room Settings
                 </button>
                 <div id="room-config-status" class="text-sm text-green-600 font-medium text-center h-5"></div>
             </div>
         </div>
     </div>
+
+    <!-- *** NEW: "Session Assign" View *** -->
+    <div id="view-session-assign" class="container max-w-2xl mx-auto p-4 min-h-screen hidden">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-full">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6">Session to Room Assignment</h1>
+
+            <div id="session-assign-content-wrapper" class="hidden">
+                <p class="text-gray-600 mb-4">
+                    Assign a specific set of rooms (e.g., Room 1, Room 2, etc.) to the extracted exam session below. This is required for accurate room-wise report generation.
+                </p>
+
+                <!-- Session Selector -->
+                <div class="mb-4">
+                    <label for="session-select-assign" class="block text-sm font-medium text-gray-700 mb-1">Select Exam Session:</label>
+                    <select id="session-select-assign" class="block w-full p-2 border border-gray-300 rounded-lg shadow-sm text-sm">
+                        <option value="">-- Select a Session --</option>
+                    </select>
+                </div>
+                
+                <!-- Room Assignment Table -->
+                <div id="session-room-assignment-container" class="space-y-4 hidden">
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-700 mb-2">Room Assignment Slots:</h3>
+                        <div id="room-assignment-slots" class="space-y-3">
+                            <!-- Input fields for Room 1, Room 2, etc. will be dynamically added here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div id="assign-status" class="text-sm text-green-600 font-medium text-center h-5 mt-4"></div>
+
+                <button id="save-session-assign-button" class="w-full inline-flex justify-center items-center rounded-lg border border-transparent bg-green-600 py-3 px-4 text-sm font-medium text-white shadow-lg hover:bg-green-700 mt-4" disabled>
+                    Save Session Room Assignment
+                </button>
+            </div>
+
+            <div id="session-assign-loader" class="text-center text-gray-600">
+                <p>Please run a data extraction or load a corrected CSV to enable this feature.</p>
+            </div>
+        </div>
+    </div>
     
-    <!-- *** (V61) "QP Codes" View - Now Session Aware *** -->
+    <!-- *** "QP Codes" View - Now Session Aware *** -->
     <div id="view-qpcodes" class="container max-w-2xl mx-auto p-4 min-h-screen hidden">
         <div class="bg-white p-8 rounded-lg shadow-xl w-full">
             <h1 class="text-3xl font-bold text-gray-800 mb-6">QP Code Settings</h1>
@@ -749,7 +742,7 @@
                 <!-- Session Selector for QP Codes -->
                 <div class="mb-4">
                     <label for="session-select-qp" class="block text-sm font-medium text-gray-700 mb-1">Select Exam Session:</label>
-                    <select id="session-select-qp" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm">
+                    <select id="session-select-qp" class="block w-full p-2 border border-gray-300 rounded-lg shadow-sm text-sm">
                         <option value="">-- Select a Session --</option>
                     </select>
                 </div>
@@ -777,7 +770,7 @@
                     <div id="qp-code-status" class="text-sm text-green-600 font-medium text-center h-5 mt-4"></div>
                     
                     <!-- V62: NEW SAVE BUTTON -->
-                    <button id="save-qp-codes-button" class="w-full inline-flex justify-center items-center rounded-md border border-transparent bg-indigo-600 py-3 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 mt-4">
+                    <button id="save-qp-codes-button" class="w-full inline-flex justify-center items-center rounded-lg border border-transparent bg-indigo-600 py-3 px-4 text-sm font-medium text-white shadow-lg hover:bg-indigo-700 mt-4">
                         Save QP Codes
                     </button>
                 </div>
@@ -791,7 +784,106 @@
         </div>
     </div>
     
-    <!-- *** "Reports" View (V68: Filter Added) *** -->
+    <!-- *** "Absentees" View *** -->
+    <div id="view-absentees" class="container max-w-2xl mx-auto p-4 min-h-screen hidden">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-full">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6">Mark Absentees</h1>
+            
+            <div id="absentee-content-wrapper" class="hidden">
+                <!-- Session Selector -->
+                <div class="mb-4">
+                    <label for="session-select" class="block text-sm font-medium text-gray-700 mb-1">Select Exam Session:</label>
+                    <select id="session-select" class="block w-full p-2 border border-gray-300 rounded-lg shadow-sm text-sm">
+                        <option value="">-- Select a Session --</option>
+                    </select>
+                </div>
+
+                <!-- Autocomplete Search -->
+                <div id="absentee-search-section" class="mb-6 hidden">
+                    <label for="absentee-search" class="block text-sm font-medium text-gray-700 mb-1">Search Register Number:</label>
+                    <div class="autocomplete-container">
+                        <input type="text" id="absentee-search" class="block w-full p-2 border border-gray-300 rounded-lg shadow-sm text-sm" placeholder="Type 3 chars...">
+                        <div id="autocomplete-results" class="autocomplete-results hidden"></div>
+                    </div>
+                    
+                    <!-- Selected Student Details -->
+                    <div id="selected-student-details" class="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-lg hidden">
+                        <div class="font-medium text-gray-800" id="selected-student-name"></div>
+                        <div class="text-sm text-gray-600" id="selected-student-course"></div>
+                        <div class="text-sm text-gray-600" id="selected-student-room"></div>
+                        <button id="add-absentee-button" class="mt-2 w-full inline-flex justify-center items-center rounded-lg border border-transparent bg-red-600 py-2 px-3 text-sm font-medium text-white shadow-md hover:bg-red-700">
+                            Add to Absentee List
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Current Absentee List -->
+                <div id="absentee-list-section" class="hidden">
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Current Absentee List for this Session:</h3>
+                    <div id="current-absentee-list" class="min-h-[50px] bg-gray-50 border border-gray-200 rounded-lg p-3 space-y-2">
+                        <!-- Absentees will be added here -->
+                    </div>
+                </div>
+                
+                <!-- Generate Report Button -->
+                <button id="generate-absentee-report-button" class="mt-6 w-full inline-flex justify-center items-center rounded-lg border border-transparent bg-blue-600 py-3 px-4 text-sm font-medium text-white shadow-lg hover:bg-blue-700 disabled:opacity-50" disabled>
+                    Generate Absentee Statement
+                </button>
+            </div>
+            
+            <div id="absentee-loader" class="text-center text-gray-600">
+                <p>Please run a data extraction or load a corrected CSV on the "Reports" tab to enable this feature.</p>
+            </div>
+
+        </div>
+    </div>
+    
+    <!-- *** V107: NEW SCRIBES VIEW *** -->
+    <div id="view-scribes" class="container max-w-2xl mx-auto p-4 min-h-screen hidden">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-full">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6">Mark Students Requiring Scribe</h1>
+
+            <div id="scribes-content-wrapper" class="hidden">
+                <p class="text-gray-600 mb-4">
+                    Students marked here will be highlighted in the Room-wise Seating Report and included in a separate Scribe Report.
+                </p>
+
+                <!-- Scribe Autocomplete Search -->
+                <div id="scribe-search-section" class="mb-6">
+                    <label for="scribe-search" class="block text-sm font-medium text-gray-700 mb-1">Search Register Number:</label>
+                    <div class="autocomplete-container">
+                        <input type="text" id="scribe-search" class="block w-full p-2 border border-gray-300 rounded-lg shadow-sm text-sm" placeholder="Type 3 chars...">
+                        <div id="scribe-autocomplete-results" class="autocomplete-results hidden"></div>
+                    </div>
+                    
+                    <!-- Selected Student Details -->
+                    <div id="scribe-selected-student-details" class="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-lg hidden">
+                        <div class="font-medium text-gray-800" id="scribe-selected-student-name"></div>
+                        <div class="text-sm text-gray-600" id="scribe-selected-student-course"></div>
+                        <button id="add-scribe-button" class="mt-2 w-full inline-flex justify-center items-center rounded-lg border border-transparent bg-teal-600 py-2 px-3 text-sm font-medium text-white shadow-md hover:bg-teal-700">
+                            Add to Scribe List
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Current Scribe List -->
+                <div id="scribe-list-section">
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Current Scribe List (Global):</h3>
+                    <div id="current-scribe-list" class="min-h-[50px] bg-gray-50 border border-gray-200 rounded-lg p-3 space-y-2">
+                        <!-- Scribes will be added here -->
+                    </div>
+                </div>
+            </div>
+            
+            <div id="scribes-loader" class="text-center text-gray-600">
+                <p>Please run a data extraction or load a corrected CSV to enable this feature.</p>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- *** "Reports" View *** -->
     <div id="view-reports" class="container max-w-2xl mx-auto p-4 min-h-screen hidden">
         <div class="bg-white p-8 rounded-lg shadow-xl w-full">
             <h1 class="text-3xl font-bold text-gray-800 mb-6">Reports</h1>
@@ -800,7 +892,7 @@
                 Generate reports based on the last loaded data. (Buttons are enabled after extraction or CSV load.)
             </p>
 
-            <!-- V68: Report Filtering Options -->
+            <!-- Report Filtering Options -->
             <div id="report-filter-section" class="bg-gray-100 p-4 rounded-lg mb-6 hidden">
                 <h4 class="font-semibold text-gray-700 mb-2">Filter Reports By:</h4>
                 <div class="flex flex-col sm:flex-row gap-4 mb-3">
@@ -818,7 +910,7 @@
                 
                 <!-- Session Dropdown (Initially Hidden) -->
                 <div id="reports-session-dropdown-container" class="">
-                    <select id="reports-session-select" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm">
+                    <select id="reports-session-select" class="block w-full p-2 border border-gray-300 rounded-lg shadow-sm text-sm">
                         <option value="">-- Select a Session --</option>
                     </select>
                 </div>
@@ -827,73 +919,91 @@
 
 
             <div class="space-y-4">
-                <button id="generate-report-button" class="w-full inline-flex justify-center items-center rounded-md border border-transparent bg-blue-600 py-3 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50" disabled>
+                <button id="generate-report-button" class="w-full inline-flex justify-center items-center rounded-lg border border-transparent bg-blue-600 py-3 px-4 text-sm font-medium text-white shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50" disabled>
                     Generate Room-wise Seating Report
                 </button>
                 
                 <!-- (V49) Renamed Button -->
-                <button id="generate-daywise-report-button" class="w-full inline-flex justify-center items-center rounded-md border border-transparent bg-blue-600 py-3 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 disabled:opacity-50" disabled>
+                <button id="generate-daywise-report-button" class="w-full inline-flex justify-center items-center rounded-lg border border-transparent bg-blue-600 py-3 px-4 text-sm font-medium text-white shadow-lg hover:bg-blue-700 disabled:opacity-50" disabled>
                     Generate Seating Details for Candidates (Compact)
                 </button>
 
-                <button id="generate-qpaper-report-button" class="w-full inline-flex justify-center items-center rounded-md border border-transparent bg-blue-600 py-3 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 disabled:opacity-50" disabled>
+                <button id="generate-qpaper-report-button" class="w-full inline-flex justify-center items-center rounded-lg border border-transparent bg-blue-600 py-3 px-4 text-sm font-medium text-white shadow-lg hover:bg-blue-700 disabled:opacity-50" disabled>
                     Generate Question Paper Report
+                </button>
+                
+                <!-- V107: NEW SCRIBE REPORT BUTTON -->
+                <button id="generate-scribe-report-button" class="w-full inline-flex justify-center items-center rounded-lg border border-transparent bg-teal-600 py-3 px-4 text-sm font-medium text-white shadow-lg hover:bg-teal-700 disabled:opacity-50" disabled>
+                    Generate Scribe Student List
                 </button>
             </div>
         </div>
     </div>
     
-    <!-- *** (V56) "Absentees" View *** -->
-    <div id="view-absentees" class="container max-w-2xl mx-auto p-4 min-h-screen hidden">
+    <!-- *** "General Settings" View (MOVED TO RIGHT) *** -->
+    <div id="view-settings" class="container max-w-2xl mx-auto p-4 min-h-screen hidden">
         <div class="bg-white p-8 rounded-lg shadow-xl w-full">
-            <h1 class="text-3xl font-bold text-gray-800 mb-6">Mark Absentees</h1>
+            <h1 class="text-3xl font-bold text-gray-800 mb-6">General Application & Data Settings</h1>
             
-            <div id="absentee-content-wrapper" class="hidden">
-                <!-- Session Selector -->
-                <div class="mb-4">
-                    <label for="session-select" class="block text-sm font-medium text-gray-700 mb-1">Select Exam Session:</label>
-                    <select id="session-select" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm">
-                        <option value="">-- Select a Session --</option>
-                    </select>
+            <!-- College Name Settings -->
+            <div class="bg-indigo-50 border border-indigo-200 p-4 rounded-lg mb-6">
+                 <h2 class="text-xl font-bold text-gray-800 mb-4 pb-2 border-b border-indigo-300">
+                    College Name (Reports Header)
+                </h2>
+                <div class="mb-3 flex gap-2 items-end">
+                    <div class="flex-grow">
+                        <label for="college-name-input" class="block text-sm font-medium text-gray-700 mb-1">College Name</label>
+                        <input type="text" id="college-name-input" class="block w-full p-2 border border-gray-300 rounded-lg shadow-sm text-sm" placeholder="e.g., University of Calicut">
+                    </div>
+                    <button id="save-college-name-button" class="inline-flex items-center justify-center rounded-lg border border-transparent bg-indigo-500 py-2 px-4 text-sm font-medium text-white shadow-md hover:bg-indigo-600">
+                        Save
+                    </button>
                 </div>
+                <div id="college-name-status" class="text-sm font-medium text-green-600 mt-2 block h-5"></div>
+            </div>
+            
+            <!-- Data Management (Import/Export) -->
+            <div class="bg-gray-100 border border-gray-300 p-4 rounded-lg mb-6">
+                 <h2 class="text-xl font-bold text-gray-800 mb-4 pb-2 border-b border-gray-400">
+                    Data Backup & Restore
+                </h2>
+                <p class="text-sm text-gray-600 mb-4">
+                    Export all configurations (Rooms, QP Codes, Absentees, Scribes, College Name) to a JSON file.
+                </p>
+                <button id="export-data-button" class="w-full inline-flex justify-center items-center rounded-lg border border-transparent bg-gray-600 py-2 px-4 text-sm font-medium text-white shadow-md hover:bg-gray-700">
+                    Export All Data (.json)
+                </button>
+                
+                <hr class="my-4 border-gray-300">
+                
+                <p class="text-sm text-gray-600 mb-3">
+                    Import a previously exported JSON file to restore settings.
+                </p>
+                <div class="flex items-center gap-2">
+                    <input type="file" id="import-file" accept=".json" class="block w-full text-sm text-gray-500
+                                  file:py-2 file:px-4 file:rounded-lg file:border-0
+                                  file:text-sm file:font-semibold
+                                  file:bg-indigo-50 file:text-indigo-700
+                                  hover:file:bg-indigo-100"/>
+                    <button id="import-data-button" class="inline-flex justify-center items-center rounded-lg border border-transparent bg-green-600 py-2 px-4 text-sm font-medium text-white shadow-md hover:bg-green-700">
+                        Import
+                    </button>
+                </div>
+                <div id="import-status" class="text-sm font-medium text-green-600 mt-2 block h-5"></div>
+            </div>
 
-                <!-- Autocomplete Search -->
-                <div id="absentee-search-section" class="mb-6 hidden">
-                    <label for="absentee-search" class="block text-sm font-medium text-gray-700 mb-1">Search Register Number:</label>
-                    <div class="autocomplete-container">
-                        <input type="text" id="absentee-search" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm" placeholder="Type 3 chars...">
-                        <div id="autocomplete-results" class="autocomplete-results hidden"></div>
-                    </div>
-                    
-                    <!-- Selected Student Details -->
-                    <div id="selected-student-details" class="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-md hidden">
-                        <div class="font-medium text-gray-800" id="selected-student-name"></div>
-                        <div class="text-sm text-gray-600" id="selected-student-course"></div>
-                        <div class="text-sm text-gray-600" id="selected-student-room"></div>
-                        <button id="add-absentee-button" class="mt-2 w-full inline-flex justify-center items-center rounded-md border border-transparent bg-red-600 py-2 px-3 text-sm font-medium text-white shadow-sm hover:bg-red-700">
-                            Add to Absentee List
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Current Absentee List -->
-                <div id="absentee-list-section" class="hidden">
-                    <h3 class="text-lg font-medium text-gray-900 mb-2">Current Absentee List for this Session:</h3>
-                    <div id="current-absentee-list" class="min-h-[50px] bg-gray-50 border border-gray-200 rounded-md p-3 space-y-2">
-                        <!-- Absentees will be added here -->
-                    </div>
-                </div>
-                
-                <!-- Generate Report Button -->
-                <button id="generate-absentee-report-button" class="mt-6 w-full inline-flex justify-center items-center rounded-md border border-transparent bg-blue-600 py-3 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 disabled:opacity-50" disabled>
-                    Generate Absentee Statement
+             <!-- Master Reset -->
+            <div class="bg-red-50 border border-red-200 p-4 rounded-lg">
+                 <h2 class="text-xl font-bold text-gray-800 mb-4 pb-2 border-b border-red-300">
+                    Master Reset
+                </h2>
+                <p class="text-sm text-gray-600 mb-3">
+                    Warning: This action clears ALL local data, including extracted rolls, room setup, and all configurations.
+                </p>
+                <button id="master-reset-button" class="w-full inline-flex justify-center items-center rounded-lg border border-red-700 bg-red-600 py-2 px-4 text-sm font-medium text-white shadow-lg hover:bg-red-700 mt-2">
+                    Master Reset: Clear ALL Local Data
                 </button>
             </div>
-            
-            <div id="absentee-loader" class="text-center text-gray-600">
-                <p>Please run a data extraction or load a corrected CSV on the "Reports" tab to enable this feature.</p>
-            </div>
-
         </div>
     </div>
 
@@ -904,10 +1014,10 @@
         <!-- V91: Updated control buttons -->
         <div class="flex flex-wrap gap-2 mt-2">
             <!-- V96: Download PDF button removed as requested -->
-            <button id="final-print-button" class="flex-1 inline-flex justify-center items-center rounded-md border border-transparent bg-green-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-green-700">
+            <button id="final-print-button" class="flex-1 inline-flex justify-center items-center rounded-lg border border-transparent bg-green-600 py-2 px-4 text-sm font-medium text-white shadow-lg hover:bg-green-700">
                 Print Report (Browser)
             </button>
-            <button id="clear-report-button" class="flex-1 inline-flex justify-center items-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">
+            <button id="clear-report-button" class="flex-1 inline-flex justify-center items-center rounded-lg border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-md hover:bg-gray-50">
                 Clear Report
             </button>
             <div id="room-csv-download-container" class="w-full mt-2"></div>
@@ -931,14 +1041,14 @@
         packages = ["pandas", "pdfplumber==0.9.0"]
     </py-config>
     
-    <!-- *** Python Script (V74 - FINAL STABLE PARSING/PERSISTENCE) *** -->
+    <!-- *** Python Script *** -->
     <py-script>
         import pandas as pd
         import pdfplumber
         import re
         import io
-        import js # V55: FIX - Import the main js module
-        from js import document, console, URL, Blob, window, localStorage # V55: FIX - Import specific parts
+        import js 
+        from js import document, console, URL, Blob, window, localStorage 
         import asyncio
         import json 
         import math 
@@ -971,8 +1081,9 @@
         qpcode_content_wrapper = document.getElementById("qpcode-content-wrapper")
         
         ROOM_CONFIG_KEY = 'examRoomConfig'
-        COLLEGE_NAME_KEY = 'examCollegeName' # V48: New key
-        BASE_DATA_KEY = 'examBaseData'; # V65: New key for persistent base data
+        COLLEGE_NAME_KEY = 'examCollegeName' 
+        BASE_DATA_KEY = 'examBaseData'; 
+        SESSION_ROOM_ASSIGN_KEY = 'examSessionRoomAssign'
 
         def log_message(message):
             """Helper function to print messages to the HTML (Processing) log."""
@@ -1030,6 +1141,7 @@
             
             # 1. Regex to find a course code, e.g., (ECO5B07) or [BCM5B07]
             # This looks for 3 letters, a number, a letter, and 2 numbers
+            # V109 FIX: Ensure string literal is correctly terminated
             code_match = re.search(r'[\[\(-]{2}([A-Z]{3}\d[A-Z]\d{2,})[\]\)-]{2}', course_name, re.IGNORECASE)
             if not code_match:
                 code_match = re.search(r'([A-Z]{3}\d[A-Z]\d{2,})', course_name, re.IGNORECASE)
@@ -1053,7 +1165,7 @@
             # If no code found, just return the cleaned-up original
             return re.sub(r'\s+', ' ', course_name).strip().upper()
 
-        # --- V40: STATEFUL PARSER for the "NEW" PDF format ---
+        # --- V40: STATEFUL PARSER for the "OLD" PDF format (V44: ROBUST) ---
         def extract_new_format_header(page_text):
             """Extracts header from Page 1 of the new format."""
             date_val, time_val, course_name = "Unknown", "Unknown", "Unknown"
@@ -1209,14 +1321,18 @@
                 show_loader(True)
                 await asyncio.sleep(0) # Let loader show
                 
-                # V33: Clear the CSV upload status
-                js.clear_csv_upload_status() # This needs the global 'js'
+                # V108 FIX: Wrap in try/except block to prevent PyScript crash if JS bridge isn't immediately ready
+                try:
+                    js.clear_csv_upload_status() 
+                except:
+                    console.warn("JS function clear_csv_upload_status was not available during Python startup.")
                     
                 # Call the main logic function
                 await run_extraction_py()
                 
             except Exception as e:
-                log_message(f"Critical bridge error: {e}")
+                # V104 FIX: This will only catch Python-side errors now.
+                log_message(f"Critical Python execution error: {e}")
             finally:
                 show_loader(False)
 
@@ -1226,7 +1342,7 @@
             V40: Re-written to be STATEFUL and FILE-BASED.
             """
             errors_list = []
-            try: # <-- CORRECTED SYNTAX
+            try: 
                 # --- 1. Reset all UI elements ---
                 csv_download_container.innerHTML = ""
                 generate_report_button.disabled = True
@@ -1234,6 +1350,10 @@
                 generate_daywise_report_button.disabled = True
                 js.disable_absentee_tab(True) # V56: Disable absentee tab
                 js.disable_qpcode_tab(True) # V58: Disable QP Code tab
+                # V103: Disable Session Assign tab
+                js.disable_session_assign_tab(True) 
+                # V107: Disable Scribes tab
+                js.disable_scribes_tab(True) 
                 json_data_store.innerHTML = ""
                 q_paper_data_store.innerHTML = ""
                 status_div.innerHTML = ""
@@ -1392,7 +1512,7 @@
                 
                 csv_download_container.innerHTML = f"""
                     <a href="{url}" download="{csv_filename}"
-                       class="w-full inline-flex justify-center items-center rounded-md border border-transparent bg-green-600 py-3 px-4 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                       class="w-full inline-flex justify-center items-center rounded-lg border border-transparent bg-green-600 py-3 px-4 text-sm font-medium text-white shadow-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
                         Download {csv_filename} ({len(all_exam_rows)} rows)
                     </a>
                 """
@@ -1403,13 +1523,8 @@
                 # V65: Save the base data to localStorage
                 localStorage.setItem(BASE_DATA_KEY, json_data)
                 
-                generate_report_button.disabled = False
-                generate_qpaper_report_button.disabled = False
-                generate_daywise_report_button.disabled = False
-                js.disable_absentee_tab(False) # V56: Enable absentee tab
-                js.disable_qpcode_tab(False) # V58: Enable QP Code tab
-                js.populate_session_dropdown() # V56: Populate dropdown
-                js.populate_qp_code_session_dropdown() # V61: Populate QP Code dropdown
+                # V110 FIX: Call the single consolidated JS initialization function
+                js.initializeAfterDataLoad();
                                 
                 log_message("Success! Your combined files are ready.")
             
@@ -1428,18 +1543,20 @@
             
     </py-script>
 
-    <!-- *** JAVASCRIPT FOR ALL UI (V90) *** -->
+    <!-- *** JAVASCRIPT FOR ALL UI (V111) *** -->
     <script>
         // --- Global localStorage Key ---
         const ROOM_CONFIG_KEY = 'examRoomConfig';
-        const COLLEGE_NAME_KEY = 'examCollegeName'; // V48: New key
-        const ABSENTEE_LIST_KEY = 'examAbsenteeList'; // V56: New key
-        const QP_CODE_LIST_KEY = 'examQPCodes'; // V58: New key
-        const BASE_DATA_KEY = 'examBaseData'; // V65: New key for persistent base data
+        const COLLEGE_NAME_KEY = 'examCollegeName'; 
+        const ABSENTEE_LIST_KEY = 'examAbsenteeList'; 
+        const QP_CODE_LIST_KEY = 'examQPCodes'; 
+        const BASE_DATA_KEY = 'examBaseData'; 
+        const SESSION_ROOM_ASSIGN_KEY = 'examSessionRoomAssign'; 
+        const SCRIBE_LIST_KEY = 'examScribeList'; 
 
         // --- Global var to hold data from the last *report run* ---
         let lastGeneratedRoomData = [];
-        let lastGeneratedReportType = ""; // V91: To track the type for PDF filename
+        let lastGeneratedReportType = ""; 
         
         // --- (V28) Global var to hold room config map for report generation ---
         let currentRoomConfig = {};
@@ -1451,104 +1568,146 @@
         let allStudentData = []; // Holds all students from PDF/CSV
         let allStudentSessions = []; // Holds unique sessions
         let currentAbsenteeList = []; // Holds absentees for the selected session
-        let selectedStudent = null; // Holds student from autocomplete
+        let selectedStudent = null; // Holds student from autocomplete (Absentees)
+        
+        // --- V107: Scribe variables ---
+        let allScribes = {}; // Master map {regNo: {Name, Course}}
+        let selectedScribeStudent = null; // Holds student from autocomplete (Scribes)
         
         // --- (V58) Global var for QP Code data ---
         let allUniqueCourses = [];
         // V89: This is the master map that holds ALL codes for ALL sessions
         let qpCodeMap = {}; 
+        
+        // --- V103: Global var for per-session room assignments ---
+        let sessionRoomAssignMap = {};
+        
+        // V111 FIX: Get ALL necessary DOM references when the DOM is guaranteed ready
+        function getUIElements() {
+            // NOTE: Must access elements by ID directly, as these references are shared globally 
+            // but defined locally. This pattern is necessary due to the PyScript bridge environment.
+            return {
+                // Nav/Views
+                navAbsentees: document.getElementById('nav-absentees'),
+                navQPCodes: document.getElementById('nav-qpcodes'),
+                navSessionAssign: document.getElementById('nav-session-assign'),
+                navScribes: document.getElementById('nav-scribes'),
+                absenteeLoader: document.getElementById('absentee-loader'),
+                scribesLoader: document.getElementById('scribes-loader'),
+                
+                // Inputs/Selectors
+                collegeNameInput: document.getElementById('college-name-input'),
+                reportsSessionSelect: document.getElementById('reports-session-select'),
+                sessionSelect: document.getElementById('session-select'),
+                sessionSelectQP: document.getElementById('session-select-qp'),
+                sessionSelectAssign: document.getElementById('session-select-assign'),
+                reportsSessionDropdownContainer: document.getElementById('reports-session-dropdown-container'),
+                reportFilterSection: document.getElementById('report-filter-section'),
+                
+                // Buttons
+                generateReportButton: document.getElementById('generate-report-button'),
+                generateQPaperReportButton: document.getElementById('generate-qpaper-report-button'),
+                generateDaywiseReportButton: document.getElementById('generate-daywise-report-button'),
+                generateScribeReportButton: document.getElementById('generate-scribe-report-button'),
+                
+                // Data Stores
+                jsonDataStore: document.getElementById('json-data-store'),
+                // Utility
+                correctedCsvUpload: document.getElementById('corrected-csv-upload'),
+                loadCsvButton: document.getElementById('load-csv-button'),
+                pdfFileInput: document.getElementById('pdf-file'),
+                runButton: document.getElementById('run-button'),
+                roomConfigContainer: document.getElementById('room-config-container'),
+                currentScribeListDiv: document.getElementById('current-scribe-list'), // Added for renderScribeList
+            };
+        }
 
-        // --- Get references to all Report elements ---
-        const generateReportButton = document.getElementById('generate-report-button');
-        const jsonDataStore = document.getElementById('json-data-store');
-        const reportControls = document.getElementById('report-controls');
-        const reportOutputArea = document.getElementById('report-output-area');
-        const reportStatus = document.getElementById('report-status');
-        // const downloadPdfButton = document.getElementById('download-pdf-button'); // V96: Removed
-        const finalPrintButton = document.getElementById('final-print-button');
-        const clearReportButton = document.getElementById('clear-report-button');
-        const roomCsvDownloadContainer = document.getElementById('room-csv-download-container');
-        
-        // --- Get references to all Navigation elements ---
-        const viewExtractor = document.getElementById('view-extractor');
-        const viewSettings = document.getElementById('view-settings');
-        const viewQPCodes = document.getElementById('view-qpcodes'); // V58
-        const viewReports = document.getElementById('view-reports');
-        const viewAbsentees = document.getElementById('view-absentees'); // V56
-        const viewRoomSettings = document.getElementById('view-room-settings'); // V83
-        const navExtractor = document.getElementById('nav-extractor');
-        const navSettings = document.getElementById('nav-settings');
-        const navQPCodes = document.getElementById('nav-qpcodes'); // V58
-        const navReports = document.getElementById('nav-reports');
-        const navAbsentees = document.getElementById('nav-absentees'); // V56
-        const navRoomSettings = document.getElementById('nav-room-settings'); // V83
-        const allNavButtons = [navExtractor, navSettings, navRoomSettings, navQPCodes, navReports, navAbsentees]; // V83
-        const allViews = [viewExtractor, viewSettings, viewRoomSettings, viewQPCodes, viewReports, viewAbsentees]; // V83
-        
-        // --- (V26) Get references to NEW Room Settings elements ---
-        const collegeNameInput = document.getElementById('college-name-input'); // V48
-        // V97: New Status and Button
-        const saveCollegeNameButton = document.getElementById('save-college-name-button'); 
-        const collegeNameStatus = document.getElementById('college-name-status');
-        
-        const roomConfigContainer = document.getElementById('room-config-container');
-        const addRoomButton = document.getElementById('add-room-button');
-        const saveRoomConfigButton = document.getElementById('save-room-config-button');
-        const roomConfigStatus = document.getElementById('room-config-status');
-        
-        // --- Get references to Q-Paper Report elements ---
-        const qPaperDataStore = document.getElementById('q-paper-data-store');
-        const generateQPaperReportButton = document.getElementById('generate-qpaper-report-button');
-        
-        // --- Get references to Day-wise Report elements ---
-        const generateDaywiseReportButton = document.getElementById('generate-daywise-report-button');
-        
-        // --- Get references to CSV Upload elements ---
-        const correctedCsvUpload = document.getElementById('corrected-csv-upload'); // V67 Shifted
-        const loadCsvButton = document.getElementById('load-csv-button'); // V67 Shifted
-        const csvLoadStatus = document.getElementById('csv-load-status'); // V67 Shifted
-        
-        // --- (V56) Get references to Absentee elements ---
-        const absenteeLoader = document.getElementById('absentee-loader');
-        const absenteeContentWrapper = document.getElementById('absentee-content-wrapper');
-        const sessionSelect = document.getElementById('session-select');
-        const absenteeSearchSection = document.getElementById('absentee-search-section');
-        const absenteeSearchInput = document.getElementById('absentee-search');
-        const autocompleteResults = document.getElementById('autocomplete-results');
-        const selectedStudentDetails = document.getElementById('selected-student-details');
-        const selectedStudentName = document.getElementById('selected-student-name');
-        const selectedStudentCourse = document.getElementById('selected-student-course');
-        const selectedStudentRoom = document.getElementById('selected-student-room');
-        const addAbsenteeButton = document.getElementById('add-absentee-button');
-        const absenteeListSection = document.getElementById('absentee-list-section');
-        const currentAbsenteeListDiv = document.getElementById('current-absentee-list');
-        const generateAbsenteeReportButton = document.getElementById('generate-absentee-report-button');
-        
-        // --- (V58) Get references to QP Code elements ---
-        const qpcodeLoader = document.getElementById('qpcode-loader');
-        const qpcodeContentWrapper = document.getElementById('qpcode-content-wrapper');
-        const sessionSelectQP = document.getElementById('session-select-qp'); // V61
-        const qpEntrySection = document.getElementById('qp-entry-section'); // V61
-        const qpCodeContainer = document.getElementById('qp-code-container');
-        const qpCodeStatus = document.getElementById('qp-code-status');
-        const saveQpCodesButton = document.getElementById('save-qp-codes-button'); // V62
 
-        // --- V68 Report Filter Elements ---
-        const reportFilterSection = document.getElementById('report-filter-section');
-        const filterAllRadio = document.getElementById('filter-all');
-        const filterSessionRadio = document.getElementById('filter-session');
-        const reportsSessionDropdownContainer = document.getElementById('reports-session-dropdown-container');
-        const reportsSessionSelect = document.getElementById('reports-session-select');
+        // --- CORE UI HELPERS ---
+        // V105 FIX: Define core enablement functions first to ensure Python can call them
+        function disable_absentee_tab(disabled) {
+            const ui = getUIElements();
+            if (!ui.navAbsentees) return;
+            ui.navAbsentees.disabled = disabled;
+            if (disabled) {
+                if(ui.absenteeLoader) ui.absenteeLoader.classList.remove('hidden');
+                document.getElementById('absentee-content-wrapper').classList.add('hidden');
+                ui.navAbsentees.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                if(ui.absenteeLoader) ui.absenteeLoader.classList.add('hidden');
+                document.getElementById('absentee-content-wrapper').classList.remove('hidden');
+                ui.navAbsentees.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+        
+        function disable_qpcode_tab(disabled) {
+            const ui = getUIElements();
+            if (!ui.navQPCodes) return;
+            ui.navQPCodes.disabled = disabled;
+            if (disabled) {
+                document.getElementById('qpcode-loader').classList.remove('hidden');
+                document.getElementById('qpcode-content-wrapper').classList.add('hidden');
+                ui.navQPCodes.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                document.getElementById('qpcode-loader').classList.add('hidden');
+                document.getElementById('qpcode-content-wrapper').classList.remove('hidden');
+                ui.navQPCodes.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+        
+        function disable_session_assign_tab(disabled) {
+            const ui = getUIElements();
+            if (!ui.navSessionAssign) return;
+            ui.navSessionAssign.disabled = disabled;
+            if (disabled) {
+                document.getElementById('session-assign-loader').classList.remove('hidden');
+                document.getElementById('session-assign-content-wrapper').classList.add('hidden');
+                ui.navSessionAssign.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                document.getElementById('session-assign-loader').classList.add('hidden');
+                document.getElementById('session-assign-content-wrapper').classList.remove('hidden');
+                ui.navSessionAssign.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+        
+        // V107: Disable/Enable Scribes tab
+        function disable_scribes_tab(disabled) {
+            const ui = getUIElements();
+            if (!ui.navScribes) return;
+            ui.navScribes.disabled = disabled;
+            if (disabled) {
+                if(ui.scribesLoader) ui.scribesLoader.classList.remove('hidden');
+                document.getElementById('scribes-content-wrapper').classList.add('hidden');
+                ui.navScribes.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                if(ui.scribesLoader) ui.scribesLoader.classList.add('hidden');
+                document.getElementById('scribes-content-wrapper').classList.remove('hidden');
+                ui.navScribes.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+        
+        // V104 FIX: Centralized function to clear CSV upload status, callable from PyScript/JS.
+        function clear_csv_upload_status() {
+            const ui = getUIElements();
+            const csvLoadStatus = document.getElementById('csv-load-status');
+
+            if (csvLoadStatus) csvLoadStatus.textContent = "";
+            if (ui.correctedCsvUpload) ui.correctedCsvUpload.value = ""; // Clear the file input
+            
+            // Re-enable inputs if we are clearing the status (after successful run)
+            if(ui.pdfFileInput) ui.pdfFileInput.disabled = false;
+            if(ui.runButton) ui.runButton.disabled = false;
+            if(ui.correctedCsvUpload) ui.correctedCsvUpload.disabled = false;
+            if(ui.loadCsvButton) ui.loadCsvButton.disabled = false;
+        }
+
+        // --- END CORE UI HELPERS ---
 
 
         // --// V90 FIX: Aggressive Key Cleaning Function (Fixes key collision) ---
         function cleanCourseKey(courseName) {
             if (typeof courseName !== 'string') return '';
-            // V90 FIX: Keep only alphanumeric characters and the course code part
-            // The course code is the most unique part (e.g., BOT3CJ201)
             let cleaned = courseName.toUpperCase();
-            
-            // 1. Extract the course code (e.g., BOT3CJ201) and the syllabus year (e.g., 2024)
             const codeMatch = cleaned.match(/([A-Z]{3}\d[A-Z]{2}\d{3})/);
             const syllabusMatch = cleaned.match(/(\d{4})\s+SYLLABUS/);
             
@@ -1560,38 +1719,33 @@
                 key += syllabusMatch[1];
             }
             
-            // Fallback: If no code is found, use the old aggressive cleaning method
             if (!key) {
-                // Remove all non-standard chars (including BOM, non-breaking spaces, and control chars)
                 cleaned = cleaned.replace(/[\ufeff\u00A0\u200B\u200C\u200D\u200E\u200F\uFEFF]/g, ' ').toUpperCase(); 
-                // Remove ALL non-alphanumeric chars (except spaces, - ( ) [ ] / & , ; .)
                 cleaned = cleaned.replace(/[^\w\s\-\(\)\[\]\/&,;.]/g, ''); 
-                // Replace multiple spaces with one, then trim
                 key = cleaned.replace(/\s+/g, ' ').trim();
             }
-            
             return key;
         }        
         
         // --- Helper function to numerically sort room keys ---
         function getNumericSortKey(key) {
-            const parts = key.split('_'); // Date_Time_Room 1
+            const parts = key.split('_'); 
             const roomPart = parts[2] || "Room 0";
-            const roomNumber = parseInt(roomPart.replace('Room ', ''), 10);
+            const roomNumber = parseInt(roomPart.replace('Room ', ''), 10) || 0; // Handle NaN gracefully
             return `${parts[0]}_${parts[1]}_${String(roomNumber).padStart(4, '0')}`;
         }
         
         // --- (V28) Helper function to create a new room row HTML (with location) ---
         function createRoomRowHtml(roomName, capacity, location, isLast = false) {
             const removeButtonHtml = isLast ? 
-                `<button class="remove-room-button ml-auto text-sm text-red-600 hover:text-red-800 font-medium">&times; Remove</button>` : 
+                `<button class="remove-room-button ml-auto text-sm text-red-600 hover:text-red-800 font-medium rounded-lg px-2 py-1">&times; Remove</button>` : 
                 `<div class="w-[84px]"></div>`; // Placeholder for alignment
             
             return `
                 <div class="room-row flex items-center gap-3 p-2 border-b border-gray-200" data-room-name="${roomName}">
                     <label class="room-name-label font-medium text-gray-700 w-24 shrink-0">${roomName}:</label>
-                    <input type="number" class="room-capacity-input block w-20 p-2 border border-gray-300 rounded-md shadow-sm text-sm" value="${capacity}" min="1" placeholder="30">
-                    <input type="text" class="room-location-input block flex-grow p-2 border border-gray-300 rounded-md shadow-sm text-sm" value="${location}" placeholder="e.g., Commerce Block">
+                    <input type="number" class="room-capacity-input block w-20 p-2 border border-gray-300 rounded-lg shadow-sm text-sm" value="${capacity}" min="1" placeholder="30">
+                    <input type="text" class="room-location-input block flex-grow p-2 border border-gray-300 rounded-lg shadow-sm text-sm" value="${location}" placeholder="e.g., Commerce Block">
                     ${removeButtonHtml}
                 </div>
             `;
@@ -1599,116 +1753,206 @@
         
         // --- (V69) FIX: Robust Room Config Loading (handles NULL) ---
         function getRoomCapacitiesFromStorage() {
-            // V48: Load College Name (Read, but do not update UI here)
-            currentCollegeName = localStorage.getItem(COLLEGE_NAME_KEY) || "University of Calicut";
-            
-            // Load Room Config
             let savedConfigJson = localStorage.getItem(ROOM_CONFIG_KEY);
-            let roomConfig = {}; // V69: Initialize to empty object to prevent crash
+            let roomConfig = {}; 
             
             if (savedConfigJson) {
                 try {
                     roomConfig = JSON.parse(savedConfigJson);
                 } catch (e) {
                     console.error("Error parsing room config from localStorage:", e);
-                    // roomConfig already {}
                 }
             }
             
-            // (V28) Store in global var for report generation
             currentRoomConfig = roomConfig; 
             
             let roomNames = [];
             let roomCapacities = [];
             
             if (Object.keys(roomConfig).length === 0) {
-                // *** (V27): Default to 30 rooms ***
                 console.log("Using default room config (30 rooms of 30)");
                 config = {};
                 for (let i = 1; i <= 30; i++) {
                     config[`Room ${i}`] = { capacity: 30, location: "" };
                 }
-                localStorage.setItem(ROOM_CONFIG_KEY, JSON.stringify(config));
-                currentRoomConfig = config; // Update global var
+                currentRoomConfig = config; 
             } else {
-                console.log("Using saved room config:", roomConfig);
                 const sortedRoomKeys = Object.keys(roomConfig).sort((a, b) => {
                     const numA = parseInt(a.replace(/\D/g, ''), 10) || 0;
                     const numB = parseInt(b.replace(/\D/g, ''), 10) || 0;
                     return numA - numB;
                 });
                 roomNames = sortedRoomKeys;
-                // (V28) Get capacity from the new object structure
-                roomCapacities = sortedRoomKeys.map(key => roomConfig[key].capacity);
+                roomCapacities = sortedRoomKeys.map(key => currentRoomConfig[key].capacity);
             }
             return { roomNames, roomCapacities };
         }
         
-        // --- (V29) Central Allocation Function (to be used by multiple reports) ---
-        function performRoomAllocation(data) {
-            // 1. Get CURRENT room capacities
-            // This function also populates 'currentRoomConfig' global var
-            const { roomNames: masterRoomNames, roomCapacities: masterRoomCaps } = getRoomCapacitiesFromStorage();
+        // V103: Load per-session room assignments
+        function loadSessionRoomAssignments() {
+            try {
+                sessionRoomAssignMap = JSON.parse(localStorage.getItem(SESSION_ROOM_ASSIGN_KEY) || '{}');
+            } catch (e) {
+                console.error("Error parsing session room assignment map:", e);
+                sessionRoomAssignMap = {};
+            }
+        }
+        
+        // V107: Save Scribe List
+        function saveScribeList() {
+            // Convert map back to array for storage
+            const scribesArray = Object.values(allScribes);
+            localStorage.setItem(SCRIBE_LIST_KEY, JSON.stringify(scribesArray));
+            renderScribeList();
+        }
+
+        // V107: Render Scribe List (Structural Fix: Moved to the top of helper block)
+        function renderScribeList() {
+            const ui = getUIElements();
+            if (!ui.currentScribeListDiv) return;
+
+            ui.currentScribeListDiv.innerHTML = "";
+            const scribeRegNos = Object.keys(allScribes).sort();
             
+            if (scribeRegNos.length === 0) {
+                ui.currentScribeListDiv.innerHTML = `<em class="text-gray-500">No students currently marked for scribes.</em>`;
+                if(ui.generateScribeReportButton) ui.generateScribeReportButton.disabled = true;
+                return;
+            }
+            
+            if(ui.generateScribeReportButton) ui.generateScribeReportButton.disabled = false;
+
+            scribeRegNos.forEach(regNo => {
+                const student = allScribes[regNo];
+                const item = document.createElement('div');
+                item.className = 'flex justify-between items-center p-2 bg-white border border-gray-200 rounded-lg scribe-highlight';
+                item.innerHTML = `
+                    <span class="font-bold">${regNo}</span>
+                    <span class="text-sm text-gray-700">${student.Name} (${student.Course})</span>
+                    <button class="text-xs text-red-600 hover:text-red-800 font-medium">&times; Remove</button>
+                `;
+                item.querySelector('button').onclick = () => removeScribe(regNo);
+                ui.currentScribeListDiv.appendChild(item);
+            });
+        }
+        
+        // V107: Load Scribe List (Global: RegNo, Name, Course)
+        function loadScribeList() {
+            try {
+                const scribesArray = JSON.parse(localStorage.getItem(SCRIBE_LIST_KEY) || '[]');
+                // Convert array to map for fast lookup
+                allScribes = scribesArray.reduce((map, student) => {
+                    map[student['Register Number']] = student;
+                    return map;
+                }, {});
+                renderScribeList(); // Call is safe now
+            } catch (e) {
+                console.error("Error parsing scribe list from localStorage:", e);
+                allScribes = {};
+            }
+        }
+
+        // V107: Remove Scribe
+        function removeScribe(regNo) {
+            delete allScribes[regNo];
+            saveScribeList();
+        }
+
+        // --- (V29) Central Allocation Function (UPDATED for Session Assignment) ---
+        function performRoomAllocation(data) {
+            // 1. Load config and assignments
+            loadSessionRoomAssignments(); // Load map
+            const { roomNames: masterRoomNames, roomCapacities: masterRoomCaps } = getRoomCapacitiesFromStorage(); // Load physical rooms
+
             // 2. Perform Room Allocation
             const processed_rows_with_rooms = [];
-            const sessionRoomFills = {};
-            const DEFAULT_OVERFLOW_CAPACITY = 30;
             
-            for (const row of data) {
-                const sessionKey = `${row.Date}_${row.Time}`;
+            // Group by Session first
+            const sessionsData = data.reduce((acc, row) => {
+                const key = `${row.Date} | ${row.Time}`;
+                if (!acc[key]) acc[key] = [];
+                acc[key].push(row);
+                return acc;
+            }, {});
+
+            for (const sessionKey in sessionsData) {
+                const sessionStudents = sessionsData[sessionKey];
                 
-                if (!sessionRoomFills[sessionKey]) {
-                    sessionRoomFills[sessionKey] = new Array(masterRoomCaps.length).fill(0);
+                // V103: Check for manual assignment for this session
+                const assignedRooms = sessionRoomAssignMap[sessionKey] || [];
+                
+                // Determine the rooms to use for allocation (either manual or default)
+                let availableRooms = [];
+                if (assignedRooms.length > 0) {
+                    // Use the manually assigned rooms for this session
+                    availableRooms = assignedRooms.map(roomName => {
+                        const roomInfo = currentRoomConfig[roomName];
+                        return { 
+                            name: roomName, 
+                            capacity: roomInfo ? roomInfo.capacity : 30, // Use capacity from Room Setup
+                            location: roomInfo ? roomInfo.location : ""
+                        };
+                    });
+                } else {
+                    // Use all configured physical rooms (default fallback)
+                    availableRooms = masterRoomNames.map(roomName => ({
+                        name: roomName,
+                        capacity: currentRoomConfig[roomName].capacity,
+                        location: currentRoomConfig[roomName].location
+                    }));
                 }
                 
-                const currentFills = sessionRoomFills[sessionKey];
-                let assignedRoomName = "";
-                
-                // 2a. Try to fill configured rooms
-                for (let i = 0; i < masterRoomCaps.length; i++) {
-                    if (currentFills[i] < masterRoomCaps[i]) {
-                        currentFills[i]++;
-                        assignedRoomName = masterRoomNames[i];
-                        break;
-                    }
-                }
-                
-                // 2b. If all configured rooms are full, create overflow
-                if (assignedRoomName === "") {
-                    let foundOverflowSpot = false;
-                    for (let i = masterRoomCaps.length; i < currentFills.length; i++) {
-                        if (currentFills[i] < DEFAULT_OVERFLOW_CAPACITY) {
-                            currentFills[i]++;
-                            assignedRoomName = `Room ${i + 1}`;
-                            foundOverflowSpot = true;
+                const roomFills = availableRooms.map(() => 0);
+                const DEFAULT_OVERFLOW_CAPACITY = 30; // Fallback capacity for new rooms
+
+                for (const row of sessionStudents) {
+                    let assignedRoomName = "";
+                    let assignedLocation = "";
+
+                    // 2a. Try to fill available rooms
+                    for (let i = 0; i < availableRooms.length; i++) {
+                        if (roomFills[i] < availableRooms[i].capacity) {
+                            roomFills[i]++;
+                            assignedRoomName = availableRooms[i].name;
+                            assignedLocation = availableRooms[i].location;
                             break;
                         }
                     }
-                    
-                    // 2c. If no existing overflow has space, create a *new* overflow
-                    if (!foundOverflowSpot) {
-                        currentFills.push(1); 
-                        assignedRoomName = `Room ${currentFills.length}`;
+
+                    // 2b. If all available rooms are full, use the last room or create overflow (fallback logic)
+                    if (assignedRoomName === "") {
+                        assignedRoomName = "Overflow / Extra Seating";
+                        assignedLocation = "N/A - Check Admin";
+                        
+                        console.warn(`Overflow detected in session ${sessionKey}. Assigning student to ${assignedRoomName}.`);
                     }
+                    
+                    processed_rows_with_rooms.push({ 
+                        ...row, 
+                        'Room No': assignedRoomName,
+                        'Location': assignedLocation // Store location for CSV download
+                    });
                 }
-                
-                processed_rows_with_rooms.push({ ...row, 'Room No': assignedRoomName });
             }
             return processed_rows_with_rooms;
         }
-
+        
         // V68: Helper function to filter data based on selected report filter
         function getFilteredReportData(reportType) {
-            const data = JSON.parse(jsonDataStore.innerHTML || '[]');
+            const ui = getUIElements();
+            const data = JSON.parse(ui.jsonDataStore.innerHTML || '[]');
             if (data.length === 0) return [];
             
-            if (filterAllRadio.checked) {
+            // NOTE: filterAllRadio and filterSessionRadio are global HTML elements, accessed by ID or implicit global access
+            const filterAllRadio = document.getElementById('filter-all');
+            const filterSessionRadio = document.getElementById('filter-session');
+
+            if (filterAllRadio && filterAllRadio.checked) {
                 // Return all data
                 return data;
-            } else if (filterSessionRadio.checked) {
-                const sessionKey = reportsSessionSelect.value;
-                if (!sessionKey || sessionKey === 'all') { // Fallback if somehow 'all' is selected here
+            } else if (filterSessionRadio && filterSessionRadio.checked) {
+                const sessionKey = ui.reportsSessionSelect.value;
+                if (!sessionKey || sessionKey === 'all') { 
                     return data; 
                 }
                 const [date, time] = sessionKey.split(' | ');
@@ -1720,37 +1964,306 @@
         }
 
 
-        // --- 1. Event listener for the "Generate Room-wise Report" button ---
-        generateReportButton.addEventListener('click', async () => {
+        
+        // V103: Populates the new Session Assign dropdown
+        function populate_session_assign_dropdown() {
+            const ui = getUIElements();
+            if (allStudentData.length === 0) {
+                disable_session_assign_tab(true);
+                return;
+            }
             
-            generateReportButton.disabled = true;
-            generateReportButton.textContent = "Allocating Rooms & Generating Report...";
-            reportOutputArea.innerHTML = "";
-            reportControls.classList.add('hidden');
-            roomCsvDownloadContainer.innerHTML = "";
+            const sessions = new Set(allStudentData.map(s => `${s.Date} | ${s.Time}`));
+            allStudentSessions = Array.from(sessions).sort();
+            
+            if (ui.sessionSelectAssign) ui.sessionSelectAssign.innerHTML = '<option value="">-- Select a Session --</option>'; // Clear
+            
+            const today = new Date();
+            const todayStr = today.toLocaleDateString('en-GB').replace(/\//g, '.'); 
+            let defaultSession = "";
+            
+            allStudentSessions.forEach(session => {
+                if (ui.sessionSelectAssign) ui.sessionSelectAssign.innerHTML += `<option value="${session}">${session}</option>`;
+                if (session.startsWith(todayStr)) {
+                    defaultSession = session;
+                }
+            });
+            
+            if (defaultSession && ui.sessionSelectAssign) {
+                ui.sessionSelectAssign.value = defaultSession;
+                ui.sessionSelectAssign.dispatchEvent(new Event('change')); 
+            }
+            
+            disable_session_assign_tab(false);
+        }
+        
+        // V106 FIX: Made populate_session_dropdown robust against empty data and ensures elements exist.
+        function populate_session_dropdown() {
+            const ui = getUIElements();
+            
+            // 1. Get data, bail if empty
+            allStudentData = JSON.parse(ui.jsonDataStore.innerHTML || '[]');
+            if (allStudentData.length === 0) {
+                disable_absentee_tab(true);
+                return;
+            }
+            
+            // 2. Get unique sessions
+            const sessions = new Set(allStudentData.map(s => `${s.Date} | ${s.Time}`));
+            allStudentSessions = Array.from(sessions).sort();
+            
+            // 3. Check for existence before clearing/setting innerHTML (safe guards)
+            if (ui.sessionSelect) ui.sessionSelect.innerHTML = '<option value="">-- Select a Session --</option>'; 
+            if (ui.reportsSessionSelect) ui.reportsSessionSelect.innerHTML = '<option value="all">All Sessions</option>'; 
+            
+            // 4. Find and populate
+            const today = new Date();
+            const todayStr = today.toLocaleDateString('en-GB').replace(/\//g, '.'); 
+            let defaultSession = "";
+            
+            allStudentSessions.forEach(session => {
+                if (ui.sessionSelect) ui.sessionSelect.innerHTML += `<option value="${session}">${session}</option>`;
+                if (ui.reportsSessionSelect) ui.reportsSessionSelect.innerHTML += `<option value="${session}">${session}</option>`; 
+                if (session.startsWith(todayStr)) {
+                    defaultSession = session;
+                }
+            });
+            
+            // 5. Set defaults and trigger change event
+            if (defaultSession && ui.sessionSelect) {
+                ui.sessionSelect.value = defaultSession;
+                ui.sessionSelect.dispatchEvent(new Event('change')); 
+            }
+            
+            if (ui.reportsSessionSelect) {
+                // V81: Set Specific Session as default
+                document.getElementById('filter-session').checked = true;
+                if(ui.reportsSessionDropdownContainer) ui.reportsSessionDropdownContainer.classList.remove('hidden');
+                ui.reportsSessionSelect.value = defaultSession || ui.reportsSessionSelect.options[1]?.value || "all";
+            }
+            
+            if(ui.reportFilterSection) ui.reportFilterSection.classList.remove('hidden');
+        }
+        
+        function populate_qp_code_session_dropdown() {
+            const ui = getUIElements();
+            if (allStudentData.length === 0) {
+                disable_qpcode_tab(true);
+                return;
+            }
+            
+            const sessions = new Set(allStudentData.map(s => `${s.Date} | ${s.Time}`));
+            allStudentSessions = Array.from(sessions).sort();
+            
+            if (ui.sessionSelectQP) ui.sessionSelectQP.innerHTML = '<option value="">-- Select a Session --</option>'; // Clear
+            
+            const today = new Date();
+            const todayStr = today.toLocaleDateString('en-GB').replace(/\//g, '.');
+            let defaultSession = "";
+            
+            allStudentSessions.forEach(session => {
+                if (ui.sessionSelectQP) ui.sessionSelectQP.innerHTML += `<option value="${session}">${session}</option>`;
+                if (session.startsWith(todayStr)) {
+                    defaultSession = session;
+                }
+            });
+            
+            if (defaultSession && ui.sessionSelectQP) {
+                ui.sessionSelectQP.value = defaultSession;
+                ui.sessionSelectQP.dispatchEvent(new Event('change')); 
+            }
+
+            disable_qpcode_tab(false);
+        }
+        
+        // V107: Helper to perform allocation and get data, used by multiple reports
+        function getAllocatedReportData(reportType) {
+            // 1. Get filtered data
+            const data = getFilteredReportData(reportType);
+            
+            if (data.length === 0) {
+                alert("No student data found for the selected filter/session.");
+                return null;
+            }
+            
+            // 2. Check if room assignments exist for the *currently selected filter*
+            const sessionsInFilter = new Set(data.map(s => `${s.Date} | ${s.Time}`));
+            loadSessionRoomAssignments();
+            
+            let allAssigned = true;
+            sessionsInFilter.forEach(sessionKey => {
+                if (!sessionRoomAssignMap[sessionKey] || sessionRoomAssignMap[sessionKey].length === 0) {
+                    allAssigned = false;
+                }
+            });
+
+            if (!allAssigned) {
+                alert("Room Assignments are missing for one or more sessions in the current filter. Please go to the 'Room Assign' tab and save assignments before generating reports.");
+                return null;
+            }
+            
+            // 3. Perform Room Allocation 
+            const processed_rows_with_rooms = performRoomAllocation(data);
+            
+            return processed_rows_with_rooms;
+        }
+        
+        // V110 FIX: Consolidated function to run all post-extraction UI updates
+        function initializeAfterDataLoad() {
+            const ui = getUIElements();
+            
+            // 1. Enable primary report generation buttons
+            if(ui.generateReportButton) ui.generateReportButton.disabled = false;
+            if(ui.generateQPaperReportButton) ui.generateQPaperReportButton.disabled = false;
+            if(ui.generateDaywiseReportButton) ui.generateDaywiseReportButton.disabled = false;
+            if(ui.generateScribeReportButton) ui.generateScribeReportButton.disabled = false;
+
+            // 2. Enable utility tabs
+            disable_absentee_tab(false);
+            disable_qpcode_tab(false);
+            disable_session_assign_tab(false);
+            disable_scribes_tab(false);
+            
+            // 3. Populate all dropdowns
+            populate_session_dropdown();
+            populate_qp_code_session_dropdown();
+            populate_session_assign_dropdown();
+        }
+
+        // V112 FIX: This function now sits structurally correct to be called by the DOMContentLoaded block.
+        function loadRoomConfig() {
+            const ui = getUIElements();
+            currentCollegeName = localStorage.getItem('examCollegeName') || "University of Calicut";
+            if (ui.collegeNameInput) ui.collegeNameInput.value = currentCollegeName; 
+            
+            let savedConfigJson = localStorage.getItem('examRoomConfig');
+            let config = {};
+            
+            if (savedConfigJson) {
+                try {
+                    config = JSON.parse(savedConfigJson);
+                } catch (e) {
+                    console.error("Error parsing saved room config, resetting.", e);
+                    config = {};
+                }
+            }
+            
+            currentRoomConfig = config;
+            
+            if (Object.keys(config).length === 0) {
+                for (let i = 1; i <= 10; i++) {
+                    config[`Room ${i}`] = { capacity: 30, location: "" };
+                }
+            }
+            
+            if (ui.roomConfigContainer) {
+                 ui.roomConfigContainer.innerHTML = ''; 
+                const sortedKeys = Object.keys(config).sort((a, b) => {
+                    const numA = parseInt(a.replace(/\D/g, ''), 10) || 0;
+                    const numB = parseInt(b.replace(/\D/g, ''), 10) || 0;
+                    return numA - numB;
+                });
+                
+                sortedKeys.forEach((roomName, index) => {
+                    const roomData = config[roomName];
+                    const isLast = (index === sortedKeys.length - 1);
+                    const rowHtml = createRoomRowHtml(roomName, roomData.capacity, roomData.location, isLast); 
+                    ui.roomConfigContainer.insertAdjacentHTML('beforeend', rowHtml);
+                });
+            }
+        }
+        
+        // V112 FIX: This function now sits structurally correct to be called by the DOMContentLoaded block.
+        function loadInitialData() {
+            // 1. Load configurations
+            loadRoomConfig(); 
+            loadSessionRoomAssignments();
+            loadScribeList(); // V107: Load scribe data
+
+            // 2. Check for base student data persistence
+            const savedDataJson = localStorage.getItem('examBaseData');
+            if (savedDataJson) {
+                try {
+                    const savedData = JSON.parse(savedDataJson);
+                    if (savedData && savedData.length > 0) {
+                        
+                        const qPaperSummary = {};
+                        
+                        savedData.forEach(student => {
+                            const key = `${student.Date}_${student.Time}_${student.Course}`;
+                            if (!qPaperSummary[key]) {
+                                qPaperSummary[key] = { 
+                                    Date: student.Date, 
+                                    Time: student.Time, 
+                                    Course: student.Course, 
+                                    'Student Count': 0 
+                                };
+                            }
+                            qPaperSummary[key]['Student Count']++;
+                        });
+                        
+                        document.getElementById('json-data-store').innerHTML = JSON.stringify(savedData);
+                        
+                        // V110 FIX: Call the consolidated initialization function
+                        initializeAfterDataLoad(); 
+                        
+                        console.log(`Successfully loaded ${savedData.length} records from local storage.`);
+                        
+                        document.getElementById("status-log").innerHTML = `<p class="mb-1 text-green-700">&gt; [${new Date().toLocaleTimeString()}] Successfully loaded data from previous session.</p>`;
+                        document.getElementById("status-log").scrollTop = document.getElementById("status-log").scrollHeight;
+                    }
+                } catch(e) {
+                    console.error("Failed to load BASE_DATA_KEY from localStorage. Clearing key.", e);
+                    localStorage.removeItem('examBaseData');
+                }
+            }
+        }
+
+
+        // V114 FIX: Define showView in the global scope before DOMContentLoaded is processed.
+        function showView(viewToShow, buttonToActivate) {
+            // NOTE: We must fetch these elements dynamically inside the function as they are not global variables
+            const allViews = [document.getElementById('view-extractor'), document.getElementById('view-room-settings'), document.getElementById('view-session-assign'), document.getElementById('view-qpcodes'), document.getElementById('view-absentees'), document.getElementById('view-scribes'), document.getElementById('view-reports'), document.getElementById('view-settings')];
+            const allNavButtons = [document.getElementById('nav-extractor'), document.getElementById('nav-room-settings'), document.getElementById('nav-session-assign'), document.getElementById('nav-qpcodes'), document.getElementById('nav-absentees'), document.getElementById('nav-scribes'), document.getElementById('nav-reports'), document.getElementById('nav-settings')];
+
+            allViews.forEach(view => view.classList.add('hidden'));
+            allNavButtons.forEach(btn => {
+                btn.classList.add('nav-button-inactive');
+                btn.classList.remove('nav-button-active');
+            });
+            viewToShow.classList.remove('hidden');
+            buttonToActivate.classList.remove('nav-button-inactive');
+            buttonToActivate.classList.add('nav-button-active');
+            
+            clearReport(); // Always clear reports when switching views
+        }
+
+
+        // --- 1. Event listener for the "Generate Room-wise Report" button ---
+        document.getElementById('generate-report-button').addEventListener('click', async () => {
+            const ui = getUIElements();
+            
+            ui.generateReportButton.disabled = true;
+            ui.generateReportButton.textContent = "Allocating Rooms & Generating Report...";
+            document.getElementById('report-output-area').innerHTML = "";
+            document.getElementById('report-controls').classList.add('hidden');
+            document.getElementById('room-csv-download-container').innerHTML = "";
             lastGeneratedRoomData = [];
-            lastGeneratedReportType = ""; // V91: Reset report type
+            lastGeneratedReportType = ""; 
             await new Promise(resolve => setTimeout(resolve, 50));
 
             try {
-                // *** V95 FIX: Refresh college name from local storage BEFORE generation ***
-                currentCollegeName = localStorage.getItem(COLLEGE_NAME_KEY) || "University of Calicut";
-                
-                // 1. Get FILTERED RAW student data
-                const data = getFilteredReportData('room-wise');
+                currentCollegeName = localStorage.getItem('examCollegeName') || "University of Calicut";
+                loadScribeList(); // V107: Load scribe list for highlighting
 
-                if (data.length === 0) {
-                    // V70 FIX: Use alert instead of custom modal
-                    alert("No data found for the selected filter/session."); 
-                    return;
-                }
-                
-                // 2. Perform Room Allocation (V29 - uses central function)
-                const processed_rows_with_rooms = performRoomAllocation(data);
+                // 1. Get allocated student data (includes assignment check)
+                const processed_rows_with_rooms = getAllocatedReportData('room-wise');
+
+                if (!processed_rows_with_rooms) return;
                 
                 // 3. Store data for CSV
                 lastGeneratedRoomData = processed_rows_with_rooms;
-                lastGeneratedReportType = "Roomwise_Seating_Report"; // V91: Set report type
+                lastGeneratedReportType = "Roomwise_Seating_Report";
 
                 // 4. Group data for Report Generation
                 const sessions = {};
@@ -1786,25 +2299,19 @@
                     const session = sessions[key];
                     const studentsPerPage = 20;
                     
-                    // (V28) Get location for this room
-                    const roomInfo = currentRoomConfig[session.Room];
-                    const location = (roomInfo && roomInfo.location) ? roomInfo.location : "";
+                    const location = session.students[0].Location || (currentRoomConfig[session.Room] ? currentRoomConfig[session.Room].location : "");
                     const locationHtml = location ? `<div class="report-location-header">Location: ${location}</div>` : "";
 
-                    // V98: Prepare Course Summary for the FOOTER
                     let courseSummaryHtml = '';
                     for (const [courseName, count] of Object.entries(session.courseCounts)) {
-                        courseSummaryHtml += `<div style="font-weight: bold;">${courseName}: ${count} Student(s)</div>`; // V38: Show full course name
+                        courseSummaryHtml += `<div style="font-weight: bold;">${courseName}: ${count} Student(s)</div>`;
                     }
                     
-                    // *** COLLEGE NAME IS CORRECTLY REFLECTED HERE ***
                     const pageHeaderHtml = `
-                        <!-- V89: Wrap headers in group to prevent page break -->
                         <div class="print-header-group">
-                            <h1>${currentCollegeName}</h1> <!-- V48: Use college name -->
+                            <h1>${currentCollegeName}</h1> 
                             <h2>${session.Date} &nbsp;|&nbsp; ${session.Time} &nbsp;|&nbsp; ${session.Room}</h2>
-                            ${locationHtml} <!-- (V28) Added location here -->
-                            <!-- V99 FIX: Removed course-summary div from header -->
+                            ${locationHtml}
                         </div>
                     `;
                     
@@ -1823,7 +2330,6 @@
                     `; 
                     const invigilatorFooterHtml = `
                         <div class="invigilator-footer">
-                            <!-- V98: ADDED COURSE SUMMARY HERE (Moved from top) -->
                             <div class="course-summary-footer">
                                 <strong>Course Summary:</strong>
                                 ${courseSummaryHtml}
@@ -1842,17 +2348,19 @@
                         let rowsHtml = '';
                         studentList.forEach((student) => { 
                             const studentNumber = student.originalIndex + 1; 
-                            const tableCourseName = student.Course; // V38: Show full course name
+                            const tableCourseName = student.Course; 
                             
-                            // V97 FIX: Truncate Course Name to first 4 words for table cell
                             const words = tableCourseName.split(/\s+/);
                             const truncatedCourseName = words.slice(0, 4).join(' ') + (words.length > 4 ? '...' : '');
                             
                             let displayCourseName = (truncatedCourseName === previousCourseName) ? '"' : truncatedCourseName;
                             if (truncatedCourseName !== previousCourseName) previousCourseName = truncatedCourseName;
+                            
+                            // V107: Check if student needs scribe for highlighting
+                            const highlightClass = allScribes[student['Register Number']] ? 'scribe-highlight' : '';
 
                             rowsHtml += `
-                                <tr>
+                                <tr class="${highlightClass}">
                                     <td class="sl-col">${studentNumber}</td>
                                     <td class="course-col">${displayCourseName}</td>
                                     <td class="reg-col">${student['Register Number']}</td>
@@ -1874,30 +2382,27 @@
 
                     previousCourseName = ""; 
                     const tableRowsPage1 = generateTableRows(studentsPage1);
-                    // V92 FIX: Ensure table is properly closed on every page
-                    allPagesHtml += `<div class="print-page">${pageHeaderHtml}${tableHeaderHtml}${tableRowsPage1}</tbody></table>`; 
-                    if (studentsPage2.length === 0) allPagesHtml += invigilatorFooterHtml;
-                    allPagesHtml += `</div>`; 
+                    document.getElementById('report-output-area').innerHTML += `<div class="print-page">${pageHeaderHtml}${tableHeaderHtml}${tableRowsPage1}</tbody></table>`; 
+                    if (studentsPage2.length === 0) document.getElementById('report-output-area').innerHTML += invigilatorFooterHtml;
+                    document.getElementById('report-output-area').innerHTML += `</div>`; 
                     totalPagesGenerated++;
                     
                     if (studentsPage2.length > 0) {
                         previousCourseName = ""; 
                         const tableRowsPage2 = generateTableRows(studentsPage2);
-                        // V92 FIX: Ensure table is properly closed on every page
-                        allPagesHtml += `<div class="print-page">${tableHeaderHtml}${tableRowsPage2}</tbody></table>${invigilatorFooterHtml}</div>`; 
+                        document.getElementById('report-output-area').innerHTML += `<div class="print-page">${tableHeaderHtml}${tableRowsPage2}</tbody></table>${invigilatorFooterHtml}</div>`; 
                         totalPagesGenerated++;
                     }
                 });
 
                 // 6. Show report and controls
-                reportOutputArea.innerHTML = allPagesHtml;
-                reportOutputArea.style.display = 'block'; 
-                reportStatus.textContent = `Generated ${totalPagesGenerated} total pages for ${sortedSessionKeys.length} room sessions.`;
-                reportControls.classList.remove('hidden');
+                document.getElementById('report-output-area').style.display = 'block'; 
+                document.getElementById('report-status').textContent = `Generated ${totalPagesGenerated} total pages for ${sortedSessionKeys.length} room sessions.`;
+                document.getElementById('report-controls').classList.remove('hidden');
                 
                 // 7. Add download button
-                roomCsvDownloadContainer.innerHTML = `
-                    <button id="download-room-csv-button" class="w-full inline-flex justify-center items-center rounded-md border border-gray-300 bg-white py-3 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">
+                document.getElementById('room-csv-download-container').innerHTML = `
+                    <button id="download-room-csv-button" class="w-full inline-flex justify-center items-center rounded-lg border border-gray-300 bg-white py-3 px-4 text-sm font-medium text-gray-700 shadow-md hover:bg-gray-50">
                         Download Room Allocation Report (.csv)
                     </button>
                 `;
@@ -1905,42 +2410,37 @@
 
             } catch (e) {
                 console.error("Error generating room-wise report:", e);
-                reportStatus.textContent = "An error occurred while generating the report.";
-                reportControls.classList.remove('hidden');
+                alert("An error occurred while generating the report. Check console for details.");
+                document.getElementById('report-status').textContent = "An error occurred while generating the report.";
+                document.getElementById('report-controls').classList.remove('hidden');
             } finally {
-                generateReportButton.disabled = false;
-                generateReportButton.textContent = "Generate Room-wise Seating Report";
+                ui.generateReportButton.disabled = false;
+                ui.generateReportButton.textContent = "Generate Room-wise Seating Report";
             }
         });
 
         // --- (V29) Event listener for the "Day-wise Student List" button ---
-        generateDaywiseReportButton.addEventListener('click', async () => {
-            generateDaywiseReportButton.disabled = true;
-            // V49: Button text updated
-            generateDaywiseReportButton.textContent = "Generating...";
-            reportOutputArea.innerHTML = "";
-            reportControls.classList.add('hidden');
-            roomCsvDownloadContainer.innerHTML = "";
-            lastGeneratedRoomData = []; // This report doesn't use the room CSV
-            lastGeneratedReportType = ""; // V91: Reset report type
+        document.getElementById('generate-daywise-report-button').addEventListener('click', async () => {
+            const ui = getUIElements();
+            
+            ui.generateDaywiseReportButton.disabled = true;
+            ui.generateDaywiseReportButton.textContent = "Generating...";
+            document.getElementById('report-output-area').innerHTML = "";
+            document.getElementById('report-controls').classList.add('hidden');
+            document.getElementById('room-csv-download-container').innerHTML = "";
+            lastGeneratedRoomData = []; 
+            lastGeneratedReportType = ""; 
             await new Promise(resolve => setTimeout(resolve, 50));
 
             try {
-                // *** V95 FIX: Refresh college name from local storage BEFORE generation ***
-                currentCollegeName = localStorage.getItem(COLLEGE_NAME_KEY) || "University of Calicut";
+                currentCollegeName = localStorage.getItem('examCollegeName') || "University of Calicut";
                 
-                // 1. Get FILTERED RAW student data
-                const data = getFilteredReportData('day-wise');
+                // 1. Get allocated student data (includes assignment check)
+                const processed_rows_with_rooms = getAllocatedReportData('day-wise');
 
-                if (data.length === 0) {
-                    alert("No data found for the selected filter/session.");
-                    return;
-                }
+                if (!processed_rows_with_rooms) return;
                 
-                // 2. Perform Room Allocation (V29 - uses central function)
-                const processed_rows_with_rooms = performRoomAllocation(data);
-
-                // 3. Group by Room to get SL No.
+                // 2. Group by Room to get SL No.
                 const roomSessions = {};
                 processed_rows_with_rooms.forEach(student => {
                     const key = `${student.Date}_${student.Time}_${student['Room No']}`;
@@ -1955,9 +2455,9 @@
                     roomSessions[key].students.push(student);
                 });
                 
-                const daySessions = {}; // V72 FIX: Added definition here
+                const daySessions = {}; 
 
-                // 4. Create new flat list with SlNoInRoom
+                // 3. Create new flat list with SlNoInRoom
                 let flatStudentList = [];
                 Object.values(roomSessions).forEach(roomSession => {
                     roomSession.students.forEach((student, index) => {
@@ -1969,15 +2469,15 @@
                     });
                 });
                 
-                // 5. Sort this new list by Date, Time, Course, then Register Number
+                // 4. Sort this new list by Date, Time, Course, then Register Number
                 flatStudentList.sort((a, b) => {
                     if (a.Date !== b.Date) return a.Date.localeCompare(b.Date);
-                    if (a.Time !== b.Time) return a.Time.localeCompare(b.Time, 'en', { numeric: true }); // Handle 10:00 AM vs 2:00 PM
+                    if (a.Time !== b.Time) return a.Time.localeCompare(b.Time, 'en', { numeric: true });
                     if (a.Course !== b.Course) return a.Course.localeCompare(b.Course);
                     return a['Register Number'].localeCompare(b['Register Number']);
                 });
 
-                // 6. Group this sorted list by Day/Session
+                // 5. Group this sorted list by Day/Session
                 flatStudentList.forEach(student => {
                     const key = `${student.Date}_${student.Time}`;
                     if (!daySessions[key]) {
@@ -1990,10 +2490,9 @@
                     daySessions[key].students.push(student);
                 });
                 
-                // 7. Build the HTML
+                // 6. Build the HTML
                 let allPagesHtml = '';
                 let totalPagesGenerated = 0;
-                // V77: Updated for better fit (35 per column)
                 const STUDENTS_PER_COLUMN = 35; 
                 const COLUMNS_PER_PAGE = 2; 
                 const STUDENTS_PER_PAGE = STUDENTS_PER_COLUMN * COLUMNS_PER_PAGE; 
@@ -2001,15 +2500,13 @@
                 // (V30) Helper to build a table for a column, NOW WITH COURSE GROUPING
                 function buildColumnTable(studentChunk) {
                     let rowsHtml = '';
-                    let currentCourse = ""; // Track the current course
-                    let previousRoomDisplay = ""; // V48: Track previous room
+                    let currentCourse = ""; 
+                    let previousRoomDisplay = ""; 
 
                     studentChunk.forEach(student => {
-                        // Check if the course has changed
                         if (student.Course !== currentCourse) {
                             currentCourse = student.Course;
-                            previousRoomDisplay = ""; // V48: Reset for new course
-                            // Add a course heading row
+                            previousRoomDisplay = ""; 
                             rowsHtml += `
                                 <tr>
                                     <td colspan="4" style="background-color: #ddd; font-weight: bold; padding: 4px 2px; border: 1px solid #999;">
@@ -2019,14 +2516,12 @@
                             `;
                         }
 
-                        // Add the student row
                         const roomInfo = currentRoomConfig[student.roomName];
                         const location = (roomInfo && roomInfo.location) ? roomInfo.location : "";
                         const roomDisplay = location ? `${student.roomName} (${location})` : student.roomName;
 
-                        // V48: Check if same as above
                         const displayRoom = (roomDisplay === previousRoomDisplay) ? '"' : roomDisplay;
-                        previousRoomDisplay = roomDisplay; // Update for next iteration
+                        previousRoomDisplay = roomDisplay; 
 
                         rowsHtml += `
                             <tr>
@@ -2038,8 +2533,6 @@
                         `;
                     });
 
-                    // (V30) Updated table header to remove Course
-                    // (V32) Updated widths
                     return `
                         <table class="daywise-report-table">
                             <thead>
@@ -2064,21 +2557,13 @@
                         const pageStudents = session.students.slice(i, i + STUDENTS_PER_PAGE);
                         totalPagesGenerated++;
                         
-                        // V92 FIX: For compact report, render as a single column for PDF export if many pages are needed.
                         const col1Students = pageStudents.slice(0, STUDENTS_PER_COLUMN);
                         const col2Students = pageStudents.slice(STUDENTS_PER_COLUMN); 
                         
-                        // To ensure PDF doesn't break tables, we will manually merge the two columns if they exist.
-                        // This allows the table to flow naturally and use the existing page break CSS rules.
-                        // However, on-screen display still uses flex/columns via CSS.
-                        
                         let columnHtml = '';
                         if (col1Students.length > 0 && col2Students.length === 0) {
-                            // Only column 1 needed
                             columnHtml = `<div class="column">${buildColumnTable(col1Students)}</div>`;
                         } else if (col1Students.length > 0 && col2Students.length > 0) {
-                            // Two columns needed (default screen view). We use the container for display on screen,
-                            // but CSS print media handles how they break/flow for print.
                             columnHtml = `
                                 <div class="column-container">
                                     <div class="column">
@@ -2094,11 +2579,8 @@
 
                         allPagesHtml += `
                             <div class="print-page print-page-daywise">
-                                <!-- V89: Wrap headers in group to prevent page break -->
                                 <div class="print-header-group">
-                                    <!-- V49: Title Updated -->
                                     <h1>Seating Details for Candidates</h1>
-                                    <!-- V48: Use college name -->
                                     <h2>${currentCollegeName} &nbsp;|&nbsp; ${session.Date} &nbsp;|&nbsp; ${session.Time}</h2>
                                 </div>
                                 ${columnHtml}
@@ -2108,37 +2590,143 @@
                 });
 
                 // 8. Show report and controls
-                reportOutputArea.innerHTML = allPagesHtml;
-                reportOutputArea.style.display = 'block'; 
-                reportStatus.textContent = `Generated ${totalPagesGenerated} compact pages for ${sortedSessionKeys.length} sessions.`;
-                reportControls.classList.remove('hidden');
-                roomCsvDownloadContainer.innerHTML = ""; // This report has no CSV
-                lastGeneratedReportType = "Daywise_Seating_Details"; // V91: Set report type
+                document.getElementById('report-output-area').innerHTML = allPagesHtml;
+                document.getElementById('report-output-area').style.display = 'block'; 
+                document.getElementById('report-status').textContent = `Generated ${totalPagesGenerated} compact pages for ${sortedSessionKeys.length} sessions.`;
+                document.getElementById('report-controls').classList.remove('hidden');
+                document.getElementById('room-csv-download-container').innerHTML = ""; // This report has no CSV
+                lastGeneratedReportType = "Daywise_Seating_Details";
 
             } catch (e) {
                 console.error("Error generating day-wise report:", e);
-                reportStatus.textContent = "An error occurred while generating the report.";
-                reportControls.classList.remove('hidden');
+                alert("An error occurred while generating the report. Check console for details.");
+                document.getElementById('report-status').textContent = "An error occurred while generating the report.";
+                document.getElementById('report-controls').classList.remove('hidden');
             } finally {
-                generateDaywiseReportButton.disabled = false;
-                // V49: Button text updated
-                generateDaywiseReportButton.textContent = "Generate Seating Details for Candidates (Compact)";
+                ui.generateDaywiseReportButton.disabled = false;
+                ui.generateDaywiseReportButton.textContent = "Generate Seating Details for Candidates (Compact)";
             }
         });
         
-        // --- V91: Event listener for "Generate Question Paper Report" (Added report type set) ---
-        generateQPaperReportButton.addEventListener('click', async () => {
-            generateQPaperReportButton.disabled = true;
-            generateQPaperReportButton.textContent = "Generating...";
-            reportOutputArea.innerHTML = "";
-            reportControls.classList.add('hidden');
-            roomCsvDownloadContainer.innerHTML = "";
-            lastGeneratedReportType = ""; // V91: Reset report type
+        // --- V107: NEW SCRIBE REPORT GENERATION ---
+        document.getElementById('generate-scribe-report-button').addEventListener('click', async () => {
+            const ui = getUIElements();
+            
+            ui.generateScribeReportButton.disabled = true;
+            ui.generateScribeReportButton.textContent = "Generating...";
+            document.getElementById('report-output-area').innerHTML = "";
+            document.getElementById('report-controls').classList.add('hidden');
+            await new Promise(resolve => setTimeout(resolve, 50));
+
+            try {
+                currentCollegeName = localStorage.getItem('examCollegeName') || "University of Calicut";
+                
+                // 1. Get allocated student data (includes assignment check)
+                const allocatedData = getAllocatedReportData('scribe-report');
+
+                if (!allocatedData) return;
+                
+                loadScribeList();
+                
+                // 2. Filter the allocated list down to only scribe students
+                const scribeStudents = allocatedData.filter(student => allScribes[student['Register Number']]);
+
+                if (scribeStudents.length === 0) {
+                    alert("No students marked as requiring a scribe were found in the current filtered data.");
+                    return;
+                }
+                
+                // 3. Group by Session for better report structure
+                const sessions = scribeStudents.reduce((acc, student) => {
+                    const key = `${student.Date} | ${student.Time}`;
+                    if (!acc[key]) acc[key] = [];
+                    acc[key].push(student);
+                    return acc;
+                }, {});
+
+                let allPagesHtml = '';
+                let totalPagesGenerated = 0;
+                
+                const sortedSessionKeys = Object.keys(sessions).sort();
+
+                // 4. Build the HTML report pages
+                sortedSessionKeys.forEach(sessionKey => {
+                    const students = sessions[sessionKey];
+                    totalPagesGenerated++;
+                    
+                    let tableRowsHtml = '';
+                    students.forEach((student, index) => {
+                         const locationDisplay = student.Location ? ` (${student.Location})` : '';
+                         tableRowsHtml += `
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${student['Register Number']}</td>
+                                <td>${student.Name}</td>
+                                <td>${student.Course}</td>
+                                <td>${student['Room No']}${locationDisplay}</td>
+                            </tr>
+                        `;
+                    });
+
+                    const pageHtml = `
+                        <div class="print-page">
+                            <div class="print-header-group">
+                                <h1>${currentCollegeName}</h1> 
+                                <h2>Scribe Student Requirement List</h2>
+                                <h3>Session: ${sessionKey}</h3>
+                            </div>
+                            
+                            <table class="q-paper-table print-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 5%;">Sl No</th>
+                                        <th style="width: 20%;">Register Number</th>
+                                        <th style="width: 25%;">Name</th>
+                                        <th style="width: 35%;">Course Name</th>
+                                        <th style="width: 15%;">Assigned Room</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${tableRowsHtml}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                    allPagesHtml += pageHtml;
+                });
+
+                // 5. Show report and controls
+                document.getElementById('report-output-area').innerHTML = allPagesHtml;
+                document.getElementById('report-output-area').style.display = 'block'; 
+                document.getElementById('report-status').textContent = `Generated ${totalPagesGenerated} pages for ${scribeStudents.length} scribe students.`;
+                document.getElementById('report-controls').classList.remove('hidden');
+                
+            } catch (e) {
+                console.error("Error generating Scribe report:", e);
+                alert("An error occurred while generating the Scribe report. Check console for details.");
+                document.getElementById('report-status').textContent = "An error occurred while generating the Scribe report.";
+                document.getElementById('report-controls').classList.remove('hidden');
+            } finally {
+                ui.generateScribeReportButton.disabled = false;
+                ui.generateScribeReportButton.textContent = "Generate Scribe Student List";
+            }
+        });
+
+        
+        // --- V91: Event listener for "Generate Question Paper Report" ---
+        document.getElementById('generate-qpaper-report-button').addEventListener('click', async () => {
+            const ui = getUIElements();
+
+            ui.generateQPaperReportButton.disabled = true;
+            ui.generateQPaperReportButton.textContent = "Generating...";
+            document.getElementById('report-output-area').innerHTML = "";
+            document.getElementById('report-controls').classList.add('hidden');
+            document.getElementById('room-csv-download-container').innerHTML = "";
+            lastGeneratedReportType = ""; 
             await new Promise(resolve => setTimeout(resolve, 50));
             
             try {
-                // *** V95 FIX: Refresh college name from local storage BEFORE generation ***
-                currentCollegeName = localStorage.getItem(COLLEGE_NAME_KEY) || "University of Calicut";
+                currentCollegeName = localStorage.getItem('examCollegeName') || "University of Calicut";
                 
                 // V68: Get Filtered data
                 const filteredData = getFilteredReportData('q-paper');
@@ -2190,11 +2778,10 @@
                     
                     const pageHtml = `
                         <div class="print-page">
-                            <!-- V89: Wrap headers in group to prevent page break -->
                             <div class="print-header-group">
-                                <h1>${currentCollegeName}</h1> <!-- V48: Use college name -->
+                                <h1>${currentCollegeName}</h1> 
                                 <h2>Question Paper Summary</h2>
-                                <h3>${session.Date} &nbsp;|&nbsp; ${session.Time}</h3>
+                                <h3>Session: ${session.Date} &nbsp;|&nbsp; ${session.Time}</h3>
                             </div>
                             
                             <table class="q-paper-table print-table">
@@ -2220,37 +2807,38 @@
                     allPagesHtml += pageHtml;
                 });
                 
-                reportOutputArea.innerHTML = allPagesHtml;
-                reportOutputArea.style.display = 'block'; 
-                reportStatus.textContent = `Generated ${totalPages} summary pages for ${sortedSessionKeys.length} sessions.`;
-                reportControls.classList.remove('hidden');
-                lastGeneratedReportType = "Question_Paper_Summary"; // V91: Set report type
+                document.getElementById('report-output-area').innerHTML = allPagesHtml;
+                document.getElementById('report-output-area').style.display = 'block'; 
+                document.getElementById('report-status').textContent = `Generated ${totalPages} summary pages for ${sortedSessionKeys.length} sessions.`;
+                document.getElementById('report-controls').classList.remove('hidden');
+                lastGeneratedReportType = "Question_Paper_Summary";
 
             } catch(e) {
                 console.error("Error generating Q-Paper report:", e);
-                reportStatus.textContent = "An error occurred generating the report.";
-                reportControls.classList.remove('hidden');
+                alert("An error occurred while generating the Q-Paper report. Check console for details.");
+                document.getElementById('report-status').textContent = "An error occurred generating the report.";
+                document.getElementById('report-controls').classList.remove('hidden');
             } finally {
-                generateQPaperReportButton.disabled = false;
-                generateQPaperReportButton.textContent = "Generate Question Paper Report";
+                ui.generateQPaperReportButton.disabled = false;
+                ui.generateQPaperReportButton.textContent = "Generate Question Paper Report";
             }
         });
         
         // --- (V56) Event listener for "Generate Absentee Statement" ---
-        generateAbsenteeReportButton.addEventListener('click', async () => {
-            const sessionKey = sessionSelect.value;
+        document.getElementById('generate-absentee-report-button').addEventListener('click', async () => {
+            const ui = getUIElements();
+            const sessionKey = document.getElementById('session-select').value;
             if (!sessionKey) {
                 alert("Please select a session first.");
                 return;
             }
 
-            generateAbsenteeReportButton.disabled = true;
-            generateAbsenteeReportButton.textContent = "Generating...";
+            document.getElementById('generate-absentee-report-button').disabled = true;
+            document.getElementById('generate-absentee-report-button').textContent = "Generating...";
             await new Promise(resolve => setTimeout(resolve, 50));
             
             try {
-                // *** V95 FIX: Refresh college name from local storage BEFORE generation ***
-                currentCollegeName = localStorage.getItem(COLLEGE_NAME_KEY) || "University of Calicut";
+                currentCollegeName = localStorage.getItem('examCollegeName') || "University of Calicut";
                 
                 // 1. Get all students for this session
                 const [date, time] = sessionKey.split(' | ');
@@ -2264,7 +2852,7 @@
                 const courses = {};
                 for (const student of sessionStudents) {
                     const courseDisplay = student.Course;
-                    const courseKey = cleanCourseKey(courseDisplay); // V64 FIX: Ensure course key is aggressively cleaned
+                    const courseKey = cleanCourseKey(courseDisplay); 
                     
                     if (!courses[courseKey]) {
                         courses[courseKey] = {
@@ -2286,22 +2874,16 @@
                 let totalPages = 0;
                 const sortedCourseKeys = Object.keys(courses).sort();
                 
-                // V58: Load QP codes
-                loadQPCodes(); // Ensure qpCodeMap is up-to-date
+                loadQPCodes(); 
                 
                 for (const courseKey of sortedCourseKeys) {
                     totalPages++;
                     const courseData = courses[courseKey];
-                    // V64 FIX: Use the clean key for lookup
-                    // V89: Load session-specific codes
                     const sessionCodes = qpCodeMap[sessionKey] || {};
                     const qpCode = sessionCodes[courseKey] || "____"; 
                     
-                    // V57: Add page break logic. Each course is a new page.
                     allPagesHtml += `
                         <div class="print-page">
-                            <!-- V57: Header repeated on each page -->
-                            <!-- V89: Wrap headers in group to prevent page break -->
                             <div class="print-header-group">
                                 <h1>${currentCollegeName}</h1>
                                 <h2>Absentee Statement</h2>
@@ -2311,7 +2893,6 @@
                             <table class="absentee-report-table">
                                 <thead>
                                     <tr>
-                                        <!-- V58: Added QP Code -->
                                         <th colspan="2">Course: ${courseData.name} &nbsp;&nbsp; [ QP Code: ${qpCode} ]</th>
                                     </tr>
                                     <tr>
@@ -2345,41 +2926,38 @@
                 }
 
                 // 5. Show report and controls
-                reportOutputArea.innerHTML = allPagesHtml;
-                reportOutputArea.style.display = 'block'; 
-                reportStatus.textContent = `Generated ${totalPages} page(s) for ${sortedCourseKeys.length} courses.`;
-                reportControls.classList.remove('hidden');
-                roomCsvDownloadContainer.innerHTML = ""; // This report has no CSV
-                lastGeneratedReportType = `Absentee_Statement_${date.replace(/\./g, '_')}_${time.replace(/\s/g, '')}`; // V91: Set report type
+                document.getElementById('report-output-area').innerHTML = allPagesHtml;
+                document.getElementById('report-output-area').style.display = 'block'; 
+                document.getElementById('report-status').textContent = `Generated ${totalPages} page(s) for ${sortedCourseKeys.length} courses.`;
+                document.getElementById('report-controls').classList.remove('hidden');
+                document.getElementById('room-csv-download-container').innerHTML = ""; 
+                lastGeneratedReportType = `Absentee_Statement_${date.replace(/\./g, '_')}_${time.replace(/\s/g, '')}`;
 
             } catch (e) {
                 console.error("Error generating absentee report:", e);
-                reportStatus.textContent = "An error occurred while generating the report.";
-                reportControls.classList.remove('hidden');
+                alert("An error occurred while generating the Absentee report. Check console for details.");
+                document.getElementById('report-status').textContent = "An error occurred while generating the report.";
+                document.getElementById('report-controls').classList.remove('hidden');
             } finally {
-                generateAbsenteeReportButton.disabled = false;
-                generateAbsenteeReportButton.textContent = "Generate Absentee Statement";
+                document.getElementById('generate-absentee-report-button').disabled = false;
+                document.getElementById('generate-absentee-report-button').textContent = "Generate Absentee Statement";
             }
         });
         
-        // --- V96: Removed PDF Download Functionality (Replaced with native Print) ---
-        // downloadPdfButton.addEventListener('click', ... removed ...)
-        
         // --- Event listener for the "Print" button ---
-        finalPrintButton.addEventListener('click', () => {
-            // This button now exclusively uses the native browser print function
+        document.getElementById('final-print-button').addEventListener('click', () => {
             window.print();
         });
 
         // --- Event listener for the "Clear" button ---
-        clearReportButton.addEventListener('click', clearReport);
+        document.getElementById('clear-report-button').addEventListener('click', clearReport);
         
         // --- Centralized logic for clearing reports ---
         function clearReport() {
-            reportOutputArea.innerHTML = "";
-            reportOutputArea.style.display = 'none'; 
-            reportControls.classList.add('hidden');
-            roomCsvDownloadContainer.innerHTML = ""; // Clear CSV button
+            document.getElementById('report-output-area').innerHTML = "";
+            document.getElementById('report-output-area').style.display = 'none'; 
+            document.getElementById('report-controls').classList.add('hidden');
+            document.getElementById('room-csv-download-container').innerHTML = ""; // Clear CSV button
             lastGeneratedRoomData = []; // Clear data
             lastGeneratedReportType = ""; // V91: Clear report type
         }
@@ -2391,18 +2969,15 @@
                 return;
             }
             
-            // (V28) Add Location to CSV
             const headers = ['Date', 'Time', 'Course', 'Register Number', 'Name', 'Room No', 'Location'];
             let csvContent = headers.join(",") + "\n";
             
             lastGeneratedRoomData.forEach(row => {
-                // (V28) Get location for this row
-                const roomInfo = currentRoomConfig[row['Room No']];
-                const location = (roomInfo && roomInfo.location) ? row['Location'] || roomInfo.location.toString() : ""; // V91 FIX: Use row location if present
+                const location = row['Location'] ? row['Location'].toString() : ""; 
                 
                 const values = headers.map(header => {
                     let val = row[header] ? row[header].toString() : "";
-                    if (header === 'Location') { val = location; } // V91 FIX: Explicitly set location
+                    if (header === 'Location') { val = location; } 
                     
                     val = val.replace(/"/g, '""');
                     if (val.includes(',') || val.includes('\n')) {
@@ -2422,18 +2997,27 @@
             link.click();
             document.body.removeChild(link);
         }
-
         
-        // --- NAVIGATION VIEW-SWITCHING LOGIC ---
-        navExtractor.addEventListener('click', () => showView(viewExtractor, navExtractor));
-        navSettings.addEventListener('click', () => showView(viewSettings, navSettings));
-        navQPCodes.addEventListener('click', () => showView(viewQPCodes, navQPCodes)); // V58
-        navReports.addEventListener('click', () => showView(viewReports, navReports));
-        navAbsentees.addEventListener('click', () => showView(viewAbsentees, navAbsentees)); // V56
-        // V82: New tab structure
-        document.getElementById('nav-room-settings').addEventListener('click', () => showView(document.getElementById('view-room-settings'), document.getElementById('nav-room-settings')));
+        // --- V68: Master Reset Button Logic ---
+        document.getElementById('master-reset-button').addEventListener('click', () => {
+            const step1 = confirm('WARNING: This will clear ALL saved data (Base Data, Rooms, College Name, Absentees, QP Codes, Room Assignments, AND Scribes) from your browser. Continue?');
+            if (!step1) return;
+            
+            const step2 = confirm('ARE YOU ABSOLUTELY SURE? This action cannot be undone.');
+            if (step2) {
+                localStorage.clear();
+                alert('All local data cleared. The application will now reload.');
+                window.location.reload();
+            }
+        });
 
+
+        // V114 FIX: Define showView in the global scope before DOMContentLoaded is processed.
         function showView(viewToShow, buttonToActivate) {
+            // NOTE: We must fetch these elements dynamically inside the function as they are not global variables
+            const allViews = [document.getElementById('view-extractor'), document.getElementById('view-room-settings'), document.getElementById('view-session-assign'), document.getElementById('view-qpcodes'), document.getElementById('view-absentees'), document.getElementById('view-scribes'), document.getElementById('view-reports'), document.getElementById('view-settings')];
+            const allNavButtons = [document.getElementById('nav-extractor'), document.getElementById('nav-room-settings'), document.getElementById('nav-session-assign'), document.getElementById('nav-qpcodes'), document.getElementById('nav-absentees'), document.getElementById('nav-scribes'), document.getElementById('nav-reports'), document.getElementById('nav-settings')];
+
             allViews.forEach(view => view.classList.add('hidden'));
             allNavButtons.forEach(btn => {
                 btn.classList.add('nav-button-inactive');
@@ -2445,837 +3029,50 @@
             
             clearReport(); // Always clear reports when switching views
         }
-
-        // --- (V97) College Name Save Logic ---
-        saveCollegeNameButton.addEventListener('click', () => {
-            const collegeName = collegeNameInput.value.trim() || "University of Calicut";
-            localStorage.setItem(COLLEGE_NAME_KEY, collegeName);
-            currentCollegeName = collegeName; // Update global var immediately
-            
-            collegeNameStatus.textContent = "College name saved!";
-            setTimeout(() => { collegeNameStatus.textContent = ""; }, 2000);
-        });
         
-        // --- (V48) Save from dynamic form (uses new object structure) ---
-        saveRoomConfigButton.addEventListener('click', () => {
-            try {
-                // NOTE: College Name saving is now handled by saveCollegeNameButton
-                
-                // Save Room Config
-                const newConfig = {};
-                // V79: Get all rows, re-read and save
-                const roomRows = roomConfigContainer.querySelectorAll('.room-row');
-                
-                roomRows.forEach(row => {
-                    // V79: Read current values (name label is the source of truth for the room key)
-                    const roomName = row.querySelector('.room-name-label').textContent.replace(':', '').trim();
-                    let capacity = parseInt(row.querySelector('.room-capacity-input').value, 10);
-                    let location = row.querySelector('.room-location-input').value.trim();
-                    
-                    // Default to 30 if blank or invalid
-                    if (isNaN(capacity) || capacity <= 0) {
-                        capacity = 30;
-                    }
-                    
-                    if (roomName) {
-                        // V79: Re-save all rooms with new sequential names and updated data
-                        newConfig[roomName] = {
-                            capacity: capacity,
-                            location: location
-                        };
-                    }
-                });
-                
-                localStorage.setItem(ROOM_CONFIG_KEY, JSON.stringify(newConfig));
-                
-                // Show success message
-                roomConfigStatus.textContent = "Settings saved successfully!";
-                setTimeout(() => { roomConfigStatus.textContent = ""; }, 2000);
-                
-                // V79: RE-RENDER the list to fix numbering and apply UX rules (remove button on last row only)
-                loadRoomConfig();
-                
-            } catch (e) {
-                roomConfigStatus.textContent = "Error saving settings.";
-                console.error("Error saving room config:", e);
-            }
-        });
-
-        // --- (V79) Load data into dynamic form (with UX Fix) ---
-        function loadRoomConfig() {
-            // V48: Load College Name
-            currentCollegeName = localStorage.getItem(COLLEGE_NAME_KEY) || "University of Calicut";
-            // *** V91 FIX: Populate the input field with the saved value ***
-            if (collegeNameInput) collegeNameInput.value = currentCollegeName; 
-            
-            // Load Room Config
-            let savedConfigJson = localStorage.getItem(ROOM_CONFIG_KEY);
-            let config;
-            
-            if (savedConfigJson) {
-                try {
-                    config = JSON.parse(savedConfigJson);
-                } catch (e) {
-                    console.error("Error parsing saved config, resetting.", e);
-                    config = {};
-                }
-            } else {
-                config = {};
-            }
-            
-            // (V28) Store in global var for other functions to use
-            currentRoomConfig = config;
-            
-            if (Object.keys(config).length === 0) {
-                // *** (V27): Default to 30 rooms ***
-                console.log("Using default room config (30 rooms of 30)");
-                config = {};
-                for (let i = 1; i <= 30; i++) {
-                    config[`Room ${i}`] = { capacity: 30, location: "" };
-                }
-                localStorage.setItem(ROOM_CONFIG_KEY, JSON.stringify(config));
-                currentRoomConfig = config; // Update global var
-            }
-            
-            // Populate the dynamic form
-            roomConfigContainer.innerHTML = ''; // Clear existing rows
-            const sortedKeys = Object.keys(config).sort((a, b) => {
-                const numA = parseInt(a.replace(/\D/g, ''), 10) || 0;
-                const numB = parseInt(b.replace(/\D/g, ''), 10) || 0;
-                return numA - numB;
-            });
-            
-            // V79: Add rows, determining if 'isLast' is true
-            sortedKeys.forEach((roomName, index) => {
-                const roomData = config[roomName];
-                const isLast = (index === sortedKeys.length - 1);
-                const rowHtml = createRoomRowHtml(roomName, roomData.capacity, roomData.location, isLast);
-                roomConfigContainer.insertAdjacentHTML('beforeend', rowHtml);
-            });
-        }
-        
-        // --- (V28) Add New Room Button (with location) ---
-        addRoomButton.addEventListener('click', () => {
-            const allRows = roomConfigContainer.querySelectorAll('.room-row');
-            let newName = "Room 1";
-            
-            if (allRows.length > 0) {
-                const lastRow = allRows[allRows.length - 1];
-                const lastName = lastRow.querySelector('.room-name-label').textContent.replace(':', '').trim();
-                let lastNum = 0;
-                try {
-                    lastNum = parseInt(lastName.match(/(\d+)/)[0], 10);
-                } catch(e) {
-                    lastNum = allRows.length; // Fallback
-                }
-                newName = `Room ${lastNum + 1}`;
-            }
-            
-            // V79: Before adding new row, remove remove button from the current last row
-            const currentLastRow = roomConfigContainer.lastElementChild;
-            if (currentLastRow) {
-                const removeButton = currentLastRow.querySelector('.remove-room-button');
-                if (removeButton) {
-                    const placeholder = document.createElement('div');
-                    placeholder.className = 'w-[84px]'; // Match the button width for alignment
-                    removeButton.parentNode.replaceChild(placeholder, removeButton);
-                }
-            }
-
-            const newRowHtml = createRoomRowHtml(newName, 30, "", true); // Add new row as the last row
-            roomConfigContainer.insertAdjacentHTML('beforeend', newRowHtml);
-        });
-        
-        // --- (V79) Remove Room Button (Event Delegation for all rows) ---
-        roomConfigContainer.addEventListener('click', (e) => {
-            if (e.target.classList.contains('remove-room-button')) {
-                e.target.closest('.room-row').remove();
-                
-                // Re-save configuration to update the room names and persist the deletion
-                saveRoomConfigButton.click(); // Triggers re-saving and re-rendering to fix numbering and buttons
-            }
-        });
-        
-        
-        // --- Q-PAPER REPORT LOGIC ---
-        // Listener moved above
-        
-        // --- (V33) NEW CSV UPLOAD LOGIC ---
-        
-        // V33: Function called by Python to clear the CSV upload status
-        function clear_csv_upload_status() {
-            csvLoadStatus.textContent = "";
-            if (correctedCsvUpload) {
-                correctedCsvUpload.value = ""; // Clear the file input
-            }
-        }
-
-        // V33: Add event listener for the new "Load CSV" button
-        loadCsvButton.addEventListener('click', () => {
-            const file = correctedCsvUpload.files[0];
-            if (!file) {
-                csvLoadStatus.textContent = "Please select a CSV file first.";
-                return;
-            }
-            
-            // V67: Disable PDF input while CSV is being processed/loaded
-            document.getElementById('pdf-file').disabled = true;
-            document.getElementById('run-button').disabled = true;
-
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const csvText = event.target.result;
-                parseCsvAndLoadData(csvText);
-            };
-            reader.onerror = () => {
-                csvLoadStatus.textContent = "Error reading file.";
-                document.getElementById('pdf-file').disabled = true;
-                document.getElementById('run-button').disabled = true;
-            };
-            reader.readAsText(file);
-        });
-
-        // V33: This function parses the CSV and overwrites the data stores
-        function parseCsvAndLoadData(csvText) {
-            try {
-                const lines = csvText.trim().split('\n');
-                const headersLine = lines.shift().trim();
-                const headers = headersLine.split(',');
-
-                // Find indices, this is more robust
-                const dateIndex = headers.indexOf('Date');
-                const timeIndex = headers.indexOf('Time');
-                const courseIndex = headers.indexOf('Course');
-                const regNumIndex = headers.indexOf('Register Number');
-                const nameIndex = headers.indexOf('Name');
-
-                if (regNumIndex === -1 || nameIndex === -1 || courseIndex === -1) {
-                    csvLoadStatus.textContent = "Error: CSV must contain 'Register Number', 'Name', and 'Course' headers.";
-                    csvLoadStatus.classList.add('text-red-600');
-                    csvLoadStatus.classList.remove('text-green-600');
-                    // V67: Re-enable PDF inputs
-                    document.getElementById('pdf-file').disabled = false;
-                    document.getElementById('run-button').disabled = false;
-                    return;
-                }
-
-                const jsonData = [];
-                const qPaperSummary = {}; // Use an object for quick lookup
-
-                for (const line of lines) {
-                    if (!line.trim()) continue;
-                    
-                    // Regex parser that handles quoted fields (commas inside courses)
-                    const regex = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
-                    const values = line.split(regex).map(val => val.trim().replace(/^"|"$/g, '')); // Trim and remove surrounding quotes
-
-                    if (values.length !== headers.length) {
-                        console.warn("Skipping malformed CSV line:", line);
-                        continue;
-                    }
-
-                    const student = {
-                        'Date': values[dateIndex],
-                        'Time': values[timeIndex],
-                        'Course': values[courseIndex], // V60: This name should be normalized already
-                        'Register Number': values[regNumIndex],
-                        'Name': values[nameIndex]
-                    };
-                    
-                    jsonData.push(student);
-                    
-                    // --- Regenerate Q-Paper Summary ---
-                    const key = `${student.Date}_${student.Time}_${student.Course}`;
-                    if (!qPaperSummary[key]) {
-                        qPaperSummary[key] = { 
-                            Date: student.Date, 
-                            Time: student.Time, 
-                            Course: student.Course, 
-                            'Student Count': 0 
-                        };
-                    }
-                    qPaperSummary[key]['Student Count']++;
-                }
-                
-                const qPaperArray = Object.values(qPaperSummary);
-
-                // --- Update Data Stores ---
-                jsonDataStore.innerHTML = JSON.stringify(jsonData);
-                qPaperDataStore.innerHTML = JSON.stringify(qPaperArray);
-                
-                // V65: Save the base data to localStorage
-                localStorage.setItem(BASE_DATA_KEY, JSON.stringify(jsonData))
-
-                // --- Update UI ---
-                csvLoadStatus.textContent = `Successfully loaded and parsed ${jsonData.length} student records.`;
-                csvLoadStatus.classList.remove('text-red-600');
-                csvLoadStatus.classList.add('text-green-600');
-                
-                // Enable report buttons
-                generateReportButton.disabled = false;
-                generateQPaperReportButton.disabled = false;
-                generateDaywiseReportButton.disabled = false;
-                
-                // V56: Enable and populate absentee tab
-                disable_absentee_tab(false);
-                populate_session_dropdown();
-                
-                // V61: Enable and populate QP Code tab
-                disable_qpcode_tab(false);
-                populate_qp_code_session_dropdown();
-                
-                // V67: Disable CSV input while PDF input is enabled (since CSV is the new source)
-                document.getElementById('pdf-file').disabled = false;
-                document.getElementById('run-button').disabled = false;
-
-
-            } catch (e) {
-                console.error("Error parsing CSV:", e);
-                csvLoadStatus.textContent = "Error parsing CSV file. See console for details.";
-                csvLoadStatus.classList.add('text-red-600');
-                csvLoadStatus.classList.remove('text-green-600');
-                // V67: Re-enable PDF inputs
-                document.getElementById('pdf-file').disabled = false;
-                document.getElementById('run-button').disabled = false;
-            }
-        }
-        
-        
-        // --- (V56) NEW ABSENTEE LOGIC ---
-        
-        function disable_absentee_tab(disabled) {
-            navAbsentees.disabled = disabled;
-            if (disabled) {
-                absenteeLoader.classList.remove('hidden');
-                absenteeContentWrapper.classList.add('hidden');
-                navAbsentees.classList.add('opacity-50', 'cursor-not-allowed');
-            } else {
-                absenteeLoader.classList.add('hidden');
-                absenteeContentWrapper.classList.remove('hidden');
-                navAbsentees.classList.remove('opacity-50', 'cursor-not-allowed');
-            }
-        }
-        
-        function populate_session_dropdown() {
-            try {
-                allStudentData = JSON.parse(jsonDataStore.innerHTML || '[]');
-                if (allStudentData.length === 0) {
-                    disable_absentee_tab(true);
-                    return;
-                }
-                
-                // Get unique sessions
-                const sessions = new Set(allStudentData.map(s => `${s.Date} | ${s.Time}`));
-                allStudentSessions = Array.from(sessions).sort();
-                
-                sessionSelect.innerHTML = '<option value="">-- Select a Session --</option>'; // Clear
-                reportsSessionSelect.innerHTML = '<option value="all">All Sessions</option>'; // V68: Clear and set default for reports
-                
-                // Find today's session
-                const today = new Date();
-                const todayStr = today.toLocaleDateString('en-GB').replace(/\//g, '.'); // DD.MM.YYYY
-                let defaultSession = "";
-                
-                allStudentSessions.forEach(session => {
-                    sessionSelect.innerHTML += `<option value="${session}">${session}</option>`;
-                    reportsSessionSelect.innerHTML += `<option value="${session}">${session}</option>`; // V68
-                    if (session.startsWith(todayStr)) {
-                        defaultSession = session;
-                    }
-                });
-                
-                if (defaultSession) {
-                    sessionSelect.value = defaultSession;
-                    sessionSelect.dispatchEvent(new Event('change')); // Trigger change to load list
-                }
-                
-                // V68: Ensure report filters are visible and default set
-                reportFilterSection.classList.remove('hidden');
-                // V81: Set Specific Session as default
-                filterSessionRadio.checked = true;
-                reportsSessionDropdownContainer.classList.remove('hidden');
-                // Ensure the report select box defaults to today's session if found
-                reportsSessionSelect.value = defaultSession || reportsSessionSelect.options[1]?.value || "all";
-
-            } catch (e) {
-                console.error("Failed to populate sessions:", e);
-                disable_absentee_tab(true);
-            }
-        }
-        
-        sessionSelect.addEventListener('change', () => {
-            const sessionKey = sessionSelect.value;
-            if (sessionKey) {
-                absenteeSearchSection.classList.remove('hidden');
-                absenteeListSection.classList.remove('hidden');
-                generateAbsenteeReportButton.disabled = false;
-                loadAbsenteeList(sessionKey);
-            } else {
-                absenteeSearchSection.classList.add('hidden');
-                absenteeListSection.classList.add('hidden');
-                generateAbsenteeReportButton.disabled = true;
-                currentAbsenteeListDiv.innerHTML = "";
-            }
-            clearSearch();
-        });
-        
-        absenteeSearchInput.addEventListener('input', () => {
-            const query = absenteeSearchInput.value.trim().toUpperCase();
-            if (query.length < 3) {
-                autocompleteResults.classList.add('hidden');
-                return;
-            }
-            
-            const sessionKey = sessionSelect.value;
-            if (!sessionKey) return;
-            const [date, time] = sessionKey.split(' | ');
-            
-            // Filter students for this session
-            const sessionStudents = allStudentData.filter(s => s.Date === date && s.Time === time);
-            
-            // Filter by search query
-            const matches = sessionStudents.filter(s => s['Register Number'].toUpperCase().includes(query)).slice(0, 10);
-            
-            if (matches.length > 0) {
-                autocompleteResults.innerHTML = '';
-                matches.forEach(student => {
-                    const item = document.createElement('div');
-                    item.className = 'autocomplete-item';
-                    item.innerHTML = student['Register Number'].replace(new RegExp(query, 'gi'), '<strong>$&</strong>') + ` (${student.Name})`;
-                    item.onclick = () => selectStudent(student);
-                    autocompleteResults.appendChild(item);
-                });
-                autocompleteResults.classList.remove('hidden');
-            } else {
-                autocompleteResults.classList.add('hidden');
-            }
-        });
-        
-        function selectStudent(student) {
-            selectedStudent = student;
-            absenteeSearchInput.value = student['Register Number'];
-            autocompleteResults.classList.add('hidden');
-            
-            // V87 FIX: Allocate rooms for the *entire* session to find the correct room
-            const sessionKey = sessionSelect.value;
-            const [date, time] = sessionKey.split(' | ');
-            const sessionStudents = allStudentData.filter(s => s.Date === date && s.Time === time);
-            
-            // Perform allocation on the *entire* session
-            const allocatedSessionData = performRoomAllocation(sessionStudents);
-            
-            // Find our selected student in the allocated list
-            const allocatedStudent = allocatedSessionData.find(s => s['Register Number'] === student['Register Number']);
-            
-            const roomNo = allocatedStudent ? allocatedStudent['Room No'] : 'N/A';
-            const roomInfo = currentRoomConfig[roomNo];
-            const location = (roomInfo && roomInfo.location) ? `(${roomInfo.location})` : "";
-            
-            selectedStudentName.textContent = student.Name;
-            selectedStudentCourse.textContent = student.Course;
-            selectedStudentRoom.textContent = `Room: ${roomNo} ${location}`; // Use the correctly allocated room
-            selectedStudentDetails.classList.remove('hidden');
-        }
-        
-        function clearSearch() {
-            selectedStudent = null;
-            absenteeSearchInput.value = "";
-            autocompleteResults.classList.add('hidden');
-            selectedStudentDetails.classList.add('hidden');
-        }
-        
-        addAbsenteeButton.addEventListener('click', () => {
-            if (!selectedStudent) return;
-            
-            const sessionKey = sessionSelect.value;
-            const regNo = selectedStudent['Register Number'];
-            
-            if (currentAbsenteeList.includes(regNo)) {
-                alert(`${regNo} is already on the absentee list.`);
-                clearSearch();
-                return;
-            }
-            
-            // Add to list and save
-            currentAbsenteeList.push(regNo);
-            saveAbsenteeList(sessionKey);
-            renderAbsenteeList();
-            clearSearch();
-        });
-        
-        function loadAbsenteeList(sessionKey) {
-            const allAbsentees = JSON.parse(localStorage.getItem(ABSENTEE_LIST_KEY) || '{}');
-            currentAbsenteeList = allAbsentees[sessionKey] || [];
-            renderAbsenteeList();
-        }
-        
-        function saveAbsenteeList(sessionKey) {
-            const allAbsentees = JSON.parse(localStorage.getItem(ABSENTEE_LIST_KEY) || '{}');
-            allAbsentees[sessionKey] = currentAbsenteeList;
-            localStorage.setItem(ABSENTEE_LIST_KEY, JSON.stringify(allAbsentees));
-        }
-        
-        function renderAbsenteeList() {
-            const sessionKey = sessionSelect.value;
-            currentAbsenteeListDiv.innerHTML = "";
-            
-            if (currentAbsenteeList.length === 0) {
-                currentAbsenteeListDiv.innerHTML = `<em class="text-gray-500">No absentees marked for this session.</em>`;
-                return;
-            }
-
-            // V81 FIX: Allocate rooms for the entire session first to get correct room numbers
-            const [date, time] = sessionKey.split(' | ');
-            const sessionStudents = allStudentData.filter(s => s.Date === date && s.Time === time);
-            const allocatedSessionData = performRoomAllocation(sessionStudents);
-            const allocatedMap = allocatedSessionData.reduce((map, s) => {
-                map[s['Register Number']] = s['Room No'];
-                return map;
-            }, {});
-
-            currentAbsenteeList.forEach(regNo => {
-                const room = allocatedMap[regNo] || 'N/A'; // Get the correct room from the map
-                const roomInfo = currentRoomConfig[room];
-                const location = (roomInfo && roomInfo.location) ? `(${roomInfo.location})` : "";
-                const roomDisplay = `${room} ${location}`;
-                
-                const item = document.createElement('div');
-                item.className = 'flex justify-between items-center p-2 bg-white border border-gray-200 rounded';
-                item.innerHTML = `
-                    <span class="font-medium">${regNo}</span>
-                    <span class="text-sm text-gray-500">${roomDisplay}</span>
-                    <button class="text-xs text-red-600 hover:text-red-800 font-medium">&times; Remove</button>
-                `;
-                item.querySelector('button').onclick = () => removeAbsentee(regNo);
-                currentAbsenteeListDiv.appendChild(item);
-            });
-        }
-        
-        function removeAbsentee(regNo) {
-            currentAbsenteeList = currentAbsenteeList.filter(r => r !== regNo);
-            saveAbsenteeList(sessionSelect.value);
-            renderAbsenteeList();
-        }
-        
-        // --- (V89) NEW QP CODE LOGIC (DIFFERENT STRATEGY) ---
-        
-        function disable_qpcode_tab(disabled) {
-            navQPCodes.disabled = disabled;
-            if (disabled) {
-                qpcodeLoader.classList.remove('hidden');
-                qpcodeContentWrapper.classList.add('hidden');
-                navQPCodes.classList.add('opacity-50', 'cursor-not-allowed');
-            } else {
-                qpcodeLoader.classList.add('hidden');
-                qpcodeContentWrapper.classList.remove('hidden');
-                navQPCodes.classList.remove('opacity-50', 'cursor-not-allowed');
-            }
-        }
-        
-        // V89: Loads the *entire* QP code map from localStorage into the global var
-        function loadQPCodes() {
-            qpCodeMap = JSON.parse(localStorage.getItem(QP_CODE_LIST_KEY) || '{}');
-        }
-        
-        // V61: Populates the QP Code session dropdown
-        function populate_qp_code_session_dropdown() {
-            try {
-                if (allStudentData.length === 0) {
-                     allStudentData = JSON.parse(jsonDataStore.innerHTML || '[]');
-                }
-                if (allStudentData.length === 0) {
-                    disable_qpcode_tab(true);
-                    return;
-                }
-                
-                // Get unique sessions
-                const sessions = new Set(allStudentData.map(s => `${s.Date} | ${s.Time}`));
-                allStudentSessions = Array.from(sessions).sort();
-                
-                sessionSelectQP.innerHTML = '<option value="">-- Select a Session --</option>'; // Clear
-                
-                // Find today's session
-                const today = new Date();
-                const todayStr = today.toLocaleDateString('en-GB').replace(/\//g, '.'); // DD.MM.YYYY
-                let defaultSession = "";
-                
-                allStudentSessions.forEach(session => {
-                    sessionSelectQP.innerHTML += `<option value="${session}">${session}</option>`;
-                    if (session.startsWith(todayStr)) {
-                        defaultSession = session;
-                    }
-                });
-                
-                if (defaultSession) {
-                    sessionSelectQP.value = defaultSession;
-                    sessionSelectQP.dispatchEvent(new Event('change')); // Trigger change to load course list
-                }
-
-            } catch (e) {
-                console.error("Failed to populate QP sessions:", e);
-                disable_qpcode_tab(true);
-            }
-        }
-
-        // V61: Event listener for the QP Code session dropdown
-        sessionSelectQP.addEventListener('change', () => {
-            const sessionKey = sessionSelectQP.value;
-            if (sessionKey) {
-                qpEntrySection.classList.remove('hidden');
-                render_qp_code_list(sessionKey);
-            } else {
-                qpEntrySection.classList.add('hidden');
-                qpCodeContainer.innerHTML = '';
-                qpCodeStatus.textContent = '';
-                saveQpCodesButton.disabled = true; // V62: Disable save button
-            }
-        });
-        
-        // V61: Renders the course list for the selected session
-        function render_qp_code_list(sessionKey) {
-            
-            // 1. Filter students for this specific session
-            const [date, time] = sessionKey.split(' | ');
-            const sessionStudents = allStudentData.filter(s => s.Date === date && s.Time === time);
-            
-            // 2. Get unique courses for this session
-            const sessionCourses = new Set(sessionStudents.map(s => s.Course));
-            const uniqueCoursesArray = Array.from(sessionCourses).sort();
-            
-            // 3. V89: Load *all* codes, then get the ones for *this* session
-            loadQPCodes();
-            const sessionCodes = qpCodeMap[sessionKey] || {};
-            
-            // 4. Populate the UI
-            const htmlChunks = [];
-            
-            if (uniqueCoursesArray.length === 0) {
-                qpCodeContainer.innerHTML = '<p class="text-center text-gray-500">No courses found for this session.</p>';
-                saveQpCodesButton.disabled = true; 
-                return;
-            }
-
-            uniqueCoursesArray.forEach(courseName => {
-                const cleanKey = cleanCourseKey(courseName);
-
-                // V90 FIX: If the course name cleans to an empty string,
-                // don't render an input for it as it cannot be saved.
-                if (!cleanKey) {
-                    console.warn(`Skipping QP code input for un-keyable course: ${courseName}`);
-                    return; // Skip this iteration
-                }
-                
-                // V89: Look up the code in the session-specific map
-                const savedCode = sessionCodes[cleanKey] || "";
-                
-                htmlChunks.push(`
-                    <div class="flex items-center gap-3 p-2 border-b border-gray-200">
-                        <label class="font-medium text-gray-700 w-2/3 text-sm">${courseName}</label>
-                        <input type="text" 
-                               class="qp-code-input block w-1/3 p-2 border border-gray-300 rounded-md shadow-sm text-sm" 
-                               value="${savedCode}" 
-                               data-course="${cleanKey}" 
-                               placeholder="Enter QP Code">
-                    </div>
-                `);
-            });
-            
-            qpCodeContainer.innerHTML = htmlChunks.join('');
-            
-            saveQpCodesButton.disabled = false;
-            qpCodeStatus.textContent = ''; // Clear status on new load
-        }
-        
-        // V89: NEW SAVE STRATEGY
-        saveQpCodesButton.addEventListener('click', () => {
-            const sessionKey = sessionSelectQP.value;
-            if (!sessionKey) {
-                alert("No session selected.");
-                return;
-            }
-            
-            // V90 FIX: Ensure qpCodeMap is initialized before loading from storage
-            if (typeof qpCodeMap === 'undefined') {
-                qpCodeMap = {};
-            }
-
-            // 1. Load the entire master map from storage
-            // This ensures we don't overwrite other sessions
-            loadQPCodes(); 
-            
-            // 2. Create a new, empty map *just for this session's data*
-            const thisSessionCodes = {};
-            
-            // 3. Read all inputs from the DOM
-            const qpInputs = qpCodeContainer.querySelectorAll('.qp-code-input');
-            
-            for (let i = 0; i < qpInputs.length; i++) {
-                const input = qpInputs[i];
-                const courseKey = input.dataset.course; // Already cleaned
-                const qpCode = input.value.trim();
-
-                if (courseKey && qpCode) {
-                    thisSessionCodes[courseKey] = qpCode;
-                }
-            }
-
-            // 4. Update the master map with the new data for this session
-            qpCodeMap[sessionKey] = thisSessionCodes;
-
-            // 5. Save the *entire* master map back to localStorage
-            localStorage.setItem(QP_CODE_LIST_KEY, JSON.stringify(qpCodeMap));
-
-            // 6. Show success message
-            qpCodeStatus.classList.remove('text-red-600');
-            qpCodeStatus.classList.add('text-green-600');
-            qpCodeStatus.textContent = `QP Codes saved successfully!`;
-            setTimeout(() => { qpCodeStatus.textContent = ""; }, 2000);
-        });
-
-        // V89: NEW INPUT STRATEGY
-        // The input listener is now *only* for user feedback.
-        // It does NOT update any data.
-        qpCodeContainer.addEventListener('input', (e) => {
-            if (e.target.classList.contains('qp-code-input')) {
-                // Show pending status
-                qpCodeStatus.classList.remove('text-green-600');
-                qpCodeStatus.classList.add('text-red-600');
-                qpCodeStatus.textContent = 'Unsaved changes... Click SAVE QP CODES to commit.';
-            }
-        });
-
-        
-        // --- V68: Report Filter Logic ---
-        filterSessionRadio.addEventListener('change', () => {
-            if (filterSessionRadio.checked) {
-                reportsSessionDropdownContainer.classList.remove('hidden');
-                reportsSessionSelect.value = reportsSessionSelect.options[1]?.value || ""; // Default to first session
-            }
-        });
-
-        filterAllRadio.addEventListener('change', () => {
-            if (filterAllRadio.checked) {
-                reportsSessionDropdownContainer.classList.add('hidden');
-                reportsSessionSelect.value = reportsSessionSelect.options[0]?.value || "all"; // Reset to All
-            }
-        });
-
-        // --- V68: Master Reset Button Logic ---
-        document.addEventListener('DOMContentLoaded', () => {
-            const masterResetButton = document.getElementById('master-reset-button');
-            
-            if (masterResetButton) {
-                masterResetButton.addEventListener('click', () => {
-                    // V70 FIX: Use alert/confirm instead of modal due to iframe constraints
-                    const step1 = confirm('WARNING: This will clear ALL saved data (Rooms, College Name, Absentees, QP Codes, and Base Data) from your browser. Continue?');
-                    if (!step1) return;
-                    
-                    const step2 = confirm('ARE YOU ABSOLUTELY SURE? This action cannot be undone.');
-                    if (step2) {
-                        localStorage.clear();
-                        alert('All local data cleared. The application will now reload.');
-                        window.location.reload();
-                    }
-                });
-            }
-        });
-
-
-        // --- V65: Initial Data Load on Startup ---
-        function loadInitialData() {
-            // 1. Load configuration and UI elements (Room settings, college name)
-            // *** V91 FIX: Call loadRoomConfig to ensure collegeNameInput is populated ***
-            loadRoomConfig(); 
-            
-            // 2. Check for base student data persistence
-            const savedDataJson = localStorage.getItem(BASE_DATA_KEY);
-            if (savedDataJson) {
-                try {
-                    const savedData = JSON.parse(savedDataJson);
-                    if (savedData && savedData.length > 0) {
-                        
-                        // We create dummy data stores to allow reports to run
-                        const qPaperSummary = {};
-                        
-                        savedData.forEach(student => {
-                            const key = `${student.Date}_${student.Time}_${student.Course}`;
-                            if (!qPaperSummary[key]) {
-                                qPaperSummary[key] = { 
-                                    Date: student.Date, 
-                                    Time: student.Time, 
-                                    Course: student.Course, 
-                                    'Student Count': 0 
-                                };
-                            }
-                            qPaperSummary[key]['Student Count']++;
-                        });
-                        
-                        // Update JSON Data Stores
-                        jsonDataStore.innerHTML = JSON.stringify(savedData);
-                        qPaperDataStore.innerHTML = JSON.stringify(Object.values(qPaperSummary));
-                        
-                        // Enable UI tabs
-                        generateReportButton.disabled = false;
-                        generateQPaperReportButton.disabled = false;
-                        generateDaywiseReportButton.disabled = false;
-                        disable_absentee_tab(false);
-                        disable_qpcode_tab(false);
-                        populate_session_dropdown();
-                        populate_qp_code_session_dropdown();
-                        
-                        console.log(`Successfully loaded ${savedData.length} records from local storage.`);
-                        
-                        // Update log status (Optional, good for user feedback)
-                        document.getElementById("status-log").innerHTML = `<p class="mb-1 text-green-700">&gt; [${new Date().toLocaleTimeString()}] Successfully loaded data from previous session.</p>`;
-                        document.getElementById("status-log").scrollTop = document.getElementById("status-log").scrollHeight;
-
-
-                    }
-                } catch(e) {
-                    console.error("Failed to load BASE_DATA_KEY from localStorage. Clearing key.", e);
-                    localStorage.removeItem(BASE_DATA_KEY);
-                }
-            }
-        }
-        
-        // V67: Disable CSV input on load if data is loaded, and enable PDF button
-        if (jsonDataStore.innerHTML && JSON.parse(jsonDataStore.innerHTML).length > 0) {
-            correctedCsvUpload.disabled = false;
-            loadCsvButton.disabled = false;
-            document.getElementById('pdf-file').disabled = false;
-            document.getElementById('run-button').disabled = false;
-        } else {
-             // If no data is loaded, keep reports disabled, but enable PDF/CSV inputs
-            document.getElementById('pdf-file').disabled = false;
-            document.getElementById('run-button').disabled = false;
-            correctedCsvUpload.disabled = false;
-            loadCsvButton.disabled = false;
-        }
-        
-        // V67: Prevent user from trying to run extraction if CSV load is active
-        document.getElementById('pdf-file').addEventListener('change', () => {
-            if (document.getElementById('pdf-file').files.length > 0) {
-                correctedCsvUpload.disabled = true;
-                loadCsvButton.disabled = true;
-            } else {
-                correctedCsvUpload.disabled = false;
-                loadCsvButton.disabled = false;
-            }
-        });
-        
-        // V67: Prevent user from trying to load CSV if PDF is selected
-        correctedCsvUpload.addEventListener('change', () => {
-            if (correctedCsvUpload.files.length > 0) {
-                document.getElementById('pdf-file').disabled = true;
-                document.getElementById('run-button').disabled = true;
-            } else {
-                document.getElementById('pdf-file').disabled = false;
-                document.getElementById('run-button').disabled = false;
-            }
-        });
-
         // --- Run on initial page load ---
-        loadInitialData(); // V65: Run this first!
+        document.addEventListener('DOMContentLoaded', () => {
+            loadInitialData();
+            
+            // --- Navigation Event Bindings (V108 FIX) ---
+            document.getElementById('nav-extractor').addEventListener('click', () => showView(document.getElementById('view-extractor'), document.getElementById('nav-extractor')));
+            document.getElementById('nav-room-settings').addEventListener('click', () => showView(document.getElementById('view-room-settings'), document.getElementById('nav-room-settings')));
+            document.getElementById('nav-session-assign').addEventListener('click', () => showView(document.getElementById('view-session-assign'), document.getElementById('nav-session-assign')));
+            document.getElementById('nav-qpcodes').addEventListener('click', () => showView(document.getElementById('view-qpcodes'), document.getElementById('nav-qpcodes'))); 
+            document.getElementById('nav-absentees').addEventListener('click', () => showView(document.getElementById('view-absentees'), document.getElementById('nav-absentees'))); 
+            document.getElementById('nav-scribes').addEventListener('click', () => showView(document.getElementById('view-scribes'), document.getElementById('nav-scribes'))); 
+            document.getElementById('nav-reports').addEventListener('click', () => showView(document.getElementById('view-reports'), document.getElementById('nav-reports')));
+            document.getElementById('nav-settings').addEventListener('click', () => showView(document.getElementById('view-settings'), document.getElementById('nav-settings')));
+            
+            // Re-bind complex file input handlers after DOM load
+            const pdfFileInput = document.getElementById('pdf-file');
+            const csvUploadInput = document.getElementById('corrected-csv-upload');
+
+            if (pdfFileInput) {
+                pdfFileInput.addEventListener('change', () => {
+                    if (pdfFileInput.files.length > 0) {
+                        document.getElementById('corrected-csv-upload').disabled = true;
+                        document.getElementById('load-csv-button').disabled = true;
+                    } else {
+                        document.getElementById('corrected-csv-upload').disabled = false;
+                        document.getElementById('load-csv-button').disabled = false;
+                    }
+                });
+            }
+            
+            if (csvUploadInput) {
+                csvUploadInput.addEventListener('change', () => {
+                    if (csvUploadInput.files.length > 0) {
+                        document.getElementById('pdf-file').disabled = true;
+                        document.getElementById('run-button').disabled = true;
+                    } else {
+                        document.getElementById('pdf-file').disabled = false;
+                        document.getElementById('run-button').disabled = false;
+                    }
+                });
+            }
+            
+        });
 
     </script>
 

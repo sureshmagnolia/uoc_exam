@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Updated Title -->
-    <title>UOC Exam Management V112 (Stable)</title>
+    <title>UOC Exam Management V100 (Stable)</title>
     
     <!-- Load Tailwind CSS for styling -->
     <script src="https://cdn-tailwindcss.vercel.app/"></script>
@@ -1165,7 +1165,7 @@
             # If no code found, just return the cleaned-up original
             return re.sub(r'\s+', ' ', course_name).strip().upper()
 
-        # --- V40: STATEFUL PARSER for the "OLD" PDF format (V44: ROBUST) ---
+        # --- V40: STATEFUL PARSER for the "NEW" PDF format ---
         def extract_new_format_header(page_text):
             """Extracts header from Page 1 of the new format."""
             date_val, time_val, course_name = "Unknown", "Unknown", "Unknown"
@@ -3053,7 +3053,48 @@
         }
         
         // --- Run on initial page load ---
-        loadInitialData(); // V65: Run this first!
+        document.addEventListener('DOMContentLoaded', () => {
+            loadInitialData();
+            
+            // --- Navigation Event Bindings (V108 FIX) ---
+            document.getElementById('nav-extractor').addEventListener('click', () => showView(document.getElementById('view-extractor'), document.getElementById('nav-extractor')));
+            document.getElementById('nav-room-settings').addEventListener('click', () => showView(document.getElementById('view-room-settings'), document.getElementById('nav-room-settings')));
+            document.getElementById('nav-session-assign').addEventListener('click', () => showView(document.getElementById('view-session-assign'), document.getElementById('nav-session-assign')));
+            document.getElementById('nav-qpcodes').addEventListener('click', () => showView(document.getElementById('view-qpcodes'), document.getElementById('nav-qpcodes'))); 
+            document.getElementById('nav-absentees').addEventListener('click', () => showView(document.getElementById('view-absentees'), document.getElementById('nav-absentees'))); 
+            document.getElementById('nav-scribes').addEventListener('click', () => showView(document.getElementById('view-scribes'), document.getElementById('nav-scribes'))); 
+            document.getElementById('nav-reports').addEventListener('click', () => showView(document.getElementById('view-reports'), document.getElementById('nav-reports')));
+            document.getElementById('nav-settings').addEventListener('click', () => showView(document.getElementById('view-settings'), document.getElementById('nav-settings')));
+            
+            // Re-bind complex file input handlers after DOM load
+            const pdfFileInput = document.getElementById('pdf-file');
+            const csvUploadInput = document.getElementById('corrected-csv-upload');
+
+            if (pdfFileInput) {
+                pdfFileInput.addEventListener('change', () => {
+                    if (pdfFileInput.files.length > 0) {
+                        document.getElementById('corrected-csv-upload').disabled = true;
+                        document.getElementById('load-csv-button').disabled = true;
+                    } else {
+                        document.getElementById('corrected-csv-upload').disabled = false;
+                        document.getElementById('load-csv-button').disabled = false;
+                    }
+                });
+            }
+            
+            if (csvUploadInput) {
+                csvUploadInput.addEventListener('change', () => {
+                    if (csvUploadInput.files.length > 0) {
+                        document.getElementById('pdf-file').disabled = true;
+                        document.getElementById('run-button').disabled = true;
+                    } else {
+                        document.getElementById('pdf-file').disabled = false;
+                        document.getElementById('run-button').disabled = false;
+                    }
+                });
+            }
+            
+        });
 
     </script>
 

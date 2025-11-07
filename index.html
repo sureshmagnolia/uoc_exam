@@ -1,4 +1,5 @@
 <!doctype html>
+
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -39,88 +40,84 @@
         <h1>UOC Exam — Room Assignment (single-file)</h1>
         <div style="font-size:13px;color:var(--muted)">Upload CSV of students or paste data, create rooms & capacities, auto-assign and export.</div>
       </div>
-    </header>
-
-    <div class="card grid cols-2">
-      <div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <strong>Students</strong>
-          <div class="flex">
-            <input id="fileInput" type="file" accept="text/csv" style="width:250px" />
-            <button id="pasteBtn" class="small ghost">Paste CSV / TSV</button>
-          </div>
-        </div>
-
-        <div class="card" style="margin-bottom:10px">
-          <label>Preview / Paste area</label>
-          <textarea id="rawData" rows="7" placeholder="RegNo,Name,DOB,Course (optional). Example:\nABC123,John Doe,12-05-2000,BSC" style="width:100%"></textarea>
-          <div style="display:flex;gap:8px;margin-top:8px">
-            <button id="parseBtn">Parse Students</button>
-            <button id="clearStudents" class="ghost">Clear</button>
-          </div>
-        </div>
-
-        <div class="card">
-          <label>Parsed students (<span id="studentCount">0</span>)</label>
-          <div id="studentsPreview" class="preview muted">No students parsed yet.</div>
-          <div style="display:flex;gap:8px;margin-top:8px">
-            <button id="saveStudents">Save to local</button>
-            <button id="downloadStudents" class="ghost">Download CSV</button>
-          </div>
-        </div>
-
-      </div>
-
-      <div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <strong>Rooms</strong>
-          <div class="flex">
-            <button id="addRoomBtn" class="small">Add Room</button>
-            <button id="clearRooms" class="small ghost">Clear</button>
-          </div>
-        </div>
-
-        <div class="card">
-          <label>Create / Edit Rooms</label>
-          <div id="roomsList"></div>
-          <div style="display:flex;gap:8px;margin-top:8px">
-            <input id="defaultCapacity" type="number" min="1" placeholder="Default cap" style="width:130px" />
-            <button id="applyDefault" class="ghost">Apply to empty</button>
-          </div>
-        </div>
-
-        <div class="card" style="margin-top:10px">
-          <label>Assignment</label>
-          <div style="display:flex;gap:8px;margin-bottom:8px">
-            <button id="autoAssignBtn">Auto Assign</button>
-            <button id="clearAssign" class="ghost">Clear Assignment</button>
-          </div>
-          <div style="display:flex;gap:8px">
-            <button id="exportAssignments">Export Assignments (CSV)</button>
-            <button id="printReport" class="ghost">Print Report</button>
-          </div>
-        </div>
-
+    </header><div class="card grid cols-2">
+  <div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <strong>Students</strong>
+      <div class="flex">
+        <input id="fileInput" type="file" accept="text/csv" style="width:250px" />
+        <button id="pasteBtn" class="small ghost">Paste CSV / TSV</button>
       </div>
     </div>
 
-    <div class="card" style="margin-top:14px">
-      <strong>Assignments / Logs</strong>
+    <div class="card" style="margin-bottom:10px">
+      <label>Preview / Paste area</label>
+      <textarea id="rawData" rows="7" placeholder="RegNo,Name,DOB,Course (optional). Example:\nABC123,John Doe,12-05-2000,BSC" style="width:100%"></textarea>
       <div style="display:flex;gap:8px;margin-top:8px">
-        <div style="flex:1">
-          <label>Assignments Table</label>
-          <div id="assignTable" class="preview muted">No assignments yet.</div>
-        </div>
-        <div style="width:360px">
-          <label>Activity Log</label>
-          <div id="log" class="preview log">Ready.</div>
-        </div>
+        <button id="parseBtn">Parse Students</button>
+        <button id="clearStudents" class="ghost">Clear</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <label>Parsed students (<span id="studentCount">0</span>)</label>
+      <div id="studentsPreview" class="preview muted">No students parsed yet.</div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button id="saveStudents">Save to local</button>
+        <button id="downloadStudents" class="ghost">Download CSV</button>
       </div>
     </div>
 
   </div>
 
-  <script>
+  <div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <strong>Rooms</strong>
+      <div class="flex">
+        <button id="addRoomBtn" class="small">Add Room</button>
+        <button id="clearRooms" class="small ghost">Clear</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <label>Create / Edit Rooms</label>
+      <div id="roomsList"></div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <input id="defaultCapacity" type="number" min="1" placeholder="Default cap" style="width:130px" />
+        <button id="applyDefault" class="ghost">Apply to empty</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:10px">
+      <label>Assignment</label>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <button id="autoAssignBtn">Auto Assign</button>
+        <button id="clearAssign" class="ghost">Clear Assignment</button>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button id="exportAssignments">Export Assignments (CSV)</button>
+        <button id="printReport" class="ghost">Print Report</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="card" style="margin-top:14px">
+  <strong>Assignments / Logs</strong>
+  <div style="display:flex;gap:8px;margin-top:8px">
+    <div style="flex:1">
+      <label>Assignments Table</label>
+      <div id="assignTable" class="preview muted">No assignments yet.</div>
+    </div>
+    <div style="width:360px">
+      <label>Activity Log</label>
+      <div id="log" class="preview log">Ready.</div>
+    </div>
+  </div>
+</div>
+
+  </div>  <script>
     // Simple single-file working app for room assignment
     // Data structures
     const STORAGE_PREFIX = 'uoc_exam_v1_';
@@ -308,37 +305,36 @@
     el('printReport').addEventListener('click', ()=>{
       if(Object.keys(assignments).length===0){alert('No assignments');return;}
       const w = window.open('','_blank');
-      const html = `<!doctype html><html><head><meta charset="utf-8"><title>Room Report</title><style>body{font-family:Arial;padding:20px}table{width:100%;border-collapse:collapse}th,td{padding:6px;border:1px solid #ddd;text-align:left}</style></head><body><h2>Room Assignments</h2>${el('assignTable').innerHTML}</body></html>`;
-      w.document.write(html); w.document.close(); w.focus();
-    });
+      const html = `<!doctype html><html><head><meta charset="utf-8"><title>Room Report</title><style>body{font-family:Arial;padding:20px}table{width:100%;border-collapse:collapse}th,td{padding:6px;border:1px solid #ddd;text-align:left}</style></head><body><h2>Room Assignments</h2>${el('assignTable').innerHTML}</body></html>`;w.document.write(html); w.document.close(); w.focus();
+});
 
-    // Utility: convert students into CSV and download helper used earlier
+// Utility: convert students into CSV and download helper used earlier
 
-    // Load saved on start
+// Load saved on start
 
-    // small helper to generate sample data
-    function generateSample(){
-      students = [];
-      for(let i=1;i<=120;i++){ students.push({reg:'REG'+String(1000+i), name:'Student '+i, dob:'01-01-2002', course: (i%2==0? 'BSc' : 'BA')}); }
-      rooms = [];
-      for(let r=1;r<=6;r++) rooms.push({id:'R'+r, name:'Room '+r, capacity:20});
-      renderStudents(); renderRooms(); log('Generated sample data (120 students, 6 rooms)');
-    }
+// small helper to generate sample data
+function generateSample(){
+  students = [];
+  for(let i=1;i<=120;i++){ students.push({reg:'REG'+String(1000+i), name:'Student '+i, dob:'01-01-2002', course: (i%2==0? 'BSc' : 'BA')}); }
+  rooms = [];
+  for(let r=1;r<=6;r++) rooms.push({id:'R'+r, name:'Room '+r, capacity:20});
+  renderStudents(); renderRooms(); log('Generated sample data (120 students, 6 rooms)');
+}
 
-    // small helpers for CSV
-    function escapeCsv(v){ if(v==null) return ''; return '"'+String(v).replace(/"/g,'""')+'"'; }
+// small helpers for CSV
+function escapeCsv(v){ if(v==null) return ''; return '"'+String(v).replace(/"/g,'""')+'"'; }
 
-    // detect drag-and-drop paste of CSV content into textarea (support file paste)
-    document.addEventListener('paste', (e)=>{
-      const items = e.clipboardData && e.clipboardData.items;
-      if(!items) return;
-      for(const it of items){ if(it.kind==='file'){
-        const f = it.getAsFile(); const reader = new FileReader(); reader.onload = ev=>{ el('rawData').value = ev.target.result; log('Pasted file content'); } ; reader.readAsText(f);
-      }}
-    });
+// detect drag-and-drop paste of CSV content into textarea (support file paste)
+document.addEventListener('paste', (e)=>{
+  const items = e.clipboardData && e.clipboardData.items;
+  if(!items) return;
+  for(const it of items){ if(it.kind==='file'){
+    const f = it.getAsFile(); const reader = new FileReader(); reader.onload = ev=>{ el('rawData').value = ev.target.result; log('Pasted file content'); } ; reader.readAsText(f);
+  }}
+});
 
-    // handle sample generation (double-click title for power-user)
-    document.querySelector('h1').addEventListener('dblclick', ()=>{ if(confirm('Generate sample data?')){ generateSample(); }});
+// handle sample generation (double-click title for power-user)
+document.querySelector('h1').addEventListener('dblclick', ()=>{ if(confirm('Generate sample data?')){ generateSample(); }});
 
   </script>
 </body>
